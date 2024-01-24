@@ -15,7 +15,7 @@ docs: $(PYTHONFILES)
 
 github:
 	-git commit -a
-	git push origin master
+	git push origin main
 
 # GitHub Actions deploys the staging branch for us.
 staging: all_tests github
