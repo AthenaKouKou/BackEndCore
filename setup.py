@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 
 setup(
-    name="DMMCore",
+    name="BackEndCore",
     version="1.0dev",
     packages=find_packages(),
 )
