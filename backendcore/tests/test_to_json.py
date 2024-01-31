@@ -5,7 +5,7 @@ Tests our convert to JSON package.
 
 import json
 
-import common.to_json as tjs
+import backendcore.to_json as tjs
 
 
 def test_to_json():
