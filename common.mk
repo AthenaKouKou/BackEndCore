@@ -1,5 +1,6 @@
 # common make vars and targets:
-export ENV_DIR = env
+export ENV_DIR = "backendcore/env"
+export DATA_DIR = "backendcore/data"
 export PANDOC = pandoc
 export PYLINT = flake8
 export PYLINTFLAGS = --exclude=__main__.py

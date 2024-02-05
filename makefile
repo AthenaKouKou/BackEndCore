@@ -5,6 +5,7 @@ WEB_BUILD_PUBLIC_URL ?= /static/react
 
 all_tests: FORCE
 	cd $(ENV_DIR); make tests
+	cd $(DATA_DIR); make tests
 
 tests: FORCE
 	echo "Run make all_tests from top level dir."
@@ -20,4 +21,4 @@ github:
 # GitHub Actions deploys the staging branch for us.
 staging: all_tests github
 
-prod: all_tests
+prod: all_tests github
