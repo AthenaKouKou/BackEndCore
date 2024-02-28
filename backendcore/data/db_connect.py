@@ -41,6 +41,7 @@ API_DB = 'apiDB'
 DSRC_DB = 'apiDB'
 GEO_DB = 'geoDB'
 HMDA_DB = 'hmdaDB'
+SFA_DB = 'sfaDB'
 TIME_SERIES_DB = 'time_seriesDB'
 USER_DB = 'userDB'
 
