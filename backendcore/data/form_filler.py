@@ -63,7 +63,7 @@ BOOL_CHOICES = {
 }
 
 
-def get_form_descr(fld_descrips):
+def get_form_descr(fld_descrips: list) -> dict:
     descr = {}
     for fld in fld_descrips:
         if fld.get(PARAM_TYPE, '') == QUERY_STR:
@@ -74,14 +74,14 @@ def get_form_descr(fld_descrips):
     return descr
 
 
-def get_fld_names(fld_descrips) -> list:
+def get_fld_names(fld_descrips: list) -> list:
     fld_nms = []
     for fld in fld_descrips:
         fld_nms.append(fld[FLD_NM])  # every field MUST have a name!
     return fld_nms
 
 
-def get_query_fld_names(fld_descrips) -> list:
+def get_query_fld_names(fld_descrips: list) -> list:
     fld_nms = []
     for fld in fld_descrips:
         if fld[PARAM_TYPE] == QUERY_STR:
