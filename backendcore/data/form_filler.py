@@ -6,6 +6,7 @@ from the command line.
 FLD_NM = 'fld_nm'
 QSTN = 'question'
 DESCR = 'description'
+INSTRUCTIONS = 'instructions'
 OPT = 'optional'
 CHOICES = 'choices'
 SUBFIELDS = 'subfields'

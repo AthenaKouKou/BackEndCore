@@ -19,7 +19,6 @@ GRAPH = 'graph'
 HIDDEN = 'hidden'
 HOVER = 'hover'
 INT = 'int'
-STR = 'string'
 IS_KEY_FLD = 'isKeyField'
 LINE = 'line'
 LINK = 'link'
@@ -30,6 +29,7 @@ MARKDOWN = 'markdown'  # field contains markdown
 ORIGIN = '$ORIGIN'
 # sometimes we don't want sorting on a field; set this to True:
 NO_SORT = 'noSort'
+STR = 'string'
 VAL = '$VAL'
 
 # Common field names:
