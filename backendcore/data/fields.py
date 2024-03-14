@@ -31,6 +31,7 @@ ORIGIN = '$ORIGIN'
 NO_SORT = 'noSort'
 STR = 'string'
 VAL = '$VAL'
+WIDTH = 'width'
 
 # Common field names:
 MORE_INFO = 'more_info'
