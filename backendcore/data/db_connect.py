@@ -221,6 +221,14 @@ def fetch_by_id(db_nm, collect_nm, _id: str, no_id=False):
     return rec
 
 
+def deleted_one(del_obj):
+    return del_obj.deleted_count > 0
+
+
+def num_deleted(del_obj):
+    return del_obj.deleted_count
+
+
 def del_one(db_nm, collect_nm, filters={}):
     """
     Delete one record that meets filters.

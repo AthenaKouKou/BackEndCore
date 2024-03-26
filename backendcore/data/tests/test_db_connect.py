@@ -245,6 +245,51 @@ def test_del_many(a_doc):
     assert dbc.fetch_one(TEST_DB, TEST_COLLECT, filters={DEF_FLD: DEF_VAL}) is None
 
 
+def test_deleted_one(a_doc):
+    """
+    Make sure that deleted one can properly detect if a record has been
+    deleted.
+    """
+    result = dbc.del_one(TEST_DB, TEST_COLLECT, filters={DEF_FLD: DEF_VAL})
+    assert dbc.deleted_one(result) == True
+    
+
+def test_deleted_one_none(a_doc):
+    """
+    Make sure that deleted one can properly detect if a record has not been
+    deleted.
+    """
+    result = dbc.del_one(TEST_DB, TEST_COLLECT, filters={DEF_FLD: BAD_VAL})
+    assert dbc.deleted_one(result) == False
+    
+
+def test_num_deleted_single(a_doc):
+    """
+    Make sure that num_deleted can properly detect if a single record has been
+    deleted.
+    """
+    result = dbc.del_one(TEST_DB, TEST_COLLECT, filters={DEF_FLD: DEF_VAL})
+    assert dbc.num_deleted(result) == 1
+    
+
+def test_num_deleted_multiple(some_docs):
+    """
+    Make sure that num_deleted can properly detect if several records have been
+    deleted.
+    """
+    result = dbc.del_many(TEST_DB, TEST_COLLECT, filters={})
+    assert dbc.num_deleted(result) > 1
+    
+
+def test_num_deleted_none(a_doc):
+    """
+    Make sure that num_deleted can properly detect if no records have been
+    deleted.
+    """
+    result = dbc.del_one(TEST_DB, TEST_COLLECT, filters={DEF_FLD: BAD_VAL})
+    assert dbc.num_deleted(result) == 0
+    
+
 def test_add_fld_to_all(some_docs):
     """
     Testing updating all records with some new field.
