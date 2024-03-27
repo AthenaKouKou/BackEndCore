@@ -17,6 +17,8 @@ RECS_TO_TEST = 10  # 10 is arbitrary!
 DEF_FLD = 'fld0'
 DEF_VAL = 'def_val'
 
+DEF_PAIR = {DEF_FLD: DEF_VAL}
+
 LIST_FLD = 'a_list'
 
 NEW_FLD = 'fld1'
@@ -56,7 +58,7 @@ def a_doc():
     """
     ret = dbc.insert_doc(TEST_DB, TEST_COLLECT, {DEF_FLD: DEF_VAL, LIST_FLD: []})
     yield ret
-    dbc.del_one(TEST_DB, TEST_COLLECT, filters={DEF_FLD: DEF_VAL})
+    dbc.del_one(TEST_DB, TEST_COLLECT, filters=DEF_PAIR)
 
 
 @pytest.fixture(scope='function')
@@ -147,7 +149,7 @@ def test_del_by_id(new_doc):
 
 def test_update_fld(a_doc):
     unique_val = rand_fld_val()
-    dbc.update_fld(TEST_DB, TEST_COLLECT, {DEF_FLD: DEF_VAL},
+    dbc.update_fld(TEST_DB, TEST_COLLECT, DEF_PAIR,
                    DEF_FLD, unique_val)
     recs = dbc.select(TEST_DB, TEST_COLLECT, filters={DEF_FLD: unique_val})
     assert len(recs) == 1
@@ -155,7 +157,7 @@ def test_update_fld(a_doc):
 
 def test_update_doc(a_doc):
     unique_val = rand_fld_val()
-    dbc.update_doc(TEST_DB, TEST_COLLECT, {DEF_FLD: DEF_VAL},
+    dbc.update_doc(TEST_DB, TEST_COLLECT, DEF_PAIR,
                    {DEF_FLD: unique_val, LIST_FLD: ['something']})
     recs = dbc.select(TEST_DB, TEST_COLLECT,
                       filters={DEF_FLD: unique_val, LIST_FLD: ['something']})
@@ -217,7 +219,7 @@ def test_fetch_one_good_filter(a_doc):
     """
     Tests that a fetch with a good filter works.
     """
-    rec = dbc.fetch_one(TEST_DB, TEST_COLLECT, filters={DEF_FLD: DEF_VAL})
+    rec = dbc.fetch_one(TEST_DB, TEST_COLLECT, filters=DEF_PAIR)
     assert rec is not None
 
 
@@ -225,7 +227,7 @@ def test_del_one_that_exists(a_doc):
     """
     Make sure deleting a doc that exists deletes 1 record.
     """
-    result = dbc.del_one(TEST_DB, TEST_COLLECT, filters={DEF_FLD: DEF_VAL})
+    result = dbc.del_one(TEST_DB, TEST_COLLECT, filters=DEF_PAIR)
     assert result.deleted_count == 1
 
 
@@ -241,36 +243,36 @@ def test_del_many(a_doc):
     """
     Make sure deleting many docs leaves none behind.
     """
-    dbc.del_many(TEST_DB, TEST_COLLECT, filters={DEF_FLD: DEF_VAL})
-    assert dbc.fetch_one(TEST_DB, TEST_COLLECT, filters={DEF_FLD: DEF_VAL}) is None
+    dbc.del_many(TEST_DB, TEST_COLLECT, filters=DEF_PAIR)
+    assert dbc.fetch_one(TEST_DB, TEST_COLLECT, filters=DEF_PAIR) is None
 
 
-def test_deleted_one(a_doc):
+def test_delete_success(a_doc):
     """
     Make sure that deleted one can properly detect if a record has been
     deleted.
     """
-    result = dbc.del_one(TEST_DB, TEST_COLLECT, filters={DEF_FLD: DEF_VAL})
-    assert dbc.deleted_one(result) == True
-    
+    result = dbc.del_one(TEST_DB, TEST_COLLECT, filters=DEF_PAIR)
+    assert dbc.delete_success(result) == True
 
-def test_deleted_one_none(a_doc):
+
+def test_delete_no_success(a_doc):
     """
     Make sure that deleted one can properly detect if a record has not been
     deleted.
     """
     result = dbc.del_one(TEST_DB, TEST_COLLECT, filters={DEF_FLD: BAD_VAL})
-    assert dbc.deleted_one(result) == False
-    
+    assert dbc.delete_success(result) == False
+
 
 def test_num_deleted_single(a_doc):
     """
     Make sure that num_deleted can properly detect if a single record has been
     deleted.
     """
-    result = dbc.del_one(TEST_DB, TEST_COLLECT, filters={DEF_FLD: DEF_VAL})
+    result = dbc.del_one(TEST_DB, TEST_COLLECT, filters=DEF_PAIR)
     assert dbc.num_deleted(result) == 1
-    
+
 
 def test_num_deleted_multiple(some_docs):
     """
@@ -279,7 +281,7 @@ def test_num_deleted_multiple(some_docs):
     """
     result = dbc.del_many(TEST_DB, TEST_COLLECT, filters={})
     assert dbc.num_deleted(result) > 1
-    
+
 
 def test_num_deleted_none(a_doc):
     """
@@ -288,7 +290,53 @@ def test_num_deleted_none(a_doc):
     """
     result = dbc.del_one(TEST_DB, TEST_COLLECT, filters={DEF_FLD: BAD_VAL})
     assert dbc.num_deleted(result) == 0
-    
+
+
+def test_update_success(a_doc):
+    """
+    Make sure that updated one can properly detect if a record has been
+    updated.
+    """
+    result = dbc.update_doc(TEST_DB, TEST_COLLECT, DEF_PAIR, DEF_PAIR)
+    assert dbc.update_success(result) == True
+
+
+def test_update_no_success(a_doc):
+    """
+    Make sure that updated one can properly detect if a record has not been
+    updated.
+    """
+    result = dbc.update_doc(TEST_DB, TEST_COLLECT, {DEF_FLD: BAD_VAL}, DEF_PAIR)
+    assert dbc.update_success(result) == False
+
+
+def test_num_updated_single(a_doc):
+    """
+    Make sure that num_updated can properly detect if a single record has been
+    updated.
+    """
+    result = dbc.update_doc(TEST_DB, TEST_COLLECT, DEF_PAIR,
+                            {DEF_FLD: 'new val'})
+    assert dbc.num_updated(result) == 1
+
+
+def test_num_updated_multiple(some_docs):
+    """
+    Make sure that num_updated can properly detect if several records have been
+    updated.
+    """
+    result = dbc.update_fld_for_many(TEST_DB, TEST_COLLECT, {}, 'new field', 'new val')
+    assert dbc.num_updated(result) > 1
+
+
+def test_num_updated_none(a_doc):
+    """
+    Make sure that num_updated can properly detect if no records have been
+    updated.
+    """
+    result = dbc.update_doc(TEST_DB, TEST_COLLECT, {DEF_FLD: BAD_VAL}, DEF_PAIR)
+    assert dbc.num_updated(result) == 0
+
 
 def test_add_fld_to_all(some_docs):
     """
@@ -308,7 +356,7 @@ def test_append_to_list(a_doc):
     """
     dbc.append_to_list(TEST_DB, TEST_COLLECT, DEF_FLD, DEF_VAL,
                        LIST_FLD, 1)  # any old val will do!
-    rec = dbc.fetch_one(TEST_DB, TEST_COLLECT, filters={DEF_FLD: DEF_VAL})
+    rec = dbc.fetch_one(TEST_DB, TEST_COLLECT, filters=DEF_PAIR)
     assert rec[LIST_FLD][0] == 1
 
 

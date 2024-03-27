@@ -221,7 +221,7 @@ def fetch_by_id(db_nm, collect_nm, _id: str, no_id=False):
     return rec
 
 
-def deleted_one(del_obj):
+def delete_success(del_obj):
     return del_obj.deleted_count > 0
 
 
@@ -382,6 +382,14 @@ def upsert_doc(db_nm, collect_nm, filters, update_dict):
         rec = collect.find_one(update_dict)
         rec_id = rec[DB_ID]
     return str(rec_id)
+
+
+def update_success(update_obj):
+    return update_obj.matched_count > 0
+
+
+def num_updated(update_obj):
+    return update_obj.modified_count
 
 
 def search_collection(db_nm, collect_nm, fld_nm, regex, active=False):
