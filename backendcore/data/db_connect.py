@@ -20,7 +20,7 @@ import common.time_fmts as tfmt
 
 
 # all of these will eventually be put in the env:
-user_nm = os.getenv('MONGO_USER_NM', 'API_User')
+user_nm = os.getenv('MONGO_USER_NM', 'gcallah')
 cloud_svc = os.getenv('MONGO_HOST', 'vectorcluster.i8wds.mongodb.net')
 passwd = os.environ.get("MONGO_PASSWD", '')
 cloud_mdb = "mongodb+srv"
@@ -221,14 +221,6 @@ def fetch_by_id(db_nm, collect_nm, _id: str, no_id=False):
     return rec
 
 
-def delete_success(del_obj):
-    return del_obj.deleted_count > 0
-
-
-def num_deleted(del_obj):
-    return del_obj.deleted_count
-
-
 def del_one(db_nm, collect_nm, filters={}):
     """
     Delete one record that meets filters.
@@ -382,14 +374,6 @@ def upsert_doc(db_nm, collect_nm, filters, update_dict):
         rec = collect.find_one(update_dict)
         rec_id = rec[DB_ID]
     return str(rec_id)
-
-
-def update_success(update_obj):
-    return update_obj.matched_count > 0
-
-
-def num_updated(update_obj):
-    return update_obj.modified_count
 
 
 def search_collection(db_nm, collect_nm, fld_nm, regex, active=False):
