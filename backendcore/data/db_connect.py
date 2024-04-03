@@ -179,6 +179,10 @@ def _id_handler(rec, no_id):
     return rec
 
 
+def _id_from_str(str_id: str):
+    return ObjectId(str_id)
+
+
 def fetch_one(db_nm, collect_nm, filters={}, no_id=False):
     """
     Fetch one record that meets filters.
