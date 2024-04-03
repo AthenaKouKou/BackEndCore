@@ -21,7 +21,7 @@ import common.time_fmts as tfmt
 
 # all of these will eventually be put in the env:
 user_nm = os.getenv('MONGO_USER_NM', 'gcallah')
-cloud_svc = os.getenv('MONGO_HOST', 'koukoumongo1.yud9b.mongodb.net')
+cloud_svc = os.getenv('MONGO_HOST', 'vectorcluster.i8wds.mongodb.net')
 passwd = os.environ.get("MONGO_PASSWD", '')
 cloud_mdb = "mongodb+srv"
 db_params = "retryWrites=true&w=majority"
