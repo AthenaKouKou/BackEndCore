@@ -123,7 +123,12 @@ def get_db_variant(db_nm):
 
 
 def get_server_settings():
-    settings = {}
+    settings = {
+        "connectTimeoutMS": 30000,
+        "socketTimeoutMS": None,
+        "connect": False,
+        "maxPoolsize": 1,
+    }
     SERVER_API = os.getenv("MONGO_SERVER_API")
     if SERVER_API:
         settings[SERVER_API_PARAM] = ServerApi(SERVER_API)
