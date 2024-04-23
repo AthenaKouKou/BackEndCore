@@ -22,6 +22,7 @@ import common.time_fmts as tfmt
 # all of these will eventually be put in the env:
 user_nm = os.getenv('MONGO_USER_NM', 'gcallah')
 cloud_svc = os.getenv('MONGO_HOST', 'vectorcluster.i8wds.mongodb.net')
+replicaSet = "atlas-e383j2-shard-0"
 passwd = os.environ.get("MONGO_PASSWD", '')
 cloud_mdb = "mongodb+srv"
 db_params = "retryWrites=true&w=majority"
@@ -158,8 +159,8 @@ def connectDB():
             # some of the below params are just Mongo default:
             # we don't know what they mean!
             client = pm.MongoClient(f"{cloud_mdb}://{user_nm}:{passwd}@"
-                                    + f"{cloud_svc}/{API_DB}?"
-                                    + "retryWrites=true&w=majority",
+                                    + f"{cloud_svc}/{API_DB}?retryWrites=true"
+                                    + f"&w=majority&replicaSet={replicaSet}",
                                     tlsCAFile=certifi.where(),
                                     **settings)
     return client
