@@ -15,7 +15,6 @@ import bson.json_util as bsutil
 import backendcore.env.env_utils as envu
 
 from common.constants import OBJ_ID_NM
-import common.log as lg
 import common.time_fmts as tfmt
 
 
@@ -148,12 +147,12 @@ def connectDB():
     """
     global client
     if client is None:  # not connected yet!
-        lg.log_debug("Setting client because it is None.")
+        print("Setting client because it is None.")
         if os.environ.get("LOCAL_MONGO", REMOTE) == LOCAL:
-            lg.log_info("Connecting to Mongo locally.")
+            print("Connecting to Mongo locally.")
             client = pm.MongoClient()
         else:
-            lg.log_info("Connecting to Mongo remotely.")
+            print("Connecting to Mongo remotely.")
             settings = get_server_settings()
             # do we need a default DB?
             # some of the below params are just Mongo default:
