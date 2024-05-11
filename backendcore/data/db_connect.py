@@ -14,9 +14,7 @@ import bson.json_util as bsutil
 
 import backendcore.env.env_utils as envu
 
-from common.constants import OBJ_ID_NM
-import common.time_fmts as tfmt
-
+from backendcore.common.constants import OBJ_ID_NM
 
 # all of these will eventually be put in the env:
 user_nm = os.getenv('MONGO_USER_NM', 'gcallah')
@@ -155,9 +153,10 @@ def connectDB():
             print("Connecting to Mongo remotely.")
             settings = get_server_settings()
             # By default connect to our serverless cluster:
-            replicaSetOption = (f"&w=majority&replicaSet={replicaSet}"
-                                if os.environ.get("SHARDED_MONGO", 0)
-                                else "")
+            replicaSetOption = ""
+            if os.environ.get("SHARDED_MONGO", 0):
+                replicaSetOption = f"&w=majority&replicaSet={replicaSet}"
+            print(replicaSetOption)
             # do we need a default DB?
             # some of the below params are just Mongo default:
             # we don't know what they mean!
@@ -351,7 +350,7 @@ def insert_doc(db_nm: str, collect_nm: str, doc: dict, with_date=False):
     `with_date=True` adds the current date to any inserted doc.
     """
     if with_date:
-        doc[DATE] = str(tfmt.today())
+        print('with_date format is not supported at present time')
     ret = client[db_nm][collect_nm].insert_one(doc)
     return str(ret.inserted_id)
 

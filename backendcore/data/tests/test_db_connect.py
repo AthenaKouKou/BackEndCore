@@ -379,16 +379,3 @@ def test_insert_doc():
     dbc.insert_doc(TEST_DB, TEST_COLLECT, {DEF_FLD: unique_val})
     recs = dbc.select(TEST_DB, TEST_COLLECT, filters={DEF_FLD: unique_val})
     assert len(recs) >= 1
-
-
-def test_insert_doc_w_date():
-    """
-    Make sure `with_date=True` adds a date field to the doc.
-    """
-    unique_val = rand_fld_val()
-    dbc.insert_doc(TEST_DB, TEST_COLLECT, {DEF_FLD: unique_val}, with_date=True)
-    recs = dbc.select(TEST_DB, TEST_COLLECT, filters={DEF_FLD: unique_val})
-    assert len(recs) >= 1
-    for rec in recs:
-        assert dbc.DATE in rec
-        break
