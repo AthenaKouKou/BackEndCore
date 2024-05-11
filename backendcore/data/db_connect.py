@@ -154,12 +154,16 @@ def connectDB():
         else:
             print("Connecting to Mongo remotely.")
             settings = get_server_settings()
+            # By default connect to our serverless cluster:
+            replicaSetOption = (f"&w=majority&replicaSet={replicaSet}"
+                                if os.environ.get("SHARDED_MONGO", 0)
+                                else "")
             # do we need a default DB?
             # some of the below params are just Mongo default:
             # we don't know what they mean!
             client = pm.MongoClient(f"{cloud_mdb}://{user_nm}:{passwd}@"
                                     + f"{cloud_svc}/{API_DB}?retryWrites=true"
-                                    + f"&w=majority&replicaSet={replicaSet}",
+                                    + replicaSetOption,
                                     tlsCAFile=certifi.where(),
                                     **settings)
     return client
