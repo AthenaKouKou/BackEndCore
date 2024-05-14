@@ -18,7 +18,8 @@ from backendcore.common.constants import OBJ_ID_NM
 
 # all of these will eventually be put in the env:
 user_nm = os.getenv('MONGO_USER_NM', 'gcallah')
-cloud_svc = os.getenv('MONGO_HOST', 'vectorcluster.i8wds.mongodb.net')
+# default should be serverless instance!
+cloud_svc = os.getenv('MONGO_HOST', 'koukoumongo1.yud9b.mongodb.net')
 replicaSet = "atlas-e383j2-shard-0"
 passwd = os.environ.get("MONGO_PASSWD", '')
 cloud_mdb = "mongodb+srv"
