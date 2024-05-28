@@ -41,6 +41,8 @@ PARAMS = 'params'
 ALL = 'All'
 NONE = 'None'
 
+# Display settings
+HELPER = 'helperText'
 DISP_NAME = 'name'
 DESCR = 'description'
 LOW_VAL = 'low_value'
