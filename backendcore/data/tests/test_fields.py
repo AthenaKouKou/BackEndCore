@@ -76,10 +76,10 @@ def test_get_choices():
     assert isinstance(flds.get_choices(TEST_FIELDS, RANGE_EXAMPLE), dict)
 
 
-def test_remove_extra_flds():
+def test_rm_extra_flds():
     wanted_flds = deepcopy(TEST_FIELDS)
     existing_flds = deepcopy(TEST_FIELDS)
     del wanted_flds[flds.LTV]
-    flds.remove_extra_flds(wanted_flds, existing_flds)
+    flds.rm_extra_flds(wanted_flds, existing_flds)
     assert flds.LTV not in existing_flds
     assert flds.YEAR in existing_flds

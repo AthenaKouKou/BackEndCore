@@ -294,7 +294,7 @@ def select_cursor(db_nm, clct_nm, filters={}, sort=NO_SORT,
     """
     sort_cond = _asmbl_sort_cond(sort=sort, sort_fld=sort_fld)
     return client[db_nm][clct_nm].find(filters, sort=sort_cond,
-                                          projection=proj).limit(limit)
+                                       projection=proj).limit(limit)
 
 
 def select(db_nm, clct_nm, filters={}, sort=NO_SORT, sort_fld='_id',

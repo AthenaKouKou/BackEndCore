@@ -202,7 +202,7 @@ def get_range_choice(flds: dict, fld_nm: str, choice):
     return None
 
 
-def remove_extra_flds(wanted_flds: dict, existing_flds: dict):
+def rm_extra_flds(wanted_flds: dict, existing_flds: dict):
     to_delete = {}
     for fld in existing_flds:
         if fld not in wanted_flds:
