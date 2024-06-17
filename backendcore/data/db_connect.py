@@ -104,11 +104,11 @@ def to_json(doc):
     return json.loads(bsutil.dumps(doc))
 
 
-def get_collect(db_nm, collect_nm):
+def get_collect(db_nm, clct_nm):
     """
     Just some syntactic sugar:
     """
-    return client[db_nm][collect_nm]
+    return client[db_nm][clct_nm]
 
 
 def get_db_variant(db_nm):
@@ -192,11 +192,11 @@ def _id_from_str(str_id: str):
     return ObjectId(str_id)
 
 
-def fetch_one(db_nm, collect_nm, filters={}, no_id=False):
+def fetch_one(db_nm, clct_nm, filters={}, no_id=False):
     """
     Fetch one record that meets filters.
     """
-    rec = client[db_nm][collect_nm].find_one(filters)
+    rec = client[db_nm][clct_nm].find_one(filters)
     rec = to_json(rec)
     rec = _id_handler(rec, no_id)
     return rec
@@ -222,13 +222,13 @@ def create_and_filter(filt1: dict, filt2: dict):
     return {'$and': [filt1, filt2]}
 
 
-def fetch_by_id(db_nm, collect_nm, _id: str, no_id=False):
+def fetch_by_id(db_nm, clct_nm, _id: str, no_id=False):
     """
     Fetch the record identified by _id if it exists.
     We convert the passed in string to an ID for our user.
     """
     filter = create_id_filter(_id)
-    ret = client[db_nm][collect_nm].find_one(filter)
+    ret = client[db_nm][clct_nm].find_one(filter)
     rec = to_json(ret)
     rec = _id_handler(rec, no_id)
     return rec
@@ -242,27 +242,27 @@ def num_deleted(del_obj):
     return del_obj.deleted_count
 
 
-def del_one(db_nm, collect_nm, filters={}):
+def del_one(db_nm, clct_nm, filters={}):
     """
     Delete one record that meets filters.
     """
-    return client[db_nm][collect_nm].delete_one(filters)
+    return client[db_nm][clct_nm].delete_one(filters)
 
 
-def del_many(db_nm, collect_nm, filters={}):
+def del_many(db_nm, clct_nm, filters={}):
     """
     Delete one record that meets filters.
     """
-    return client[db_nm][collect_nm].delete_many(filters)
+    return client[db_nm][clct_nm].delete_many(filters)
 
 
-def del_by_id(db_nm, collect_nm, _id: str):
+def del_by_id(db_nm, clct_nm, _id: str):
     """
     Delete one record identified by id.
     We convert the passed in string to an ID for our user.
     """
     filter = create_id_filter(_id)
-    return client[db_nm][collect_nm].delete_one(filter)
+    return client[db_nm][clct_nm].delete_one(filter)
 
 
 def _asmbl_sort_cond(sort=NO_SORT, sort_fld='_id'):
@@ -272,7 +272,7 @@ def _asmbl_sort_cond(sort=NO_SORT, sort_fld='_id'):
     return sort_cond
 
 
-def fetch_all(db_nm, collect_nm, sort=NO_SORT, sort_fld=OBJ_ID_NM,
+def fetch_all(db_nm, clct_nm, sort=NO_SORT, sort_fld=OBJ_ID_NM,
               no_id=False):
     """
     Returns all docs from a collection.
@@ -280,30 +280,30 @@ def fetch_all(db_nm, collect_nm, sort=NO_SORT, sort_fld=OBJ_ID_NM,
     """
     all_docs = []
     sort_cond = _asmbl_sort_cond(sort=sort, sort_fld=sort_fld)
-    for doc in client[db_nm][collect_nm].find(sort=sort_cond).limit(DOC_LIMIT):
+    for doc in client[db_nm][clct_nm].find(sort=sort_cond).limit(DOC_LIMIT):
         rec = to_json(doc)
         rec = _id_handler(rec, no_id)
         all_docs.append(rec)
     return all_docs
 
 
-def select_cursor(db_nm, collect_nm, filters={}, sort=NO_SORT,
+def select_cursor(db_nm, clct_nm, filters={}, sort=NO_SORT,
                   sort_fld='_id', proj=NO_PROJ, limit=MAX_DB_INT):
     """
     A select that directly returns the mongo cursor.
     """
     sort_cond = _asmbl_sort_cond(sort=sort, sort_fld=sort_fld)
-    return client[db_nm][collect_nm].find(filters, sort=sort_cond,
+    return client[db_nm][clct_nm].find(filters, sort=sort_cond,
                                           projection=proj).limit(limit)
 
 
-def select(db_nm, collect_nm, filters={}, sort=NO_SORT, sort_fld='_id',
+def select(db_nm, clct_nm, filters={}, sort=NO_SORT, sort_fld='_id',
            proj=NO_PROJ, limit=DOC_LIMIT, no_id=False, exclude_flds=None):
     """
     Select records from a collection matching filters.
     """
     selected_docs = []
-    cursor = select_cursor(db_nm, collect_nm, filters=filters, sort=sort,
+    cursor = select_cursor(db_nm, clct_nm, filters=filters, sort=sort,
                            proj=proj, limit=limit)
     for doc in cursor:
         rec = to_json(doc)
@@ -315,14 +315,14 @@ def select(db_nm, collect_nm, filters={}, sort=NO_SORT, sort_fld='_id',
     return selected_docs
 
 
-def count_documents(db_nm, collect_nm, filters={}):
+def count_documents(db_nm, clct_nm, filters={}):
     """
     Counts the documents in a collection, with an optional filter applied.
     """
-    return client[db_nm][collect_nm].count_documents(filters)
+    return client[db_nm][clct_nm].count_documents(filters)
 
 
-def rename(db_nm: str, collect_nm: str, nm_map: dict):
+def rename(db_nm: str, clct_nm: str, nm_map: dict):
     """
     Renames specified fields on all documents in a collection.
 
@@ -330,7 +330,7 @@ def rename(db_nm: str, collect_nm: str, nm_map: dict):
     ----------
     db_nm: str
         The database name.
-    collect_nm: str
+    clct_nm: str
         The name of the database collection.
     nm_map: dict
         A dictionary. The keys are the current field names. Each key maps
@@ -340,55 +340,55 @@ def rename(db_nm: str, collect_nm: str, nm_map: dict):
             "old_nm2": "new_nm2",
         }
     """
-    collect = client[db_nm][collect_nm]
+    collect = client[db_nm][clct_nm]
     return collect.update_many({},
                                {'$rename': nm_map})
 
 
-def insert_doc(db_nm: str, collect_nm: str, doc: dict, with_date=False):
+def insert_doc(db_nm: str, clct_nm: str, doc: dict, with_date=False):
     """
     Returns the str() of the inserted ID, or None on failure.
     `with_date=True` adds the current date to any inserted doc.
     """
     if with_date:
         print('with_date format is not supported at present time')
-    ret = client[db_nm][collect_nm].insert_one(doc)
+    ret = client[db_nm][clct_nm].insert_one(doc)
     return str(ret.inserted_id)
 
 
-def add_fld_to_all(db_nm, collect_nm, new_fld, value):
-    collect = get_collect(db_nm, collect_nm)
+def add_fld_to_all(db_nm, clct_nm, new_fld, value):
+    collect = get_collect(db_nm, clct_nm)
     return collect.update_many({}, {'$set': {new_fld: value}},
                                upsert=False)
 
 
-def update_fld(db_nm, collect_nm, filters, fld_nm, fld_val):
+def update_fld(db_nm, clct_nm, filters, fld_nm, fld_val):
     """
     This should only be used when we just want to update a single
     field.
     To update more than one field in a doc, use `update_doc`.
     """
-    collect = get_collect(db_nm, collect_nm)
+    collect = get_collect(db_nm, clct_nm)
     return collect.update_one(filters, {'$set': {fld_nm: fld_val}})
 
 
-def update_fld_for_many(db_nm, collect_nm, filters, fld_nm, fld_val):
+def update_fld_for_many(db_nm, clct_nm, filters, fld_nm, fld_val):
     """
     This should only be used when we just want to update a single
     field in many records.
     To update more than one field in a doc, use `update_doc`.
     """
-    collect = get_collect(db_nm, collect_nm)
+    collect = get_collect(db_nm, clct_nm)
     return collect.update_many(filters, {'$set': {fld_nm: fld_val}})
 
 
-def update_doc(db_nm, collect_nm, filters, update_dict):
-    collect = get_collect(db_nm, collect_nm)
+def update_doc(db_nm, clct_nm, filters, update_dict):
+    collect = get_collect(db_nm, clct_nm)
     return collect.update_one(filters, {'$set': update_dict})
 
 
-def upsert_doc(db_nm, collect_nm, filters, update_dict):
-    collect = get_collect(db_nm, collect_nm)
+def upsert_doc(db_nm, clct_nm, filters, update_dict):
+    collect = get_collect(db_nm, clct_nm)
     ret = collect.update_one(filters, {'$set': update_dict}, upsert=True)
     rec_id = ret.upserted_id
     if not rec_id:  # we updated, not inserted
@@ -405,12 +405,12 @@ def num_updated(update_obj):
     return update_obj.modified_count
 
 
-def search_collection(db_nm, collect_nm, fld_nm, regex, active=False):
+def search_collection(db_nm, clct_nm, fld_nm, regex, active=False):
     """
     Searches a collection for occurences of regex in fld_nm.
     """
     match_list = []
-    collect = get_collect(db_nm, collect_nm)
+    collect = get_collect(db_nm, clct_nm)
     for doc in collect.find({fld_nm: {"$regex": regex, "$options": 'i'}}):
         append = True
         if active:
@@ -420,13 +420,13 @@ def search_collection(db_nm, collect_nm, fld_nm, regex, active=False):
     return match_list
 
 
-def append_to_list(db_nm, collect_nm, filter_fld_nm, filter_fld_val,
+def append_to_list(db_nm, clct_nm, filter_fld_nm, filter_fld_val,
                    list_nm, new_list_item):
-    collect = get_collect(db_nm, collect_nm)
+    collect = get_collect(db_nm, clct_nm)
     collect.update_one({filter_fld_nm: filter_fld_val},
                        {'$push': {list_nm: new_list_item}},
                        upsert=True)
 
 
-def aggregate(db_nm, collect_nm, pipeline):
-    return client[db_nm][collect_nm].aggregate(pipeline, allowDiskUse=True)
+def aggregate(db_nm, clct_nm, pipeline):
+    return client[db_nm][clct_nm].aggregate(pipeline, allowDiskUse=True)

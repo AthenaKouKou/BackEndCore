@@ -200,3 +200,12 @@ def get_range_choice(flds: dict, fld_nm: str, choice):
             ):
                 return curr_range
     return None
+
+
+def remove_extra_flds(wanted_flds: dict, existing_flds: dict):
+    to_delete = {}
+    for fld in existing_flds:
+        if fld not in wanted_flds:
+            to_delete[fld] = 1  # just mark it's there
+    for fld in to_delete:
+        del existing_flds[fld]

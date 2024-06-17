@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 import backendcore.data.fields as flds
 from backendcore.data.fields import (
     LTV,
@@ -72,3 +74,12 @@ def test_is_not_valid_choice():
 
 def test_get_choices():
     assert isinstance(flds.get_choices(TEST_FIELDS, RANGE_EXAMPLE), dict)
+
+
+def test_remove_extra_flds():
+    wanted_flds = deepcopy(TEST_FIELDS)
+    existing_flds = deepcopy(TEST_FIELDS)
+    del wanted_flds[flds.LTV]
+    flds.remove_extra_flds(wanted_flds, existing_flds)
+    assert flds.LTV not in existing_flds
+    assert flds.YEAR in existing_flds
