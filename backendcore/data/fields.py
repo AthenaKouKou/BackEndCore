@@ -209,3 +209,4 @@ def rm_extra_flds(wanted_flds: dict, existing_flds: dict):
             to_delete[fld] = 1  # just mark it's there
     for fld in to_delete:
         del existing_flds[fld]
+    return existing_flds

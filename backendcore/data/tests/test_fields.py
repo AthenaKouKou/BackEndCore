@@ -80,6 +80,6 @@ def test_rm_extra_flds():
     wanted_flds = deepcopy(TEST_FIELDS)
     existing_flds = deepcopy(TEST_FIELDS)
     del wanted_flds[flds.LTV]
-    flds.rm_extra_flds(wanted_flds, existing_flds)
-    assert flds.LTV not in existing_flds
-    assert flds.YEAR in existing_flds
+    new_flds = flds.rm_extra_flds(wanted_flds, existing_flds)
+    assert flds.LTV not in new_flds
+    assert flds.YEAR in new_flds
