@@ -34,8 +34,10 @@ VAL = '$VAL'
 WIDTH = 'width'
 
 # Common field names:
+CODE = 'code'
 MORE_INFO = 'more_info'
 MORE_INFO_DISP_NM = 'More info'
+NAME = 'name'
 
 """
 A sample of what the data for these functions should look like,
