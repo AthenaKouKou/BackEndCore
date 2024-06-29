@@ -3,37 +3,35 @@
 A utility for filling in a form in a notebook or
 from the command line.
 """
-FLD_NM = 'fld_nm'
-QSTN = 'question'
-DESCR = 'description'
-INSTRUCTIONS = 'instructions'
-OPT = 'optional'
-CHOICES = 'choices'
-SUBFIELDS = 'subfields'
-MULTI = 'multiple'  # choice field that allows > 1 choice
-RANGE = 'range'  # designates a field that selects a range of values
-DEFAULT = 'default'
-TYPECAST = 'typecast'
-LOW_VAL = 'low_val'
-MID_VAL = 'mid_val'
-HI_VAL = 'hi_val'
-INT = 'int'
 BOOL = 'bool'
+CHOICES = 'choices'
+DEFAULT = 'default'
+DESCR = 'description'
+DISABLED = 'disabled'
+FLD_NM = 'fld_nm'
+INPUT_TYPE = 'input_type'
+INSTRUCTIONS = 'instructions'
+INT = 'int'
 LIST = 'list'
 MARKDOWN = 'markdown'
-REQ_LEN = 'req_len'
-INPUT_TYPE = 'input_type'
-RECOMMENDED_PAGE = 'recommended_page'
-URL = 'url'
+MULTI = 'multiple'  # choice field that allows > 1 choice
+OPT = 'optional'
 PARAM_TYPE = 'param_type'
+QSTN = 'question'
+RANGE = 'range'  # designates a field that selects a range of values
+RECOMMENDED_PAGE = 'recommended_page'
+REQ_LEN = 'req_len'
+SUBFIELDS = 'subfields'
+TYPECAST = 'typecast'
+URL = 'url'
 # two parameter types:
 PATH = 'path'
 QUERY_STR = 'query_string'
 # some input types:
-FILE_LOADER = 'file_loader'
 DATE = 'date'
-PASSWORD = 'password'
+FILE_LOADER = 'file_loader'
 NUMERIC = 'numeric'  # a string, but only numbers allowed
+PASSWORD = 'password'
 # for strings, we might want non-default input box sizes:
 FLD_LEN = 'fld_len'
 PARAMS = 'params'
@@ -42,11 +40,12 @@ ALL = 'All'
 NONE = 'None'
 
 # Display settings
-HELPER = 'helperText'
-DISP_NAME = 'name'
 DESCR = 'description'
-LOW_VAL = 'low_value'
+DISP_NAME = 'name'
+HELPER = 'helperText'
 HI_VAL = 'high_value'
+LOW_VAL = 'low_value'
+MID_VAL = 'mid_val'
 
 TEST_FLD = 'test field'
 
