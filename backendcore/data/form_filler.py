@@ -46,6 +46,8 @@ HELPER = 'helperText'
 HI_VAL = 'high_value'
 LOW_VAL = 'low_value'
 MID_VAL = 'mid_val'
+DISP_ON = 'display_on'
+FULL_WIDTH = 'full_width'
 
 TEST_FLD = 'test field'
 
