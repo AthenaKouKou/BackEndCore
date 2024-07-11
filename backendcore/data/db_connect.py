@@ -183,8 +183,9 @@ def _id_handler(rec, no_id):
         if no_id:
             del rec[DB_ID]
         else:
-            # eliminate the ID nesting:
-            rec[DB_ID] = rec[DB_ID][INNER_DB_ID]
+            # eliminate the ID nesting if it's not already a string:
+            if not isinstance(rec[DB_ID], str):
+                rec[DB_ID] = rec[DB_ID][INNER_DB_ID]
     return rec
 
 
