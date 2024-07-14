@@ -7,6 +7,7 @@ from backendcore.data.fields import (  # noqa 401
     CHOICES,
     DESCR,
     DISP_NAME,
+    FLD_TYPE,
     HI_VAL,
     INT,
     LIST,
