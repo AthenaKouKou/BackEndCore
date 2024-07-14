@@ -3,16 +3,22 @@
 A utility for filling in a form in a notebook or
 from the command line.
 """
+from backendcore.data.fields import (  # noqa 401
+    CHOICES,
+    DESCR,
+    DISP_NAME,
+    HI_VAL,
+    INT,
+    LIST,
+    LOW_VAL,
+)
+
 BOOL = 'bool'
-CHOICES = 'choices'
 DEFAULT = 'default'
-DESCR = 'description'
 DISABLED = 'disabled'
 FLD_NM = 'fld_nm'
 INPUT_TYPE = 'input_type'
 INSTRUCTIONS = 'instructions'
-INT = 'int'
-LIST = 'list'
 MARKDOWN = 'markdown'
 MULTI = 'multiple'  # choice field that allows > 1 choice
 OPT = 'optional'
@@ -40,11 +46,7 @@ ALL = 'All'
 NONE = 'None'
 
 # Display settings
-DESCR = 'description'
-DISP_NAME = 'name'
 HELPER = 'helperText'
-HI_VAL = 'high_value'
-LOW_VAL = 'low_value'
 MID_VAL = 'mid_val'
 DISP_ON = 'display_on'
 FULL_WIDTH = 'full_width'

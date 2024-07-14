@@ -1,28 +1,26 @@
 from copy import deepcopy
 
-from backendcore.data.form_filler import (
-    CHOICES,
-    DESCR,
-    DISP_NAME,
-    HI_VAL,
-    LOW_VAL,
-)
-
 BAR = 'bar'
 CHECKBOX = 'checkbox'
+CHOICES = 'choices'
 CLICK = 'click'
+DEC_PLACES = 'decimalPlaces'
+DESCR = 'description'
+DISP_NAME = 'name'
 DSRC_LINK = 'datasources'
 FLD_TYPE = 'type'
 FLOAT = 'float'
-DEC_PLACES = 'decimalPlaces'
 GRAPH = 'graph'
 HIDDEN = 'hidden'
+HI_VAL = 'high_value'
 HOVER = 'hover'
 INT = 'int'
 LINE = 'line'
 LINK = 'link'
-LINK_TYPE = 'link-type'
 LINK_ACTIVATE = 'link-activate'
+LINK_TYPE = 'link-type'
+LIST = 'list'
+LOW_VAL = 'low_value'
 MAP = 'map'
 MARKDOWN = 'markdown'  # field contains markdown
 ORIGIN = '$ORIGIN'
