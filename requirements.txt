@@ -1,4 +1,7 @@
 certifi==2024.7.4
 dnspython==2.6.1
+numpy
 pymongo==4.8.0
+python-dateutil
+pytz
 validators==0.33.0
