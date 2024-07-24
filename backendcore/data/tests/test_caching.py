@@ -18,6 +18,11 @@ REC1 = {
     FLD2: VAL2,
 }
 
+REC2 = {
+    FLD1: VAL3,
+    FLD2: VAL4,
+}
+
 DIFF_KEY_VAL = 'A brand new val'
 DIFF_REC = {
     FLD1: DIFF_KEY_VAL,
@@ -26,10 +31,7 @@ DIFF_REC = {
 
 TEST_LIST = [
     REC1,
-    {
-        FLD1: VAL3,
-        FLD2: VAL4,
-    },
+    REC2,
 ]
 
 TEMP_DB = 'TempDB'
@@ -45,6 +47,15 @@ TEST_DCOLLECT = cach.DataCollection(TEMP_DB,
 @pytest.fixture(scope='function')
 def new_dcollect():
     return deepcopy(TEST_DCOLLECT)
+
+
+@pytest.fixture(scope='function')
+def some_recs(new_dcollect):
+    new_dcollect.add(REC1)
+    new_dcollect.add(REC2)
+    yield new_dcollect
+    new_dcollect.delete(VAL1)
+    new_dcollect.delete(VAL3)
 
 
 def test_class_is_registered(new_dcollect):
@@ -227,6 +238,13 @@ def test_update(mock_fetch, mock_update, new_dcollect):
 def test_update_not_there(mock_fetch, new_dcollect):
     with pytest.raises(ValueError):
         new_dcollect.update('Not an existing key!', DIFF_REC)
+
+
+def test_update_fld(some_recs):
+    NEW_VAL = 'new value'
+    ret = some_recs.update_fld(VAL1, FLD2, NEW_VAL)
+    assert ret
+    assert some_recs.fetch_by_key(VAL1)[FLD2] == NEW_VAL
 
 
 @patch('backendcore.data.db_connect.fetch_all', autospec=True,

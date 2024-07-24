@@ -192,6 +192,12 @@ class DataCollection(object):
         self.clear_cache()
         return dbc.update_success(ret)
 
+    def update_fld(self, key_val: str, fld_nm: str, fld_val: str):
+        """
+        Updates a field in a single record.
+        """
+        return self.update(key_val, {fld_nm: fld_val})
+
     def delete(self, key_val: str, by_id: bool = False):
         """
         Deletes a record by key_val.
