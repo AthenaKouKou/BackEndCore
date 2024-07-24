@@ -426,6 +426,13 @@ def iso_time_from_js_time(js_time: str):
     return dt.datetime.fromisoformat(issue_time)
 
 
+def datetime_to_iso(t: dt.datetime) -> str:
+    """
+    Converts datetime to ISO 8601 str
+    """
+    return t.isoformat()
+
+
 def main():
     t = dt.datetime.now()
     print(t.isoformat())
