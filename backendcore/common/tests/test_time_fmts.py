@@ -401,6 +401,6 @@ def test_iso_time_from_js_time():
     assert 'Z' not in str(iso_time)
 
 def test_datetime_to_iso():
-   test_datetime = dt.datetime(2024, 12, 31, 23, 59, 59, 999999)
+   test_datetime = tfmt.TEST_OLD_DATETIME
    iso = tfmt.datetime_to_iso(test_datetime)
-   assert iso == '2024-12-31T23:59:59.999999'
+   assert iso == '2000-01-01T01:01:01.000001'

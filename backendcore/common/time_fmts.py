@@ -119,6 +119,9 @@ OUR_TZ_STR = 'est'
 OUR_TZ = pytz.timezone('US/Eastern')
 
 
+TEST_OLD_DATETIME = dt.datetime(2000, 1, 1, 1, 1, 1, 1)
+
+
 def period_days(unit: str, freq=1) -> float:
     return freq * PERIOD_DAYS[unit]
 
