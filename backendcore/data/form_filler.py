@@ -45,6 +45,12 @@ PARAMS = 'params'
 # sometimes we don't want 'None' as the default in a pick list:
 ALL = 'All'
 NONE = 'None'
+# when submitting files, we can set valid file types
+FILE_TYPES = 'fileTypes'
+DOCX = '.docx'
+MD = '.md'
+HTML = '.html'
+TXT = '.txt' 
 
 # Display settings
 HELPER = 'helperText'
