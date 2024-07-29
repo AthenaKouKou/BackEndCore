@@ -4,9 +4,10 @@ include common.mk
 WEB_BUILD_PUBLIC_URL ?= /static/react
 
 all_tests: FORCE
-	cd $(ENV_DIR); make tests
 	cd $(DATA_DIR); make tests
 	cd $(EMAIL_DIR); make tests
+	cd $(ENV_DIR); make tests
+	cd $(USER_DIR); make tests
 
 tests: FORCE
 	echo "Run make all_tests from top level dir."

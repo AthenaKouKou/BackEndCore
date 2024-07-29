@@ -50,7 +50,7 @@ FILE_TYPES = 'fileTypes'
 DOCX = '.docx'
 MD = '.md'
 HTML = '.html'
-TXT = '.txt' 
+TXT = '.txt'
 
 # Display settings
 HELPER = 'helperText'
