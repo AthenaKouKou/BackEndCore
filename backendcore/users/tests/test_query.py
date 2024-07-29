@@ -19,8 +19,8 @@ TEST_SALT = "fiaklsnfef"
 TEST_ORG = "koukou inc"
 EMAIL_SUFFIX = '@someplace.com'
 VALID_PASSWD = 'Fl000by!'
-SOME_PAST_DATE = '2020/01/01'
-LAST_LOGIN_DATE = '2022/01/01'
+SOME_PAST_DATE = '2020-01-01'
+LAST_LOGIN_DATE = '2022-01-01'
 
 
 # We can do this globally here because it's not running on the server.
