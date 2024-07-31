@@ -40,14 +40,10 @@ RPT_RECIPS = 'rpt_recipients'
 def list_users():
     db_nm = dbc.setup_connection(dbc.USER_DB)
     users = dbc.fetch_all(db_nm, USER_COLLECT)
-    user_list = []
-    for user in users:
-        last = get_last_login(user[USER_ID])
-        user_list.append({'id': user[USER_ID], 'last login': last})
-    return user_list
+    return users
 
 
-def fetch_user(user_id: str):
+def fetch_by_key(user_id: str):
     """
     User IDs must be unique in our db, so we can fetch a unique
     record based on just user_id.
@@ -55,6 +51,13 @@ def fetch_user(user_id: str):
     db_nm = dbc.setup_connection(dbc.USER_DB)
     return dbc.fetch_one(db_nm, USER_COLLECT,
                          filters={EMAIL: user_id})
+
+
+def fetch_user(user_id: str):
+    """
+    Deprecated; use fetch_by_key.
+    """
+    return fetch_by_key(user_id)
 
 
 def create_user(email: str, firstname: str, lastname: str,
@@ -84,7 +87,7 @@ def create_user(email: str, firstname: str, lastname: str,
                                PW_RES_SALT: ""})
 
 
-def del_user(user_id: str):
+def delete(user_id: str):
     """
     Deletes a user.
     If the user user_id doesn't exist, raise ValueError.
@@ -96,6 +99,13 @@ def del_user(user_id: str):
     else:
         dbc.del_one(db_nm, USER_COLLECT, {EMAIL: user_id})
         return SUCCESS
+
+
+def del_user(user_id: str):
+    """
+    Deprecated: use `delete()`
+    """
+    return delete(user_id)
 
 
 def exists(user_id: str):
@@ -235,6 +245,29 @@ def update_pw(user_id, salt, hashed_pw):
                           PW_RES_SALT: '',
                           PW_RES_TOK: '',
                           PW_RES_TOK_ISS_TIME: ''})
+
+
+def get_auth_key(user_id):
+    user = fetch_user(user_id)
+    if user:
+        return user.get(KEY, None)
+    else:
+        return None
+
+
+def fetch_by_auth_key(key):
+    """
+    Fetch a user by their authorization key.
+    """
+    db_nm = dbc.setup_connection(dbc.USER_DB)
+    return dbc.fetch_one(db_nm, USER_COLLECT,
+                         filters={KEY: key})
+
+
+def update_auth_key(user_id, auth_key):
+    db_nm = dbc.setup_connection(dbc.USER_DB)
+    return dbc.update_doc(db_nm, USER_COLLECT, {EMAIL: user_id},
+                          {KEY: auth_key, ISSUE_TIME: tfmt.now()})
 
 
 def update_pay_prov_sid(user_id, session_id):

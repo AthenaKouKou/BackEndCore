@@ -89,12 +89,12 @@ DUP = "Can't add duplicate"
 client = None
 
 
+def time_str_from_rec(date_rec: dict):
+    return date_rec.get(DATE_KEY)
+
+
 def is_valid_id(rec_id: str):
     return isinstance(rec_id, str) and (len(rec_id) == DB_ID_LEN)
-
-
-def extract_date(key: str, rec: dict):
-    return rec[key][DATE_KEY]
 
 
 def to_json(doc):

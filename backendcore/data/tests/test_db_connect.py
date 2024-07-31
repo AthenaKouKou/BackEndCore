@@ -87,11 +87,6 @@ DATE_SAMPLE = '2023-06-06T13:50:23.091Z'
 DATE_REC_SAMPLE = {'issue_time': {dbc.DATE_KEY: DATE_SAMPLE}}
 
 
-def test_extract_date():
-    str_date = dbc.extract_date('issue_time', DATE_REC_SAMPLE)
-    assert str_date == DATE_SAMPLE
-
-
 REC_W_ID = {
     dbc.DB_ID: {
         dbc.INNER_DB_ID: '6466b27e3bddcc6a7adc6637'

@@ -1,3 +1,4 @@
+AUTH = 'Authorization'
 CODE = 'code'
 EMAIL = 'email'
 MAP = 'map'

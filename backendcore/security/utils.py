@@ -31,8 +31,13 @@ def naive_now() -> datetime:
     return datetime.now()
 
 
-def naive_dt_from_db(key, user):
-    js_time = dbc.extract_date(key, user)
-    issue_time = tfmt.iso_time_from_js_time(js_time)
+def naive_dt_from_db(time_rec=None, time_part=None):
+    if not time_part:
+        print(f'{time_rec=}')
+        time_part = dbc.time_str_from_rec(time_rec)
+    print(f'{time_part=}')
+    if time_part is None:
+        raise ValueError(f'Invalid time record: {time_rec}')
+    issue_time = tfmt.iso_time_from_js_time(time_part)
     aware_time = datetime.fromisoformat(str(issue_time))
     return tfmt.aware_time_to_naive_time(aware_time)
