@@ -19,8 +19,8 @@ SUCCESS = 0
 
 USER_COLLECT = 'users'
 LOGIN_COLLECT = 'logins'
-FIRST_NM = 'first_name'
-LAST_NM = 'last_name'
+FIRST_NAME = 'first_name'
+LAST_NAME = 'last_name'
 USER_ID = EMAIL
 SALT = 'salt'
 PASSWD = 'password'
@@ -76,8 +76,8 @@ def create_user(email: str, firstname: str, lastname: str,
         hashed_pw = hash_str_and_salt(passwd, salt)
         return dbc.insert_doc(db_nm, USER_COLLECT,
                               {EMAIL: email,
-                               FIRST_NM: firstname,
-                               LAST_NM: lastname,
+                               FIRST_NAME: firstname,
+                               LAST_NAME: lastname,
                                PASSWD: hashed_pw,
                                SALT: salt,
                                ORG: org,
