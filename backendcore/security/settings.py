@@ -19,6 +19,11 @@ def get_pw_reset_ttl():
     return PW_RESET_TOK_TTL
 
 
+def get_pw_reset_ttl_seconds():
+    day_seconds = get_pw_reset_ttl().days * tfmt.SECONDS_PER_DAY
+    return day_seconds + get_pw_reset_ttl().seconds
+
+
 def main():
     print(f'{AUTH_KEY_TTL=}')
     print(f'{PW_RESET_TOK_TTL=}')
