@@ -23,7 +23,7 @@ FIRST_NAME = 'first_name'
 LAST_NAME = 'last_name'
 USER_ID = EMAIL
 SALT = 'salt'
-PASSWD = 'password'
+PASSWORD = 'password'
 ORG = 'org'
 KEY = 'key'
 LOGINS = 'logins'
@@ -78,7 +78,7 @@ def create_user(email: str, firstname: str, lastname: str,
                               {EMAIL: email,
                                FIRST_NAME: firstname,
                                LAST_NAME: lastname,
-                               PASSWD: hashed_pw,
+                               PASSWORD: hashed_pw,
                                SALT: salt,
                                ORG: org,
                                KEY: '',
@@ -244,7 +244,7 @@ def update_pw(user_id, salt, hashed_pw):
     db_nm = dbc.setup_connection(dbc.USER_DB)
     return dbc.update_doc(db_nm, USER_COLLECT, {EMAIL: user_id},
                           {SALT: salt,
-                          PASSWD: hashed_pw,
+                          PASSWORD: hashed_pw,
                           PW_RES_SALT: '',
                           PW_RES_TOK: '',
                           PW_RES_TOK_ISS_TIME: ''})
