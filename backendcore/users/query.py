@@ -313,6 +313,7 @@ def get_user_id(user):
 
 TEST_EMAIL = 'test_user@koukoudata.com'
 TEST_PAY_PROV_SID = 'test pay prov sid'
+TEST_PASSWORD = 'a password'
 
 
 def create_test_user():
@@ -320,10 +321,8 @@ def create_test_user():
         TEST_EMAIL,
         'test',
         'user',
-        # NOTE: this password isn't hashed
-        # so this test user won't have a valid password
-        'a password',
-        'a salt',
+        TEST_PASSWORD,
+        'some salt',
         'an org'
     )
 
