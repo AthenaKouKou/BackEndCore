@@ -5,6 +5,7 @@ We should not assume that is true forever!
 Thus, we should cut over from calling the ID
 field `email` to calling it `user_id`.
 """
+from backendcore.common.hashing import hash_str_and_salt
 import backendcore.common.valid as vld
 from backendcore.common.constants import EMAIL
 import backendcore.data.db_connect as dbc
@@ -66,25 +67,27 @@ def create_user(email: str, firstname: str, lastname: str,
     Creates a new user.
     If the user email exists, raise ValueError.
     Otherwise, return the new user's id.
+    We hash the password here.
     """
     db_nm = dbc.setup_connection(dbc.USER_DB)
     if exists(email):
         raise ValueError(f'{email=} already exists in userDB')
     else:
+        hashed_pw = hash_str_and_salt(passwd, salt)
         return dbc.insert_doc(db_nm, USER_COLLECT,
                               {EMAIL: email,
                                FIRST_NM: firstname,
                                LAST_NM: lastname,
-                               PASSWD: passwd,
+                               PASSWD: hashed_pw,
                                SALT: salt,
                                ORG: org,
-                               KEY: "",
+                               KEY: '',
                                LOGINS: [tfmt.get_today()],
                                RPT_RECIPS: [],
                                ISSUE_TIME: tfmt.get_today(),
-                               PW_RES_TOK: "",
-                               PW_RES_TOK_ISS_TIME: "",
-                               PW_RES_SALT: ""})
+                               PW_RES_TOK: '',
+                               PW_RES_TOK_ISS_TIME: '',
+                               PW_RES_SALT: ''})
 
 
 def delete(user_id: str):
