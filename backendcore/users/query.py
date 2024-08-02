@@ -7,7 +7,9 @@ field `email` to calling it `user_id`.
 """
 from backendcore.common.hashing import hash_str_and_salt
 import backendcore.common.valid as vld
-from backendcore.common.constants import EMAIL
+from backendcore.common.constants import (
+    EMAIL,
+)
 import backendcore.data.db_connect as dbc
 from backendcore.users.edit_groups import EDIT_GRP_FLD, TEST_NAME
 import backendcore.common.time_fmts as tfmt
@@ -62,7 +64,8 @@ def fetch_user(user_id: str):
 
 
 def create_user(email: str, firstname: str, lastname: str,
-                passwd: str, salt: str, org: str = None):
+                passwd: str, salt: str, org: str = None,
+                auth_key: str = ''):
     """
     Creates a new user.
     If the user email exists, raise ValueError.
@@ -81,7 +84,7 @@ def create_user(email: str, firstname: str, lastname: str,
                                PASSWORD: hashed_pw,
                                SALT: salt,
                                ORG: org,
-                               KEY: '',
+                               KEY: auth_key,
                                LOGINS: [tfmt.get_today()],
                                RPT_RECIPS: [],
                                ISSUE_TIME: tfmt.get_today(),
@@ -317,6 +320,7 @@ def get_user_id(user):
 TEST_EMAIL = 'test_user@koukoudata.com'
 TEST_PAY_PROV_SID = 'test pay prov sid'
 TEST_PASSWORD = 'a password'
+TEST_AUTH_KEY = '31d32b87-4e7b-414c-b4bb-451c45139ee7'
 
 
 def create_test_user():
@@ -326,7 +330,8 @@ def create_test_user():
         'user',
         TEST_PASSWORD,
         'some salt',
-        'an org'
+        org='an org',
+        auth_key=TEST_AUTH_KEY,
     )
 
 
