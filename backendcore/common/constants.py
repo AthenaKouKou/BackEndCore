@@ -1,5 +1,6 @@
 AUTH = 'Authorization'
 CODE = 'code'
+CREATE_DATE = 'create_date'
 EMAIL = 'email'
 MAP = 'map'
 NAME = 'name'
