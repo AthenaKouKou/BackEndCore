@@ -315,7 +315,7 @@ valid_cosmos_journal_users = [
 ]
 
 cosmos_journal_checks = ActionChecks(valid_users=valid_cosmos_journal_users,
-                                     auth_key=True,
+                                     auth_key=False,
                                      pass_phrase=False)
 cosmos_journal_protocol = SecProtocol(COSMOS_JOURNAL,
                                       create=cosmos_journal_checks,
