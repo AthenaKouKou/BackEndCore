@@ -158,6 +158,7 @@ class SecProtocol(object):
 
 
 def is_permitted(name, action, user_id: str = ''):
+    print(f'{user_id=}')
     prot = fetch_by_key(name)
     if not prot:
         raise ValueError(f'Unknown protocol: {name=}')
