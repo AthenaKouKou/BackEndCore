@@ -10,10 +10,10 @@ from unittest.mock import patch
 import backendcore.security.auth_key as akey
 import backendcore.users.query as uqry
 
-import backendcore.security.sec_manager as sm
+import backendcore.security.sec_manager2 as sm
 
-TEST_PROTOCOL_NM = 'Test-Protocol'
-TEST_PROTOCOL = sm.SecProtocol(TEST_PROTOCOL_NM)
+TEST_PROTOCOL_NAME = 'Test-Protocol'
+TEST_PROTOCOL = sm.SecProtocol(TEST_PROTOCOL_NAME)
 
 GOOD_AUTH_KEY = sm.GOOD_AUTH_KEY
 GOOD_PASS_PHRASE = sm.GOOD_PASS_PHRASE
@@ -79,13 +79,6 @@ def test_init_sec_checks_bad_pass_phrase():
         sm.ActionChecks(pass_phrase=['list', 'not', 'good', 'here'])
 
 
-def test_sec_checks_to_json():
-    json_obj = GOOD_SEC_CHECKS.to_json()
-    assert json_obj is not None
-    json_str = json.dumps(json_obj)
-    assert(isinstance(json_str, str))
-
-
 def test_sec_checks_str():
     assert(isinstance(str(GOOD_SEC_CHECKS), str))
 
@@ -100,6 +93,14 @@ def test_is_sec_checks_not_valid_user():
 
 def test_is_sec_checks_valid_user_by_default():
     assert sm.NO_USERS_SEC_CHECKS.is_valid_user('Any user should be valid!')
+
+
+def test_sec_checks_is_permitted():
+    assert GOOD_SEC_CHECKS.is_permitted({sm.VALIDATE_USER: sm.TEST_EMAIL})
+
+
+def test_sec_checks_is_not_permitted():
+    assert not GOOD_SEC_CHECKS.is_permitted({sm.VALIDATE_USER: 'Bad email'})
 
 
 def test_init_protocol_w_defaults():
@@ -146,34 +147,19 @@ def test_protocol_str():
     assert(isinstance(str(GOOD_PROTOCOL), str))
 
 
-def test_protocol_to_json():
-    json_obj = GOOD_PROTOCOL.to_json()
-    assert json_obj is not None
-    json_str = json.dumps(json_obj)
-    assert(isinstance(json_str, str))
+def test_protocol_is_permitted():
+    assert GOOD_PROTOCOL.is_permitted(sm.CREATE, {sm.VALIDATE_USER: sm.TEST_EMAIL})
+
+
+def test_protocol_is_not_permitted():
+    assert not GOOD_PROTOCOL.is_permitted(sm.CREATE, {sm.VALIDATE_USER: 'Bad email'})
 
 
 SEC_AUTH = 'backendcore.security.auth_key'
 
-@patch(f'{SEC_AUTH}.is_valid_key', autospec=True, return_value=True)
-def test_protocol_is_valid_user(mock_is_valid_key):
-    assert GOOD_PROTOCOL.is_valid_user(sm.CREATE, sm.TEST_EMAIL, 'valid key')
-
-
-@patch(f'{SEC_AUTH}.is_valid_key', autospec=True, return_value=False)
-def test_protocol_is_not_valid_user(mock_is_valid_key):
-    assert not GOOD_PROTOCOL.is_valid_user(sm.CREATE, 'Not a valid user!',
-                                           'doesn\'t matter')
-
-
-@patch(f'{SEC_AUTH}.is_valid_key', autospec=True, return_value=True)
-def test_protocol_is_valid_user_no_action(mock_is_valid_key):
-    # All users have access to unknown actions.
-    assert GOOD_PROTOCOL.is_valid_user('Not an action!', 'User don\'t matter')
-
 
 def add_test_protocol():
-    prot = deepcopy(TEST_PROTOCOL)
+    prot = deepcopy(GOOD_PROTOCOL)
     sm.add(prot)
     return prot
 
@@ -182,7 +168,7 @@ def add_test_protocol():
 def temp_protocol():
     prot = add_test_protocol()
     yield prot
-    sm.delete(TEST_PROTOCOL_NM)
+    sm.delete(TEST_NAME)
 
 
 # This one is not self-deleting.
@@ -196,17 +182,17 @@ def test_fetch_by_key_missing_protocol():
 
 
 def test_fetch_by_key_protocol(temp_protocol):
-   assert sm.fetch_by_key(TEST_PROTOCOL_NM) is not None
+   assert sm.fetch_by_key(TEST_NAME) is not None
 
 
 def test_add():
     sm.add(TEST_PROTOCOL)
-    sm.delete(TEST_PROTOCOL_NM)
+    sm.delete(TEST_PROTOCOL_NAME)
 
 
 def test_add_duplicate(temp_protocol):
     with pytest.raises(ValueError):
-        sm.add(TEST_PROTOCOL)
+        sm.add(sm.GOOD_PROTOCOL)
 
 
 def test_add_not_protocol():
@@ -215,10 +201,23 @@ def test_add_not_protocol():
 
 
 def test_delete(new_protocol):
-    sm.delete(TEST_PROTOCOL_NM)
-    assert sm.fetch_by_key(TEST_PROTOCOL_NM) is None
+    sm.delete(TEST_NAME)
+    assert sm.fetch_by_key(TEST_NAME) is None
 
 
 def test_delete_missing():
     with pytest.raises(ValueError):
         sm.delete('Will not find this protocol!')
+
+
+def test_is_valid_w_bad_prot():
+    with pytest.raises(ValueError):
+        sm.is_valid('badprot name', 'irrelevant action')
+
+
+def test_is_permitted(temp_protocol):
+    assert sm.is_permitted(TEST_NAME, sm.CREATE, user_id=sm.TEST_EMAIL)
+
+
+def test_is_not_permitted(temp_protocol):
+    assert not sm.is_permitted(TEST_NAME, sm.CREATE, user_id='Bad email')

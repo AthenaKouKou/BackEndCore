@@ -5,7 +5,7 @@ Attempts to add a name a second time will fail with a ValueError.
 """
 from copy import deepcopy
 
-from backendcore.common.constants import (
+from backendcore.common.constants import (  # noqa F401
     AUTH_KEY,
     CREATE,
     DELETE,
@@ -14,7 +14,7 @@ from backendcore.common.constants import (
     UPDATE,
 )
 import backendcore.data.db_connect as dbc
-import backendcore.security.auth_key as aky
+# import backendcore.security.auth_key as aky
 # import backendcore.users.query as uqry
 from backendcore.security.constants import (
     ADD_DSRC,
@@ -33,7 +33,7 @@ VALIDATE_USER = 'validateUser'
 BAD_TYPE = 'Bad type for: '
 
 
-VALIDATOR = 'validator'  # noqa F401
+VALIDATOR = 'validator'
 IN_EFFECT = 'in_effect'
 
 SEC_COLLECT = 'security_protocols'
@@ -42,6 +42,17 @@ PROT_NM = 'protocol_name'
 
 
 sec_manager = {}
+
+VALID_ACTIONS = [
+    CREATE,
+    READ,
+    UPDATE,
+    DELETE,
+]
+
+
+def is_valid_action(action: str):
+    return action in VALID_ACTIONS
 
 
 class ActionChecks(object):
@@ -66,37 +77,43 @@ class ActionChecks(object):
         if ip_address and not isinstance(ip_address, str):
             raise TypeError(f'{BAD_TYPE}{type(ip_address)=}')
         self.checks = {
-            AUTH_KEY: auth_key,
-            # AUTH_KEY: {IN_EFFECT: auth_key, VALIDATOR: is_valid_auth_key}
-            PASS_PHRASE: pass_phrase,
-            IP_ADDRESS: ip_address,
-            VALIDATE_USER: valid_users is not None
+            VALIDATE_USER: {
+                IN_EFFECT: valid_users is not None,
+                VALIDATOR: self.is_valid_user
+            },
+            # AUTH_KEY: auth_key,
+            AUTH_KEY: {IN_EFFECT: auth_key, VALIDATOR: self.is_valid_auth_key}
+            # PASS_PHRASE: pass_phrase,
+            # IP_ADDRESS: ip_address,
         }
         self.valid_users = valid_users
 
     def __str__(self):
         return str(self.checks)
 
-    def to_json(self):
-        json_checks = deepcopy(self.checks)
-        return json_checks
+    def is_valid_auth_key(self, auth_key):
+        return False
 
     def is_valid_user(self, user):
         valid = True  # by default all users are valid
         if self.valid_users:
             valid = user in self.valid_users
+            print(f'{self.valid_users=}')
+            print(f'{valid=}')
         return valid
 
-    def is_ok(self, check_vals: dict) -> bool:
+    def is_permitted(self, check_vals: dict) -> bool:
         """
-        Checking an action should be like this:
+        If any test fails return False.
         """
         for check, val in self.checks.items():
             if val[IN_EFFECT]:
                 if check not in check_vals:
                     raise ValueError(f'Value missing for {check}')
-                # self.checks[VALIDATOR](check_vals[check])
-                # do security checking
+                if not self.checks[check][VALIDATOR](check_vals[check]):
+                    print(f'is_permitted failing on {check}')
+                    return False
+        return True
 
 
 class SecProtocol(object):
@@ -125,40 +142,32 @@ class SecProtocol(object):
             raise TypeError(f'{BAD_TYPE}{type(delete)=}')
         self.delete = delete
 
-    def __str__(self):
-        str_rep = str(self.to_json())
-        return str_rep
-
     def __repr__(self):
         return str(self)
-
-    def to_json(self):
-        return {
-            self.name: {
-                CREATE: self.create.to_json(),
-                READ: self.read.to_json(),
-                UPDATE: self.update.to_json(),
-                DELETE: self.delete.to_json(),
-            }
-        }
 
     def get_name(self):
         return self.name
 
-    def is_valid_user(self, action, user, auth_key: str = None):
-        """
-        Leaving auth_key optional until all sec protocols are converted
-        """
-        if not aky.is_valid_key(user, auth_key):
-            return False
+    def is_permitted(self, action, check_vals):
+        print(f'{check_vals=}')
         valid = True
         if action in self.__dict__:
-            valid = self.__dict__[action].is_valid_user(user)
+            print(f'{action=}')
+            valid = self.__dict__[action].is_permitted(check_vals)
         return valid
 
 
-def fetch_by_key(prot_name: str):
-    return sec_manager.get(prot_name, None)
+def is_permitted(name, action, user_id: str = ''):
+    prot = fetch_by_key(name)
+    if not prot:
+        raise ValueError(f'Unknown protocol: {name=}')
+    check_vals = {}
+    check_vals[VALIDATE_USER] = user_id
+    return prot.is_permitted(action, check_vals)
+
+
+def fetch_by_key(name: str):
+    return sec_manager.get(name, None)
 
 
 def add(protocol):
@@ -177,8 +186,17 @@ def delete(name):
         raise ValueError(f'Attempt to delete non-existent protocol: {name=}')
 
 
-def is_action_ok(prot_name: str, action: str, user_id: str, phrase: str,
-                 auth_key: str = None):
+def is_valid(name: str,
+             action: str,
+             user_id: str = None,
+             phrase: str = None,
+             auth_key: str = None,
+             ip_address: str = None):
+    prot = fetch_by_key(name)
+    if not prot:
+        raise ValueError(f'Unknown protocol: {name=}')
+    if not is_valid_action(action):
+        raise ValueError(f'Unknown action: {action=}')
     return True
 
 
@@ -314,9 +332,9 @@ TEST_EMAIL = 'test@mac.com'
 GOOD_VALID_USERS = [TEST_EMAIL, 'kris@smack.com']
 TEST_NAME = 'test name'
 
-GOOD_SEC_CHECKS = ActionChecks(auth_key=GOOD_AUTH_KEY,
-                               pass_phrase=GOOD_PASS_PHRASE,
-                               ip_address=GOOD_IP_ADDRESS,
+GOOD_SEC_CHECKS = ActionChecks(auth_key=False,
+                               pass_phrase=False,
+                               ip_address=False,
                                valid_users=GOOD_VALID_USERS,)
 
 NO_USERS_SEC_CHECKS = ActionChecks(auth_key=GOOD_AUTH_KEY,
@@ -333,10 +351,8 @@ GOOD_PROTOCOL = SecProtocol(TEST_NAME,
 def main():
     create = ActionChecks(valid_users=['gcallah@mac.com'],
                           auth_key=True)
-    print(create.to_json())
     sp = SecProtocol('test protocol',
                      create=create)
-    print(sp.to_json())
 
 
 if __name__ == '__main__':
