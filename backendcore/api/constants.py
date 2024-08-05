@@ -1,10 +1,12 @@
-CREATE = 'create'
-DELETE = 'delete'
+from backendcore.common.constants import (
+    CREATE,
+    DELETE,
+    READ,
+    UPDATE,
+)
 FIELDS = 'fields'
 FORM = 'form'
 JOURNAL = 'journal'
 MESSAGE = 'message'
-READ = 'read'
 RETRIEVE = 'retrieve'
 TEXT = 'text'
-UPDATE = 'update'
