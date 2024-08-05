@@ -64,6 +64,7 @@ class ActionChecks(object):
                  pass_phrase=False,
                  valid_users=None,
                  ip_address=None):
+        print(f'{auth_key=}')
         if not isinstance(auth_key, bool):
             raise TypeError(f'{BAD_TYPE}{type(auth_key)=}')
         if not isinstance(pass_phrase, bool):
