@@ -3,6 +3,10 @@
 A utility for filling in a form in a notebook or
 from the command line.
 """
+from backendcore.common.constants import (  # noqa F401
+    PASSWORD,
+)
+
 from backendcore.data.fields import (  # noqa 401
     CHOICES,
     DESCR,
@@ -38,7 +42,6 @@ QUERY_STR = 'query_string'
 DATE = 'date'
 FILE_LOADER = 'file_loader'
 NUMERIC = 'numeric'  # a string, but only numbers allowed
-PASSWORD = 'password'
 # for strings, we might want non-default input box sizes:
 FLD_LEN = 'fld_len'
 PARAMS = 'params'

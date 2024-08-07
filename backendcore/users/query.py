@@ -9,6 +9,7 @@ from backendcore.common.hashing import hash_str_and_salt
 import backendcore.common.valid as vld
 from backendcore.common.constants import (
     EMAIL,
+    PASSWORD,
 )
 import backendcore.data.db_connect as dbc
 from backendcore.users.edit_groups import EDIT_GRP_FLD, TEST_NAME
@@ -25,7 +26,6 @@ FIRST_NAME = 'first_name'
 LAST_NAME = 'last_name'
 USER_ID = EMAIL
 SALT = 'salt'
-PASSWORD = 'password'
 ORG = 'org'
 KEY = 'key'
 LOGINS = 'logins'
