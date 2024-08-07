@@ -3,6 +3,8 @@ Manager of security protocols.
 Each protocol has a unique name.
 Attempts to add a name a second time will fail with a ValueError.
 """
+import os
+
 from copy import deepcopy
 
 from backendcore.common.constants import (
@@ -221,115 +223,114 @@ def fetch_sec_users(name):
     return dbc.fetch_one(db_nm, SEC_COLLECT, {PROT_NM: name})[USERS]
 
 
-# Currently leaving in old in-file data format. New instantiation as follows:
-# valid_lib_users = fetch_sec_users(LIB)
-valid_lib_users = [
-    'gcallah@mac.com',
-    'vincentlaran@gmail.com',
-    'abalohubert25@gmail.com',
-    'abalo.hubert87@yahoo.com',
-    'elen.callahan@structuredfinance.org',
-    'Elen.Callahan@StructuredFinance.org',
-]
+JOURNAL_CODE = os.environ.get('JOURNAL_CODE', '')
+if JOURNAL_CODE == 'CAT':  # This should be a constant... where?
+    valid_ct_journal_users = [
+        'gcallah@mac.com',
+        'kristian.d.nikolov@gmail.com',
+        'samuelmebersole@gmail.com',
+        'bk1nyc@gmail.com',
+        'lesliemarsh@gmail.com',
+    ]
+    ct_journal_checks = ActionChecks(valid_users=valid_ct_journal_users,
+                                     auth_key=True,
+                                     pass_phrase=False)
+    ct_journal_protocol = SecProtocol(COSMOS_JOURNAL,
+                                      create=ct_journal_checks,
+                                      delete=ct_journal_checks,
+                                      read=ct_journal_checks,
+                                      update=ct_journal_checks)
+    add(ct_journal_protocol)
+else:
+    # Currently leaving in old in-file data format.
+    # New instantiation as follows:
+    # valid_lib_users = fetch_sec_users(LIB)
+    valid_lib_users = [
+        'gcallah@mac.com',
+        'vincentlaran@gmail.com',
+        'abalohubert25@gmail.com',
+        'abalo.hubert87@yahoo.com',
+        'elen.callahan@structuredfinance.org',
+        'Elen.Callahan@StructuredFinance.org',
+    ]
 
-library_checks = ActionChecks(valid_users=valid_lib_users,
-                              auth_key=True,
-                              pass_phrase=True)
-glossary_protocol = SecProtocol(GLOSSARY,
-                                create=library_checks,
-                                delete=library_checks,
-                                update=library_checks)
-add(glossary_protocol)
-bibliography_protocol = SecProtocol(BIBLIO,
+    library_checks = ActionChecks(valid_users=valid_lib_users,
+                                  auth_key=True,
+                                  pass_phrase=True)
+    glossary_protocol = SecProtocol(GLOSSARY,
                                     create=library_checks,
                                     delete=library_checks,
                                     update=library_checks)
-add(bibliography_protocol)
+    add(glossary_protocol)
+    bibliography_protocol = SecProtocol(BIBLIO,
+                                        create=library_checks,
+                                        delete=library_checks,
+                                        update=library_checks)
+    add(bibliography_protocol)
 
-# valid_adddsrc_users = fetch_sec_users(ADD_DSRC)
-valid_adddsrc_users = [
-    'gcallah@mac.com',
-    'eugene@gmail.com',
-    'vincentlaran@gmail.com',
-    'abalohubert25@gmail.com',
-    'abalo.hubert87@yahoo.com',
-    'kristian.d.nikolov@gmail.com',
-    'Elen.Callahan@StructuredFinance.org',
-    'test@test.com'
-]
+    # valid_adddsrc_users = fetch_sec_users(ADD_DSRC)
+    valid_adddsrc_users = [
+        'gcallah@mac.com',
+        'eugene@gmail.com',
+        'vincentlaran@gmail.com',
+        'abalohubert25@gmail.com',
+        'abalo.hubert87@yahoo.com',
+        'kristian.d.nikolov@gmail.com',
+        'Elen.Callahan@StructuredFinance.org',
+        'test@test.com'
+    ]
 
-adddsrc_checks = ActionChecks(
-    valid_users=valid_adddsrc_users,
-    auth_key=True,
-    pass_phrase=True
-)
-adddsrc_protocol = SecProtocol(
-    ADD_DSRC,
-    create=adddsrc_checks,
-    delete=adddsrc_checks,
-    update=adddsrc_checks
-)
-add(adddsrc_protocol)
+    adddsrc_checks = ActionChecks(
+        valid_users=valid_adddsrc_users,
+        auth_key=True,
+        pass_phrase=True
+    )
+    adddsrc_protocol = SecProtocol(
+        ADD_DSRC,
+        create=adddsrc_checks,
+        delete=adddsrc_checks,
+        update=adddsrc_checks
+    )
+    add(adddsrc_protocol)
 
-# valid_infra_users = fetch_sec_users(INFRA)
-valid_infra_users = [
-    'gcallah@mac.com',
-    'vincentlaran@gmail.com',
-    'abalohubert25@gmail.com',
-    'abalo.hubert87@yahoo.com',
-    'kristian.d.nikolov@gmail.com',
-    'samuelmebersole@gmail.com',
-    'bk1nyc@gmail.com',
-]
+    # valid_infra_users = fetch_sec_users(INFRA)
+    valid_infra_users = [
+        'gcallah@mac.com',
+        'vincentlaran@gmail.com',
+        'abalohubert25@gmail.com',
+        'abalo.hubert87@yahoo.com',
+        'kristian.d.nikolov@gmail.com',
+        'samuelmebersole@gmail.com',
+        'bk1nyc@gmail.com',
+    ]
+    infra_checks = ActionChecks(valid_users=valid_infra_users,
+                                auth_key=True,
+                                pass_phrase=True)
+    infra_protocol = SecProtocol(INFRA,
+                                 create=infra_checks,
+                                 delete=infra_checks,
+                                 read=infra_checks,
+                                 update=infra_checks)
+    add(infra_protocol)
 
-infra_checks = ActionChecks(valid_users=valid_infra_users,
-                            auth_key=True,
-                            pass_phrase=True)
-infra_protocol = SecProtocol(INFRA,
-                             create=infra_checks,
-                             delete=infra_checks,
-                             read=infra_checks,
-                             update=infra_checks)
-add(infra_protocol)
+    valid_journal_users = [
+        'gcallah@mac.com',
+        'kristian.d.nikolov@gmail.com',
+        'samuelmebersole@gmail.com',
+        'bk1nyc@gmail.com',
+        'Elen.Callahan@StructuredFinance.org',
+        'elen.callahan@structuredfinance.org',
+    ]
 
-
-valid_journal_users = [
-    'gcallah@mac.com',
-    'kristian.d.nikolov@gmail.com',
-    'samuelmebersole@gmail.com',
-    'bk1nyc@gmail.com',
-    'Elen.Callahan@StructuredFinance.org',
-    'elen.callahan@structuredfinance.org',
-]
-
-journal_checks = ActionChecks(valid_users=valid_journal_users,
-                              auth_key=True,
-                              pass_phrase=False)
-journal_protocol = SecProtocol(JOURNAL,
-                               create=journal_checks,
-                               delete=journal_checks,
-                               read=journal_checks,
-                               update=journal_checks)
-add(journal_protocol)
-
-
-valid_cosmos_journal_users = [
-    'gcallah@mac.com',
-    'kristian.d.nikolov@gmail.com',
-    'samuelmebersole@gmail.com',
-    'bk1nyc@gmail.com',
-    'lesliemarsh@gmail.com',
-]
-
-cosmos_journal_checks = ActionChecks(valid_users=valid_cosmos_journal_users,
-                                     auth_key=True,
-                                     pass_phrase=False)
-cosmos_journal_protocol = SecProtocol(COSMOS_JOURNAL,
-                                      create=cosmos_journal_checks,
-                                      delete=cosmos_journal_checks,
-                                      read=cosmos_journal_checks,
-                                      update=cosmos_journal_checks)
-add(cosmos_journal_protocol)
+    journal_checks = ActionChecks(valid_users=valid_journal_users,
+                                  auth_key=True,
+                                  pass_phrase=False)
+    journal_protocol = SecProtocol(JOURNAL,
+                                   create=journal_checks,
+                                   delete=journal_checks,
+                                   read=journal_checks,
+                                   update=journal_checks)
+    add(journal_protocol)
 
 
 # for API testing:
