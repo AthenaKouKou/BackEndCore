@@ -93,20 +93,20 @@ def test_is_sec_checks_valid_user_by_default():
 
 
 UQRY = 'backendcore.users.query'
-FETCH_AUTH_KEY = f'{UQRY}.fetch_by_auth_key'
+FETCH_BY_AUTH_KEY = f'{UQRY}.fetch_id_by_auth_key'
 
 
-@patch(f'{FETCH_AUTH_KEY}', autospec=True, return_value=sm.TEST_EMAIL)
+@patch(f'{FETCH_BY_AUTH_KEY}', autospec=True, return_value=sm.TEST_EMAIL)
 def test_is_sec_checks_valid_auth_key(mock_auth_key):
     assert GOOD_SEC_CHECKS.is_valid_auth_key(sm.TEST_EMAIL, 'some auth key')
 
 
-@patch(f'{FETCH_AUTH_KEY}', autospec=True, return_value='bademail.com')
+@patch(f'{FETCH_BY_AUTH_KEY}', autospec=True, return_value='bademail.com')
 def test_is_sec_checks_not_valid_auth_key(mock_auth_key):
    assert not GOOD_SEC_CHECKS.is_valid_auth_key(sm.TEST_EMAIL, 'some auth key')
 
 
-@patch(f'{FETCH_AUTH_KEY}', autospec=True, return_value=sm.TEST_EMAIL)
+@patch(f'{FETCH_BY_AUTH_KEY}', autospec=True, return_value=sm.TEST_EMAIL)
 def test_sec_checks_is_permitted(mock_auth_key):
     assert GOOD_SEC_CHECKS.is_permitted(sm.TEST_EMAIL, {sm.VALIDATE_USER:
                                                         sm.TEST_EMAIL,
@@ -165,7 +165,7 @@ def test_protocol_str():
     assert(isinstance(str(GOOD_PROTOCOL), str))
 
 
-@patch(f'{FETCH_AUTH_KEY}', autospec=True, return_value=sm.TEST_EMAIL)
+@patch(f'{FETCH_BY_AUTH_KEY}', autospec=True, return_value=sm.TEST_EMAIL)
 def test_protocol_is_permitted(mock_auth_key):
     assert GOOD_PROTOCOL.is_permitted(sm.CREATE, sm.TEST_EMAIL,
                                       {sm.VALIDATE_USER:
@@ -239,7 +239,7 @@ def test_is_valid_w_bad_prot():
         sm.is_valid('badprot name', 'irrelevant action')
 
 
-@patch(f'{FETCH_AUTH_KEY}', autospec=True, return_value=sm.TEST_EMAIL)
+@patch(f'{FETCH_BY_AUTH_KEY}', autospec=True, return_value=sm.TEST_EMAIL)
 def test_is_permitted(mock_auth_key, temp_protocol):
     assert sm.is_permitted(TEST_NAME, sm.CREATE, user_id=sm.TEST_EMAIL,
                            auth_key='some auth_key')

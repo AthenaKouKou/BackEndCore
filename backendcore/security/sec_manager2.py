@@ -98,7 +98,7 @@ class ActionChecks(object):
         return str(self.checks)
 
     def is_valid_auth_key(self, user_id: str, auth_key: str) -> bool:
-        auth_user = uqry.fetch_by_auth_key(auth_key)
+        auth_user = uqry.fetch_id_by_auth_key(auth_key)
         print(f'{auth_user=}')
         return user_id == auth_user
 

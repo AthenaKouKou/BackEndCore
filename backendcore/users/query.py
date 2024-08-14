@@ -261,13 +261,18 @@ def get_auth_key(user_id):
         return None
 
 
-def fetch_by_auth_key(key):
+def fetch_by_auth_key(key: str) -> dict:
     """
     Fetch a user by their authorization key.
     """
     db_nm = dbc.setup_connection(dbc.USER_DB)
-    return dbc.fetch_one(db_nm, USER_COLLECT,
-                         filters={KEY: key})
+    return dbc.fetch_one(db_nm, USER_COLLECT, filters={KEY: key})
+
+
+def fetch_id_by_auth_key(key: str) -> str:
+    user = fetch_by_auth_key(key)
+    if user:
+        return user.get(EMAIL)
 
 
 def update_auth_key(user_id, auth_key):
