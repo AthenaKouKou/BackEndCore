@@ -15,9 +15,6 @@ import backendcore.security.sec_manager2 as sm
 TEST_PROTOCOL_NAME = 'Test-Protocol'
 TEST_PROTOCOL = sm.SecProtocol(TEST_PROTOCOL_NAME)
 
-GOOD_AUTH_KEY = sm.GOOD_AUTH_KEY
-GOOD_PASS_PHRASE = sm.GOOD_PASS_PHRASE
-GOOD_IP_ADDRESS = sm.GOOD_IP_ADDRESS
 GOOD_VALID_USERS = sm.GOOD_VALID_USERS
 TEST_NAME = sm.TEST_NAME
 
@@ -46,9 +43,9 @@ def test_init_sec_checks_w_defaults():
 
 def test_init_sec_checks_w_vals():
     assert isinstance(sm.ActionChecks(
-                          auth_key=GOOD_AUTH_KEY,
-                          pass_phrase=GOOD_PASS_PHRASE,
-                          ip_address=GOOD_IP_ADDRESS,
+                          auth_key=True,
+                          pass_phrase=True,
+                          ip_address='127.0.0.1',
                           valid_users=GOOD_VALID_USERS,
                       ),
                       sm.ActionChecks)
@@ -95,12 +92,32 @@ def test_is_sec_checks_valid_user_by_default():
     assert sm.NO_USERS_SEC_CHECKS.is_valid_user('Any user should be valid!', '')
 
 
-def test_sec_checks_is_permitted():
-    assert GOOD_SEC_CHECKS.is_permitted(sm.TEST_EMAIL, {sm.VALIDATE_USER: sm.TEST_EMAIL})
+UQRY = 'backendcore.users.query'
+FETCH_AUTH_KEY = f'{UQRY}.fetch_by_auth_key'
+
+
+@patch(f'{FETCH_AUTH_KEY}', autospec=True, return_value=sm.TEST_EMAIL)
+def test_is_sec_checks_valid_auth_key(mock_auth_key):
+    assert GOOD_SEC_CHECKS.is_valid_auth_key(sm.TEST_EMAIL, 'some auth key')
+
+
+# def test_is_sec_checks_not_valid_user():
+#    assert not GOOD_SEC_CHECKS.is_valid_user('Not a user on the list!', '')
+
+
+@patch(f'{FETCH_AUTH_KEY}', autospec=True, return_value=sm.TEST_EMAIL)
+def test_sec_checks_is_permitted(mock_auth_key):
+    assert GOOD_SEC_CHECKS.is_permitted(sm.TEST_EMAIL, {sm.VALIDATE_USER:
+                                                        sm.TEST_EMAIL,
+                                                        sm.AUTH_KEY:
+                                                        'some auth key'})
 
 
 def test_sec_checks_is_not_permitted():
-    assert not GOOD_SEC_CHECKS.is_permitted(sm.TEST_EMAIL, {sm.VALIDATE_USER: 'Bad email'})
+    assert not GOOD_SEC_CHECKS.is_permitted(sm.TEST_EMAIL, {sm.VALIDATE_USER:
+                                                            'Bad email',
+                                                            sm.AUTH_KEY:
+                                                            'some auth key'})
 
 
 def test_init_protocol_w_defaults():
@@ -147,9 +164,13 @@ def test_protocol_str():
     assert(isinstance(str(GOOD_PROTOCOL), str))
 
 
-def test_protocol_is_permitted():
+@patch(f'{FETCH_AUTH_KEY}', autospec=True, return_value=sm.TEST_EMAIL)
+def test_protocol_is_permitted(mock_auth_key):
     assert GOOD_PROTOCOL.is_permitted(sm.CREATE, sm.TEST_EMAIL,
-                                      {sm.VALIDATE_USER: sm.TEST_EMAIL})
+                                      {sm.VALIDATE_USER:
+                                       sm.TEST_EMAIL,
+                                       sm.AUTH_KEY:
+                                       'some auth key'})
 
 
 def test_protocol_is_not_permitted():
@@ -217,8 +238,10 @@ def test_is_valid_w_bad_prot():
         sm.is_valid('badprot name', 'irrelevant action')
 
 
-def test_is_permitted(temp_protocol):
-    assert sm.is_permitted(TEST_NAME, sm.CREATE, user_id=sm.TEST_EMAIL)
+@patch(f'{FETCH_AUTH_KEY}', autospec=True, return_value=sm.TEST_EMAIL)
+def test_is_permitted(mock_auth_key, temp_protocol):
+    assert sm.is_permitted(TEST_NAME, sm.CREATE, user_id=sm.TEST_EMAIL,
+                           auth_key='some auth_key')
 
 
 def test_is_not_permitted(temp_protocol):

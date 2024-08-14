@@ -168,13 +168,14 @@ class SecProtocol(object):
         return valid
 
 
-def is_permitted(name, action, user_id: str = ''):
+def is_permitted(name, action, user_id: str = '', auth_key: str = ''):
     print(f'{user_id=}')
     prot = fetch_by_key(name)
     if not prot:
         raise ValueError(f'Unknown protocol: {name=}')
     check_vals = {}
     check_vals[VALIDATE_USER] = user_id
+    check_vals[AUTH_KEY] = auth_key
     return prot.is_permitted(action, user_id, check_vals)
 
 
@@ -336,20 +337,18 @@ else:
 
 
 # for API testing:
-GOOD_AUTH_KEY = True
-GOOD_PASS_PHRASE = True
 GOOD_IP_ADDRESS = '127.0.0.1'
 TEST_EMAIL = 'test@mac.com'
 GOOD_VALID_USERS = [TEST_EMAIL, 'kris@smack.com']
 TEST_NAME = 'test name'
 
-GOOD_SEC_CHECKS = ActionChecks(auth_key=False,
+GOOD_SEC_CHECKS = ActionChecks(auth_key=True,
                                pass_phrase=False,
                                ip_address=False,
                                valid_users=GOOD_VALID_USERS,)
 
-NO_USERS_SEC_CHECKS = ActionChecks(auth_key=GOOD_AUTH_KEY,
-                                   pass_phrase=GOOD_PASS_PHRASE,
+NO_USERS_SEC_CHECKS = ActionChecks(auth_key=True,
+                                   pass_phrase=True,
                                    ip_address=GOOD_IP_ADDRESS)
 
 GOOD_PROTOCOL = SecProtocol(TEST_NAME,
