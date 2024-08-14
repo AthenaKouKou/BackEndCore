@@ -101,8 +101,9 @@ def test_is_sec_checks_valid_auth_key(mock_auth_key):
     assert GOOD_SEC_CHECKS.is_valid_auth_key(sm.TEST_EMAIL, 'some auth key')
 
 
-# def test_is_sec_checks_not_valid_user():
-#    assert not GOOD_SEC_CHECKS.is_valid_user('Not a user on the list!', '')
+@patch(f'{FETCH_AUTH_KEY}', autospec=True, return_value='bademail.com')
+def test_is_sec_checks_not_valid_auth_key(mock_auth_key):
+   assert not GOOD_SEC_CHECKS.is_valid_auth_key(sm.TEST_EMAIL, 'some auth key')
 
 
 @patch(f'{FETCH_AUTH_KEY}', autospec=True, return_value=sm.TEST_EMAIL)
