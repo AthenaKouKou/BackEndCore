@@ -236,7 +236,7 @@ if JOURNAL_CODE == 'CAT':  # This should be a constant... where?
         'lesliemarsh@gmail.com',
     ]
     ct_journal_checks = ActionChecks(valid_users=valid_ct_journal_users,
-                                     auth_key=False,
+                                     auth_key=True,
                                      pass_phrase=False)
     ct_journal_protocol = SecProtocol(COSMOS_JOURNAL,
                                       create=ct_journal_checks,
