@@ -15,7 +15,7 @@ from backendcore.common.constants import (  # noqa F401
 )
 import backendcore.data.db_connect as dbc
 # import backendcore.security.auth_key as aky
-# import backendcore.users.query as uqry
+import backendcore.users.query as uqry
 from backendcore.security.constants import (
     ADD_DSRC,
     BIBLIO,
@@ -80,30 +80,41 @@ class ActionChecks(object):
         self.checks = {
             VALIDATE_USER: {
                 IN_EFFECT: valid_users is not None,
-                VALIDATOR: self.is_valid_user
+                VALIDATOR: self.is_valid_user,
             },
-            # AUTH_KEY: auth_key,
-            AUTH_KEY: {IN_EFFECT: auth_key, VALIDATOR: self.is_valid_auth_key}
-            # PASS_PHRASE: pass_phrase,
-            # IP_ADDRESS: ip_address,
+            AUTH_KEY: {
+                IN_EFFECT: auth_key,
+                VALIDATOR: self.is_valid_auth_key,
+            },
+            PASS_PHRASE: {
+                IN_EFFECT: pass_phrase,
+                VALIDATOR: self.is_valid_pass_phrase,
+            },
+            # IP_ADDRESS: to be developed!
         }
         self.valid_users = valid_users
 
     def __str__(self):
         return str(self.checks)
 
-    def is_valid_auth_key(self, auth_key):
-        return False
+    def is_valid_auth_key(self, user_id: str, auth_key: str) -> bool:
+        auth_user = uqry.fetch_by_auth_key(auth_key)
+        print(f'{auth_user=}')
+        return user_id == auth_user
 
-    def is_valid_user(self, user):
+    def is_valid_pass_phrase(self, user_id: str, pass_phrase: str) -> bool:
+        return True
+
+    def is_valid_user(self, user_id, user):
+        """
+        This method gets the user twice so the others can get it once!
+        """
         valid = True  # by default all users are valid
         if self.valid_users:
             valid = user in self.valid_users
-            print(f'{self.valid_users=}')
-            print(f'{valid=}')
         return valid
 
-    def is_permitted(self, check_vals: dict) -> bool:
+    def is_permitted(self, user_id: str, check_vals: dict) -> bool:
         """
         If any test fails return False.
         """
@@ -111,7 +122,8 @@ class ActionChecks(object):
             if val[IN_EFFECT]:
                 if check not in check_vals:
                     raise ValueError(f'Value missing for {check}')
-                if not self.checks[check][VALIDATOR](check_vals[check]):
+                if not self.checks[check][VALIDATOR](user_id,
+                                                     check_vals[check]):
                     print(f'is_permitted failing on {check}')
                     return False
         return True
@@ -146,12 +158,13 @@ class SecProtocol(object):
     def get_name(self):
         return self.name
 
-    def is_permitted(self, action, check_vals):
+    def is_permitted(self, action, user_id, check_vals):
         print(f'{check_vals=}')
         valid = True
         if action in self.__dict__:
             print(f'{action=}')
-            valid = self.__dict__[action].is_permitted(check_vals)
+            valid = self.__dict__[action].is_permitted(user_id,
+                                                       check_vals)
         return valid
 
 
@@ -162,7 +175,7 @@ def is_permitted(name, action, user_id: str = ''):
         raise ValueError(f'Unknown protocol: {name=}')
     check_vals = {}
     check_vals[VALIDATE_USER] = user_id
-    return prot.is_permitted(action, check_vals)
+    return prot.is_permitted(action, user_id, check_vals)
 
 
 def fetch_by_key(name: str):

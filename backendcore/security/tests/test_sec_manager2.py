@@ -84,23 +84,23 @@ def test_sec_checks_str():
 
 
 def test_is_sec_checks_valid_user():
-    assert GOOD_SEC_CHECKS.is_valid_user(sm.TEST_EMAIL)
+    assert GOOD_SEC_CHECKS.is_valid_user(sm.TEST_EMAIL, sm.TEST_EMAIL)
 
 
 def test_is_sec_checks_not_valid_user():
-    assert not GOOD_SEC_CHECKS.is_valid_user('Not a user on the list!')
+    assert not GOOD_SEC_CHECKS.is_valid_user('Not a user on the list!', '')
 
 
 def test_is_sec_checks_valid_user_by_default():
-    assert sm.NO_USERS_SEC_CHECKS.is_valid_user('Any user should be valid!')
+    assert sm.NO_USERS_SEC_CHECKS.is_valid_user('Any user should be valid!', '')
 
 
 def test_sec_checks_is_permitted():
-    assert GOOD_SEC_CHECKS.is_permitted({sm.VALIDATE_USER: sm.TEST_EMAIL})
+    assert GOOD_SEC_CHECKS.is_permitted(sm.TEST_EMAIL, {sm.VALIDATE_USER: sm.TEST_EMAIL})
 
 
 def test_sec_checks_is_not_permitted():
-    assert not GOOD_SEC_CHECKS.is_permitted({sm.VALIDATE_USER: 'Bad email'})
+    assert not GOOD_SEC_CHECKS.is_permitted(sm.TEST_EMAIL, {sm.VALIDATE_USER: 'Bad email'})
 
 
 def test_init_protocol_w_defaults():
@@ -148,11 +148,13 @@ def test_protocol_str():
 
 
 def test_protocol_is_permitted():
-    assert GOOD_PROTOCOL.is_permitted(sm.CREATE, {sm.VALIDATE_USER: sm.TEST_EMAIL})
+    assert GOOD_PROTOCOL.is_permitted(sm.CREATE, sm.TEST_EMAIL,
+                                      {sm.VALIDATE_USER: sm.TEST_EMAIL})
 
 
 def test_protocol_is_not_permitted():
-    assert not GOOD_PROTOCOL.is_permitted(sm.CREATE, {sm.VALIDATE_USER: 'Bad email'})
+    assert not GOOD_PROTOCOL.is_permitted(sm.CREATE, sm.TEST_EMAIL,
+                                          {sm.VALIDATE_USER: 'Bad email'})
 
 
 SEC_AUTH = 'backendcore.security.auth_key'
