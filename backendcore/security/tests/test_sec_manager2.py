@@ -247,3 +247,11 @@ def test_is_permitted(mock_auth_key, temp_protocol):
 
 def test_is_not_permitted(temp_protocol):
     assert not sm.is_permitted(TEST_NAME, sm.CREATE, user_id='Bad email')
+
+
+def test_fetch_journal_protocol_name():
+    """
+    This needs impprovement but I'm not sure how we want to go around testing
+    different environment variables
+    """
+    assert isinstance(sm.fetch_journal_protocol_name(), str)

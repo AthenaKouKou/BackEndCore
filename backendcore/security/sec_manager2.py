@@ -226,7 +226,21 @@ def fetch_sec_users(name):
 
 
 JOURNAL_CODE = os.environ.get('JOURNAL_CODE', '')
-if JOURNAL_CODE == 'CAT':  # This should be a constant... where?
+
+COSMOS_JOURNAL_CODE = 'CAT'
+
+
+def fetch_journal_protocol_name():
+    """
+    We are assuming that SFA is the default journal for now
+    """
+    if JOURNAL_CODE == COSMOS_JOURNAL_CODE:
+        return COSMOS_JOURNAL
+    else:
+        return JOURNAL
+
+
+if JOURNAL_CODE == COSMOS_JOURNAL_CODE:  # This should be a constant... where?
     valid_ct_journal_users = [
         'gcallah@mac.com',
         'kristian.d.nikolov@gmail.com',
