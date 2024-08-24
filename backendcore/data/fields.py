@@ -23,6 +23,7 @@ LIST = 'list'
 LOW_VAL = 'low_value'
 MAP = 'map'
 MARKDOWN = 'markdown'  # field contains markdown
+MAX_LEN = 'maxLen'
 ORIGIN = '$ORIGIN'
 # sometimes we don't want sorting on a field; set this to True:
 NO_SORT = 'noSort'
