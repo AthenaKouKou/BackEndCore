@@ -233,6 +233,8 @@ COSMOS_JOURNAL_CODE = 'CAT'
 def fetch_journal_protocol_name():
     """
     We are assuming that SFA is the default journal for now
+    This code should move: security should not have to know about
+    JOURNAL_CODE.
     """
     if JOURNAL_CODE == COSMOS_JOURNAL_CODE:
         return COSMOS_JOURNAL

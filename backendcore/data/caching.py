@@ -73,7 +73,6 @@ class DataCollection(object):
             return 0
 
     def fetch_list(self, filters=None):
-        print(f'In caching, {filters=}')
         if self.data_list is None:
             if filters is None:
                 self.data_list = dbc.fetch_all(self.db_nm,
