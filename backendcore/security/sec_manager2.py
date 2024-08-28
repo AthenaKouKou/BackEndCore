@@ -322,7 +322,7 @@ else:
 
     infra_checks = ActionChecks(valid_users=valid_infra_users,
                                 auth_key=True,
-                                pass_phrase=True)
+                                pass_phrase=False)
     infra_protocol = SecProtocol(INFRA,
                                  create=infra_checks,
                                  delete=infra_checks,
