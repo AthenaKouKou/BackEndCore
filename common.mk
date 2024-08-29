@@ -1,6 +1,6 @@
 # common make vars and targets:
 export DATA_DIR = "backendcore/data"
-export EMAIL_DIR = "backendcore/email"
+export EMAIL_DIR = "backendcore/emailer"
 export ENV_DIR = "backendcore/env"
 export USER_DIR = "backendcore/users"
 
