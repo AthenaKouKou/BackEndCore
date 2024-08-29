@@ -1,7 +1,10 @@
 # common make vars and targets:
+export API_DIR = "backendcore/api"
+export COMMON_DIR = "backendcore/common"
 export DATA_DIR = "backendcore/data"
 export EMAIL_DIR = "backendcore/emailer"
 export ENV_DIR = "backendcore/env"
+export SEC_DIR = "backendcore/security"
 export USER_DIR = "backendcore/users"
 
 export PANDOC = pandoc

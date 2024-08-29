@@ -3,6 +3,7 @@ Manager of security protocols.
 Each protocol has a unique name.
 Attempts to add a name a second time will fail with a ValueError.
 """
+from copy import deepcopy
 import os
 
 from backendcore.common.constants import (  # noqa F401
@@ -96,6 +97,14 @@ class ActionChecks(object):
     def __str__(self):
         return str(self.checks)
 
+    def to_json(self):
+        json_checks = deepcopy(self.checks)
+        for check in json_checks.values():
+            if VALIDATOR in check:
+                del check[VALIDATOR]
+        print(f'{json_checks=}')
+        return json_checks
+
     def is_valid_auth_key(self, user_id: str, auth_key: str) -> bool:
         auth_user = uqry.fetch_id_by_auth_key(auth_key)
         print(f'{auth_user=}')
@@ -154,6 +163,16 @@ class SecProtocol(object):
             raise TypeError(f'{BAD_TYPE}{type(delete)=}')
         self.delete = delete
 
+    def to_json(self):
+        return {
+            self.name: {
+                CREATE: self.create.to_json(),
+                READ: self.read.to_json(),
+                UPDATE: self.update.to_json(),
+                DELETE: self.delete.to_json(),
+            }
+        }
+
     def get_name(self):
         return self.name
 
@@ -178,6 +197,7 @@ def is_permitted(name, action, user_id: str = '', auth_key: str = ''):
 
 
 def fetch_by_key(name: str):
+    print(f'fetch_by_key: {name=}')
     return sec_manager.get(name, None)
 
 
@@ -255,7 +275,6 @@ if JOURNAL_CODE == COSMOS_JOURNAL_CODE:  # This should be a constant... where?
     ct_journal_protocol = SecProtocol(COSMOS_JOURNAL,
                                       create=ct_journal_checks,
                                       delete=ct_journal_checks,
-                                      read=ct_journal_checks,
                                       update=ct_journal_checks)
     add(ct_journal_protocol)
 else:
@@ -345,7 +364,6 @@ else:
     journal_protocol = SecProtocol(JOURNAL,
                                    create=journal_checks,
                                    delete=journal_checks,
-                                   read=journal_checks,
                                    update=journal_checks)
     add(journal_protocol)
 

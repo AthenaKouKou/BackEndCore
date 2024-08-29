@@ -76,6 +76,13 @@ def test_init_sec_checks_bad_pass_phrase():
         sm.ActionChecks(pass_phrase=['list', 'not', 'good', 'here'])
 
 
+def test_sec_checks_to_json():
+    json_obj = GOOD_SEC_CHECKS.to_json()
+    assert json_obj is not None
+    json_str = json.dumps(json_obj)
+    assert(isinstance(json_str, str))
+
+
 def test_sec_checks_str():
     assert(isinstance(str(GOOD_SEC_CHECKS), str))
 
@@ -159,6 +166,13 @@ def test_init_protocol_w_bad_update():
 def test_init_protocol_w_bad_delete():
     with pytest.raises(TypeError):
         sm.SecProtocol('a name', delete='Not a sec check obj')
+
+
+def test_protocol_to_json():
+    json_obj = GOOD_PROTOCOL.to_json()
+    assert json_obj is not None
+    json_str = json.dumps(json_obj)
+    assert(isinstance(json_str, str))
 
 
 def test_protocol_str():
