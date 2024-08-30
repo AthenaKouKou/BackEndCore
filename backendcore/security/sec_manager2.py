@@ -255,10 +255,7 @@ def fetch_journal_protocol_name():
     This code should move: security should not have to know about
     JOURNAL_CODE.
     """
-    if JOURNAL_CODE == COSMOS_JOURNAL_CODE:
-        return COSMOS_JOURNAL
-    else:
-        return JOURNAL
+    return JOURNAL
 
 
 if JOURNAL_CODE == COSMOS_JOURNAL_CODE:  # This should be a constant... where?
