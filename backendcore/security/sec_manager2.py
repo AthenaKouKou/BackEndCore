@@ -102,7 +102,6 @@ class ActionChecks(object):
         for check in json_checks.values():
             if VALIDATOR in check:
                 del check[VALIDATOR]
-        print(f'{json_checks=}')
         return json_checks
 
     def is_valid_auth_key(self, user_id: str, auth_key: str) -> bool:
@@ -164,7 +163,7 @@ class SecProtocol(object):
         self.delete = delete
 
     def to_json(self):
-        return {
+        prot = {
             self.name: {
                 CREATE: self.create.to_json(),
                 READ: self.read.to_json(),
@@ -172,6 +171,8 @@ class SecProtocol(object):
                 DELETE: self.delete.to_json(),
             }
         }
+        print(f'{prot=}')
+        return prot
 
     def get_name(self):
         return self.name
