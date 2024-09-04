@@ -42,6 +42,7 @@ QUERY_STR = 'query_string'
 DATE = 'date'
 FILE_LOADER = 'file_loader'
 NUMERIC = 'numeric'  # a string, but only numbers allowed
+OBJ_LIST = 'object-list'  # a list of objects
 # for strings, we might want non-default input box sizes:
 FLD_LEN = 'fld_len'
 PARAMS = 'params'
