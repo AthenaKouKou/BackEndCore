@@ -15,7 +15,7 @@ from backendcore.common.constants import (  # noqa F401
     UPDATE,
 )
 import backendcore.data.db_connect as dbc
-# import backendcore.security.auth_key as aky
+import backendcore.security.auth_key as ak
 import backendcore.users.query as uqry
 from backendcore.security.constants import (
     ADD_DSRC,
@@ -25,7 +25,6 @@ from backendcore.security.constants import (
     INFRA,
     JOURNAL,
 )
-# import backendcore.security.feature_password as ftpw
 
 
 IP_ADDRESS = 'ipAddress'
@@ -192,6 +191,8 @@ def is_permitted(name, action, user_id: str = '', auth_key: str = ''):
     if not prot:
         raise ValueError(f'Unknown protocol: {name=}')
     check_vals = {}
+    if not user_id:
+        user_id = ak.fetch_user_id_by_key(auth_key)
     check_vals[VALIDATE_USER] = user_id
     check_vals[AUTH_KEY] = auth_key
     return prot.is_permitted(action, user_id, check_vals)
