@@ -218,20 +218,6 @@ def delete(name):
         raise ValueError(f'Attempt to delete non-existent protocol: {name=}')
 
 
-def is_valid(name: str,
-             action: str,
-             user_id: str = None,
-             phrase: str = None,
-             auth_key: str = None,
-             ip_address: str = None):
-    prot = fetch_by_key(name)
-    if not prot:
-        raise ValueError(f'Unknown protocol: {name=}')
-    if not is_valid_action(action):
-        raise ValueError(f'Unknown action: {action=}')
-    return True
-
-
 def create_sec_doc(name, users):
     """
     Used to add new sec protocol docs to the database

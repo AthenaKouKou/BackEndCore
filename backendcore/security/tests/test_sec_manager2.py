@@ -248,11 +248,6 @@ def test_delete_missing():
         sm.delete('Will not find this protocol!')
 
 
-def test_is_valid_w_bad_prot():
-    with pytest.raises(ValueError):
-        sm.is_valid('badprot name', 'irrelevant action')
-
-
 @patch(f'{FETCH_BY_AUTH_KEY}', autospec=True, return_value=sm.TEST_EMAIL)
 def test_is_permitted(mock_auth_key, temp_protocol):
     assert sm.is_permitted(TEST_NAME, sm.CREATE, user_id=sm.TEST_EMAIL,
