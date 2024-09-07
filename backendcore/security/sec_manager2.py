@@ -277,7 +277,7 @@ else:
 
     library_checks = ActionChecks(valid_users=valid_lib_users,
                                   auth_key=True,
-                                  pass_phrase=True)
+                                  pass_phrase=False)
     glossary_protocol = SecProtocol(GLOSSARY,
                                     create=library_checks,
                                     delete=library_checks,

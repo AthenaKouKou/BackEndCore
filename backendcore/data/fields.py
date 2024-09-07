@@ -37,6 +37,9 @@ MORE_INFO = 'more_info'
 MORE_INFO_DISP_NM = 'More info'
 NAME = 'name'
 
+# Field values:
+DATE_LEN = 10
+
 """
 A sample of what the data for these functions should look like,
 also used for testing:
