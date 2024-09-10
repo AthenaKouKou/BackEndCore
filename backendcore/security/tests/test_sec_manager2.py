@@ -223,6 +223,12 @@ def test_fetch_by_key_protocol(temp_protocol):
    assert sm.fetch_by_key(TEST_NAME) is not None
 
 
+# Test is_valid_user
+def test_is_valid_user(temp_user, temp_protocol):
+    print('In test_is_valid_user')
+    assert sm.is_valid_user(TEST_NAME, sm.CREATE, sm.TEST_EMAIL)
+
+
 def test_add():
     sm.add(TEST_PROTOCOL)
     sm.delete(TEST_PROTOCOL_NAME)

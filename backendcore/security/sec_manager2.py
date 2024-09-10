@@ -185,6 +185,16 @@ class SecProtocol(object):
                                                        check_vals)
         return valid
 
+    def is_valid_user(self, action, user_id):
+        """
+        Must pass user_id to the action twice!
+        """
+        valid = True
+        if action in self.__dict__:
+            valid = valid = self.__dict__[action].is_valid_user(user_id,
+                                                                user_id)
+        return valid
+
 
 def is_permitted(name, action, user_id: str = '', auth_key: str = ''):
     prot = fetch_by_key(name)
@@ -201,6 +211,14 @@ def is_permitted(name, action, user_id: str = '', auth_key: str = ''):
 def fetch_by_key(name: str):
     print(f'fetch_by_key: {name=}')
     return sec_manager.get(name, None)
+
+
+def is_valid_user(prot_name: str, action: str, user: str):
+    valid = True
+    prot = fetch_by_key(prot_name)
+    if prot:
+        valid = prot.is_valid_user(action, user)
+    return valid
 
 
 def add(protocol):
