@@ -210,7 +210,11 @@ def is_permitted(name, action, user_id: str = '', auth_key: str = ''):
 
 def fetch_by_key(name: str):
     print(f'fetch_by_key: {name=}')
-    return sec_manager.get(name, None)
+    for nm in sec_manager:
+        print(nm)
+    ret = sec_manager.get(name, None)
+    print(f'{ret=}')
+    return ret
 
 
 def is_valid_user(prot_name: str, action: str, user: str):
@@ -264,7 +268,7 @@ def fetch_journal_protocol_name():
     return JOURNAL
 
 
-if JOURNAL_CODE == COSMOS_JOURNAL_CODE:  # This should be a constant... where?
+if JOURNAL_CODE == COSMOS_JOURNAL_CODE:
     valid_ct_journal_users = [
         'gcallah@mac.com',
         'kristian.d.nikolov@gmail.com',
