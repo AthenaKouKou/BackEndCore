@@ -210,8 +210,6 @@ def is_permitted(name, action, user_id: str = '', auth_key: str = ''):
 
 def fetch_by_key(name: str):
     print(f'fetch_by_key: {name=}')
-    for nm in sec_manager:
-        print(nm)
     ret = sec_manager.get(name, None)
     print(f'{ret=}')
     return ret
