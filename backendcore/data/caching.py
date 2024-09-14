@@ -72,6 +72,12 @@ class DataCollection(object):
         else:
             return 0
 
+    def _post_fetch(self):
+        """
+        This is a hook for sub-classes to override if necessary.
+        """
+        pass
+
     def fetch_list(self, filters=None):
         if self.data_list is None:
             if filters is None:
