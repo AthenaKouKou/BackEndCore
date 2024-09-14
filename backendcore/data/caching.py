@@ -93,6 +93,7 @@ class DataCollection(object):
                                             sort=dbc.ASC,
                                             sort_fld=self.sort_fld,
                                             no_id=self.no_id)
+            self._post_fetch()
         return deepcopy(self.data_list)
 
     def fetch_dict(self, filters=None):
