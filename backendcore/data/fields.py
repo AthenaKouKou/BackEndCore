@@ -36,6 +36,7 @@ WIDTH = 'width'
 
 # Common field names:
 CODE = 'code'
+DATE = 'date'
 MORE_INFO = 'more_info'
 MORE_INFO_DISP_NM = 'More info'
 NAME = 'name'
