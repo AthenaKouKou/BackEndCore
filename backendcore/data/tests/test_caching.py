@@ -58,6 +58,29 @@ def some_recs(new_dcollect):
     new_dcollect.delete(VAL3)
 
 
+FLD_NM = 'fld1'
+
+
+def test_can_do_math_with_int():
+    record = {FLD_NM: 17}
+    assert cach.can_do_math(record, FLD_NM)
+
+
+def test_can_do_math_with_float():
+    record = {FLD_NM: 3.14159}
+    assert cach.can_do_math(record, FLD_NM)
+
+
+def test_cant_do_math_with_str():
+    record = {FLD_NM: 'not a good value for math'}
+    assert not cach.can_do_math(record, FLD_NM)
+
+
+def test_cant_do_math_with_missing_fld():
+    record = {'the wrong field name': 'no good'}
+    assert not cach.can_do_math(record, FLD_NM)
+
+
 def test_class_is_registered(new_dcollect):
     assert cach.DataCollection.is_registered(TEMP_COLLECT)
 

@@ -14,6 +14,15 @@ from backendcore.common.constants import (
 import backendcore.data.query as qry
 
 
+"""
+A little utility function.
+"""
+
+
+def can_do_math(record, fld):
+    return fld in record and isinstance(record[fld], (int, float))
+
+
 class DataCollection(object):
     caches: dict = {}
 
