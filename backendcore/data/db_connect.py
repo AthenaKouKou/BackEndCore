@@ -23,7 +23,7 @@ cloud_svc = os.getenv('MONGO_HOST', 'koukoumongo1.yud9b.mongodb.net')
 replicaSet = "atlas-e383j2-shard-0"
 passwd = os.environ.get("MONGO_PASSWD", '')
 cloud_mdb = "mongodb+srv"
-db_params = "retryWrites=true&w=majority"
+db_params = "retryWrites=false&w=majority"
 
 LTE = '$lte'
 GTE = '$gte'
@@ -162,7 +162,7 @@ def connectDB():
             # some of the below params are just Mongo default:
             # we don't know what they mean!
             client = pm.MongoClient(f"{cloud_mdb}://{user_nm}:{passwd}@"
-                                    + f"{cloud_svc}/{API_DB}?retryWrites=true"
+                                    + f"{cloud_svc}/{API_DB}?retryWrites=false"
                                     + replicaSetOption,
                                     tlsCAFile=certifi.where(),
                                     **settings)
