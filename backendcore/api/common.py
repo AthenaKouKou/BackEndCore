@@ -3,8 +3,12 @@ Common functions for API handling.
 """
 from backendcore.api.constants import AUTH
 
+import backendcore.users.query as uqry
+
 GET_FROM_JSON = ['POST', 'PUT', 'PATCH']
 
+USER_ID = 'user_id'
+EMAIL = 'email'
 PARAM_SEP = '&'
 KEY_VAL_SEP = '='
 KEY = 0
@@ -58,3 +62,13 @@ def get_auth_key_from_request(request) -> str:
     Gets the auth key from the request's header.
     """
     return request.headers.get(AUTH, None)
+
+
+def get_auth_key_and_user(jdata, request):
+    auth_key = get_auth_key_from_request(request)
+    user_id = jdata.get(USER_ID, None)
+    if not user_id:
+        user_id = jdata.get(EMAIL, None)
+    if not user_id:
+        user_id = uqry.fetch_id_by_auth_key(auth_key)
+    return (auth_key, user_id)
