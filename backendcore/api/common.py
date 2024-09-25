@@ -64,7 +64,8 @@ def get_auth_key_from_request(request) -> str:
     return request.headers.get(AUTH, None)
 
 
-def get_auth_key_and_user(jdata, request):
+def get_auth_key_and_user(request):
+    jdata = request.json
     auth_key = get_auth_key_from_request(request)
     user_id = jdata.get(USER_ID, None)
     if not user_id:
