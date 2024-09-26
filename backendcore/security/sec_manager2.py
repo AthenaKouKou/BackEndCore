@@ -40,6 +40,7 @@ SEC_COLLECT = 'security_protocols'
 USERS = 'users'
 PROT_NM = 'protocol_name'
 
+INFRA_PASS_PHRASE = 'Come on, Beanie!'
 
 sec_manager = {}
 
@@ -63,11 +64,14 @@ class ActionChecks(object):
                  auth_key=False,
                  pass_phrase=False,
                  valid_users=None,
-                 ip_address=None):
+                 ip_address=None,
+                 this_phrase=''):
         if not isinstance(auth_key, bool):
             raise TypeError(f'{BAD_TYPE}{type(auth_key)=}')
         if not isinstance(pass_phrase, bool):
             raise TypeError(f'{BAD_TYPE}{type(pass_phrase)=}')
+        elif pass_phrase:
+            self.phrase = this_phrase
         if valid_users:
             if not isinstance(valid_users, list):
                 raise TypeError(f'{BAD_TYPE}{type(valid_users)=}')
@@ -109,7 +113,10 @@ class ActionChecks(object):
         return user_id == auth_user
 
     def is_valid_pass_phrase(self, user_id: str, pass_phrase: str) -> bool:
-        return True
+        """
+        This is a temporary expedient!
+        """
+        return pass_phrase == self.phrase
 
     def is_valid_user(self, user_id, user):
         """
@@ -196,7 +203,8 @@ class SecProtocol(object):
         return valid
 
 
-def is_permitted(name, action, user_id: str = '', auth_key: str = ''):
+def is_permitted(name, action, user_id: str = '', auth_key: str = '',
+                 phrase: str = ''):
     prot = fetch_by_key(name)
     if not prot:
         raise ValueError(f'Unknown protocol: {name=}')
@@ -205,6 +213,7 @@ def is_permitted(name, action, user_id: str = '', auth_key: str = ''):
         user_id = ak.fetch_user_id_by_key(auth_key)
     check_vals[VALIDATE_USER] = user_id
     check_vals[AUTH_KEY] = auth_key
+    check_vals[PASS_PHRASE] = phrase
     return prot.is_permitted(action, user_id, check_vals)
 
 
@@ -346,8 +355,9 @@ else:
     ]
 
     infra_checks = ActionChecks(valid_users=valid_infra_users,
-                                auth_key=True,
-                                pass_phrase=False)
+                                auth_key=False,
+                                pass_phrase=True,
+                                this_phrase=INFRA_PASS_PHRASE)
     infra_protocol = SecProtocol(INFRA,
                                  create=infra_checks,
                                  delete=infra_checks,
@@ -378,14 +388,17 @@ GOOD_IP_ADDRESS = '127.0.0.1'
 TEST_EMAIL = 'test@mac.com'
 GOOD_VALID_USERS = [TEST_EMAIL, 'kris@smack.com']
 TEST_NAME = 'test name'
+TEST_PHRASE = 'test phrase'
 
 GOOD_SEC_CHECKS = ActionChecks(auth_key=True,
-                               pass_phrase=False,
+                               pass_phrase=True,
+                               this_phrase=TEST_PHRASE,
                                ip_address=False,
                                valid_users=GOOD_VALID_USERS,)
 
 NO_USERS_SEC_CHECKS = ActionChecks(auth_key=True,
                                    pass_phrase=True,
+                                   this_phrase=TEST_PHRASE,
                                    ip_address=GOOD_IP_ADDRESS)
 
 GOOD_PROTOCOL = SecProtocol(TEST_NAME,

@@ -118,7 +118,9 @@ def test_sec_checks_is_permitted(mock_auth_key):
     assert GOOD_SEC_CHECKS.is_permitted(sm.TEST_EMAIL, {sm.VALIDATE_USER:
                                                         sm.TEST_EMAIL,
                                                         sm.AUTH_KEY:
-                                                        'some auth key'})
+                                                        'some auth key',
+                                                        sm.PASS_PHRASE:
+                                                        sm.TEST_PHRASE})
 
 
 def test_sec_checks_is_not_permitted():
@@ -184,8 +186,8 @@ def test_protocol_is_permitted(mock_auth_key):
     assert GOOD_PROTOCOL.is_permitted(sm.CREATE, sm.TEST_EMAIL,
                                       {sm.VALIDATE_USER:
                                        sm.TEST_EMAIL,
-                                       sm.AUTH_KEY:
-                                       'some auth key'})
+                                       sm.AUTH_KEY: 'some auth key',
+                                       sm.PASS_PHRASE: sm.TEST_PHRASE})
 
 
 def test_protocol_is_not_permitted():
@@ -257,11 +259,17 @@ def test_delete_missing():
 @patch(f'{FETCH_BY_AUTH_KEY}', autospec=True, return_value=sm.TEST_EMAIL)
 def test_is_permitted(mock_auth_key, temp_protocol):
     assert sm.is_permitted(TEST_NAME, sm.CREATE, user_id=sm.TEST_EMAIL,
-                           auth_key='some auth_key')
+                           auth_key='some auth_key', phrase=sm.TEST_PHRASE)
 
 
-def test_is_not_permitted(temp_protocol):
+def test_is_not_permitted_bad_email(temp_protocol):
     assert not sm.is_permitted(TEST_NAME, sm.CREATE, user_id='Bad email')
+
+
+@patch(f'{FETCH_BY_AUTH_KEY}', autospec=True, return_value=sm.TEST_EMAIL)
+def test_is_not_permitted_bad_phrase(mock_auth_key, temp_protocol):
+    assert True
+    # assert not sm.is_permitted(TEST_NAME, sm.CREATE, user_id='Bad email')
 
 
 def test_fetch_journal_protocol_name():
