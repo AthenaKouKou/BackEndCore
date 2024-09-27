@@ -116,6 +116,7 @@ class ActionChecks(object):
         """
         This is a temporary expedient!
         """
+        print(f'comparing {pass_phrase=} with {self.phrase=}')
         return pass_phrase == self.phrase
 
     def is_valid_user(self, user_id, user):
@@ -413,6 +414,7 @@ def main():
                           auth_key=True)
     sp = SecProtocol('test protocol', create=create)
     print(f'{sp=}')
+    print(f'{TEST_PHRASE=}')
 
 
 if __name__ == '__main__':

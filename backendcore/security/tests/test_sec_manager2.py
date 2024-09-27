@@ -268,8 +268,7 @@ def test_is_not_permitted_bad_email(temp_protocol):
 
 @patch(f'{FETCH_BY_AUTH_KEY}', autospec=True, return_value=sm.TEST_EMAIL)
 def test_is_not_permitted_bad_phrase(mock_auth_key, temp_protocol):
-    assert True
-    # assert not sm.is_permitted(TEST_NAME, sm.CREATE, user_id='Bad email')
+    assert not sm.is_permitted(TEST_NAME, sm.CREATE, user_id='Bad phrase')
 
 
 def test_fetch_journal_protocol_name():
@@ -277,4 +276,4 @@ def test_fetch_journal_protocol_name():
     This needs impprovement but I'm not sure how we want to go around testing
     different environment variables
     """
-    assert isinstance(sm.fetch_journal_protocol_name(), str)
+    assert isinstance(sm.fetch_journal_protocol_name(), str,)
