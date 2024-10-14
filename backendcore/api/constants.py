@@ -7,6 +7,7 @@ from backendcore.common.constants import (  # noqa F401
 ADD_FILE = 'add_file'
 AUTH = 'Authorization'
 FIELDS = 'fields'
+FILE = 'file'
 FORM = 'form'
 JOURNAL = 'Journal'
 MESSAGE = 'message'
