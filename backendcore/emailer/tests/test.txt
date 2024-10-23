@@ -1,0 +1,4 @@
+Test text file for attachments!
+Some special characters to spice things up:
+~!@#$%^&*()_+<>?:"}|
+\n \r \n\r <br> <\br>
