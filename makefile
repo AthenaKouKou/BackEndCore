@@ -1,4 +1,3 @@
-# Make sure you have KOUKOU_HOME set before running this.
 include common.mk
 
 WEB_BUILD_PUBLIC_URL ?= /static/react
@@ -10,6 +9,7 @@ all_tests: FORCE
 	cd $(EMAIL_DIR); make tests
 	cd $(ENV_DIR); make tests
 	cd $(SEC_DIR); make tests
+	cd $(TEMPL_DIR); make tests
 	cd $(USER_DIR); make tests
 
 tests: FORCE
@@ -17,7 +17,8 @@ tests: FORCE
 
 docs: $(PYTHONFILES)
 	rm -rf $(HTML_DOCS_DIR)
-	pydoc3 -f --html -o $(DOCS_DIR) -c show_source_code=False --skip-errors $(AQL_DIR) $(API_SERVER_DIR) $(LIB_DIR) $(SCRIPTS_DIR)
+	pydoc3 -f --html -o $(DOCS_DIR) -c show_source_code=False --skip-errors $(API_DIR) $(COMMON_DIR) $(DATA_DIR) $(EMAIL_DIR)
+	pydoc3 -f --html -o $(DOCS_DIR) -c show_source_code=False --skip-errors $(ENV_DIR) $(SEC_DIR) $(USER_DIR)
 
 github:
 	-git commit -a

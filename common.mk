@@ -1,11 +1,13 @@
 # common make vars and targets:
-export API_DIR = "backendcore/api"
-export COMMON_DIR = "backendcore/common"
-export DATA_DIR = "backendcore/data"
-export EMAIL_DIR = "backendcore/emailer"
-export ENV_DIR = "backendcore/env"
-export SEC_DIR = "backendcore/security"
-export USER_DIR = "backendcore/users"
+export CODE_ROOT = "backendcore"
+export API_DIR = "$(CODE_ROOT)/api"
+export COMMON_DIR = "$(CODE_ROOT)/common"
+export DATA_DIR = "$(CODE_ROOT)/data"
+export EMAIL_DIR = "$(CODE_ROOT)/emailer"
+export ENV_DIR = "$(CODE_ROOT)/env"
+export SEC_DIR = "$(CODE_ROOT)/security"
+export TEMPL_DIR = "$(CODE_ROOT)/templates"
+export USER_DIR = "$(CODE_ROOT)/users"
 
 export PANDOC = pandoc
 export PYLINT = flake8
