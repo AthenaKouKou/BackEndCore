@@ -11,7 +11,7 @@ API_MOD_DIR="$API_DIR/apis"
 API_TEST_DIR="$API_DIR/tests"
 
 if [ -z $1 ]; then
-    echo "You must pass a repo dir to staert from."
+    echo "You must pass a repo dir to start from."
     exit 1
 fi
 
