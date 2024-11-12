@@ -1,6 +1,8 @@
 #!/usr/local/bin/bash
 
-TEMPL_DIR=templates
+TEMPL_DIR=$(pwd)
+echo "Template directory: $TEMPL_DIR"
+
 TEMPL_TEST_DIR="$TEMPL_DIR/tests"
 TEMPL_ENT=template
 TEMPL_CLASS_PRE=Template
@@ -105,7 +107,7 @@ fi
 echo "Do you want to create API endpoints? (Y/N)"
 read create_api
 
-if [ $create_api == "Y" || $create_api == "y" ]; then
+if [ $create_api == "Y" ] || [ $create_api == "y" ]; then
     new_ep_file=$API_MOD_DIR/$ep_mod.py
     new_ep_test_file=$API_TEST_DIR/test_$ep_mod.py
     # create the endpoint file
@@ -134,7 +136,7 @@ git add $new_test_dir/test_fields.py
 git add $new_test_dir/test_form.py
 git add $new_test_dir/test_query.py
 git add $new_dir/makefile
-if [ $create_api == "Y" || $create_api == "y" ]; then
+if [ $create_api == "Y" ] || [ $create_api == "y" ]; then
     git add $new_ep_file
     git add $new_ep_test_file
 fi
