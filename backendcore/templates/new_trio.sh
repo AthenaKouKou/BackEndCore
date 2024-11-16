@@ -4,6 +4,7 @@ TEMPL_DIR=$(pwd)
 echo "Template directory: $TEMPL_DIR"
 
 TEMPL_TEST_DIR="$TEMPL_DIR/tests"
+TEMPL_PKG=templates
 TEMPL_ENT=template
 TEMPL_CLASS_PRE=Template
 TEMPL_CONST=TEMPLATE
@@ -47,6 +48,7 @@ then
         echo "$new_dir exists"
     fi
     imp_dir="$top_dir.$sub_dir"
+    echo "imp dir = $imp_dir"
     ep_mod="$top_dir"_"$sub_dir"
 fi
 echo $new_dir
@@ -75,31 +77,36 @@ echo $new_const
 # create the base trio files
 cp $TEMPL_DIR/fields.py $new_dir/fields.py
 cp $TEMPL_DIR/form.py $new_dir/form.py
+echo "About to do these substitutions:"
+echo "s/$TEMPL_DIR/$imp_dir/g"
+echo "s/$TEMPL_ENT/$ent_str/g"
+echo "s/$TEMPL_CONST/$new_const/g"
+echo "s/$TEMPL_CLASS_PRE/$new_class_pre/g"
 cat $TEMPL_DIR/query.py \
-    | sed "s/$TEMPL_DIR/$imp_dir/g" \
+    | sed "s/$TEMPL_PKG/$imp_dir/g" \
     | sed "s/$TEMPL_ENT/$ent_str/g" \
     | sed "s/$TEMPL_CONST/$new_const/g" \
     | sed "s/$TEMPL_CLASS_PRE/$new_class_pre/g" \
     > $new_dir/query.py
 cat $TEMPL_TEST_DIR/test_fields.py \
-    | sed "s/$TEMPL_DIR/$imp_dir/g" \
+    | sed "s/$TEMPL_PKG/$imp_dir/g" \
     | sed "s/$TEMPL_CONST/$new_const/g" \
     | sed "s/$TEMPL_CLASS_PRE/$new_class_pre/g" \
     > $new_test_dir/test_fields.py
 cat $TEMPL_TEST_DIR/test_form.py \
-    | sed "s/$TEMPL_DIR/$imp_dir/g" \
+    | sed "s/$TEMPL_PKG/$imp_dir/g" \
     | sed "s/$TEMPL_CONST/$new_const/g" \
     | sed "s/$TEMPL_CLASS_PRE/$new_class_pre/g" \
     > $new_test_dir/test_form.py
 cat $TEMPL_TEST_DIR/test_query.py \
-    | sed "s/$TEMPL_DIR/$imp_dir/g" \
+    | sed "s/$TEMPL_PKG/$imp_dir/g" \
     | sed "s/$TEMPL_CONST/$new_const/g" \
     | sed "s/$TEMPL_CLASS_PRE/$new_class_pre/g" \
     > $new_test_dir/test_query.py
 
 if [ ! -f "$new_dir"/makefile ]; then
     echo "makefile does not exist, so creating it."
-    cat $TEMPL_DIR/makefile | sed "s/$TEMPL_DIR/$imp_dir/g" > $new_dir/makefile
+    cat $TEMPL_PKG/makefile | sed "s/$TEMPL_DIR/$imp_dir/g" > $new_dir/makefile
 else
     echo "makefile already exists."
 fi
