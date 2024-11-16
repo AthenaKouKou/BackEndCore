@@ -106,7 +106,7 @@ cat $TEMPL_TEST_DIR/test_query.py \
 
 if [ ! -f "$new_dir"/makefile ]; then
     echo "makefile does not exist, so creating it."
-    cat $TEMPL_PKG/makefile | sed "s/$TEMPL_DIR/$imp_dir/g" > $new_dir/makefile
+    cat $TEMPL_PKG/makefile | sed "s/$TEMPL_PKG/$imp_dir/g" > $new_dir/makefile
 else
     echo "makefile already exists."
 fi
