@@ -3,7 +3,7 @@ This is our interface to some template data.
 """
 from backendcore.data.caching import needs_cache, get_cache
 
-from templates.fields import (
+from backendcore.templates.fields import (
     CODE,
     NAME,
 )

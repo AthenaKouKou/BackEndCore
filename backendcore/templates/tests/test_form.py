@@ -1,4 +1,4 @@
-import templates.form as form
+import backendcore.templates.form as form
 
 
 def test_get_form():

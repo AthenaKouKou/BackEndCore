@@ -2,7 +2,7 @@ from copy import deepcopy
 
 import pytest
 
-import templates.query as qry
+import backendcore.templates.query as qry
 
 
 def del_test_item(code):

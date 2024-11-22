@@ -1,4 +1,4 @@
-import templates.fields as flds
+import backendcore.templates.fields as flds
 
 
 def test_get_flds():
