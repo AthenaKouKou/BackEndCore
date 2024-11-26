@@ -234,7 +234,7 @@ class MongoDB():
 
     def delete_many(self, db_nm, clct_nm, filters={}):
         """
-        Delete many records that meets filters.
+        Delete many records that meet filters.
         """
         return client[db_nm][clct_nm].delete_many(filters)
 

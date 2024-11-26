@@ -56,9 +56,10 @@ def a_doc():
     General mongo test fixture.
     Creates one doc, then deletes it after test runs.
     """
-    ret = mdb.insert_doc(TEST_DB, TEST_COLLECT, {DEF_FLD: DEF_VAL, LIST_FLD: []})
+    db = mdb.MongoDB()
+    ret = db.create(TEST_DB, TEST_COLLECT, {DEF_FLD: DEF_VAL, LIST_FLD: []})
     yield ret
-    mdb.del_one(TEST_DB, TEST_COLLECT, filters=DEF_PAIR)
+    db.delete(TEST_DB, TEST_COLLECT, filters=DEF_PAIR)
 
 
 @pytest.fixture(scope='function')
@@ -68,7 +69,9 @@ def new_doc():
     Creates one doc, but does NOT delete it after test runs:
         needed for testing delete functions!
     """
-    mdb.insert_doc(TEST_DB, TEST_COLLECT, {DEF_FLD: DEF_VAL, LIST_FLD: []})
+    db = mdb.MongoDB()
+    return db.create(TEST_DB, TEST_COLLECT,
+                     {DEF_FLD: DEF_VAL, LIST_FLD: []})
 
 
 GOOD_ID = '1' * mdb.DB_ID_LEN
@@ -118,38 +121,35 @@ def test_init_mongo():
 
 
 @pytest.fixture(scope='function')
-def mongo_obj():
+def mobj():
     return mdb.MongoDB()
 
 
-def test_connectDB(mongo_obj):
+def test_connectDB(mobj):
     """
     We should be able to connect to our DB!
     """
-    connection = mongo_obj._connectDB()
+    connection = mobj._connectDB()
     assert connection is not None
 
 
-@pytest.mark.skip('Cutting over to mongo_connect.')
-def test_fetch_by_id(a_doc):
-    ret = mdb.fetch_by_id(TEST_DB, TEST_COLLECT, a_doc)
+def test_fetch_by_id(mobj, a_doc):
+    ret = mobj.fetch_by_id(TEST_DB, TEST_COLLECT, a_doc)
     assert ret is not None
 
 
-@pytest.mark.skip('Cutting over to mongo_connect.')
-def test_del_by_id(new_doc):
-    rec1 = mdb.fetch_one(TEST_DB, TEST_COLLECT)
+def test_del_by_id(mobj, new_doc):
+    rec1 = mobj.read_one(TEST_DB, TEST_COLLECT)
     rec_id = rec1[str(mdb.DB_ID)]
-    mdb.del_by_id(TEST_DB, TEST_COLLECT, rec_id)
-    assert mdb.fetch_by_id(TEST_DB, TEST_COLLECT, rec_id) is None
+    mobj.del_by_id(TEST_DB, TEST_COLLECT, rec_id)
+    assert mobj.fetch_by_id(TEST_DB, TEST_COLLECT, rec_id) is None
 
 
-@pytest.mark.skip('Cutting over to mongo_connect.')
-def test_update_fld(a_doc):
+def test_update_fld(mobj, a_doc):
     unique_val = rand_fld_val()
-    mdb.update_fld(TEST_DB, TEST_COLLECT, DEF_PAIR,
-                   DEF_FLD, unique_val)
-    recs = mdb.select(TEST_DB, TEST_COLLECT, filters={DEF_FLD: unique_val})
+    mobj.update_fld(TEST_DB, TEST_COLLECT, DEF_PAIR,
+                    DEF_FLD, unique_val)
+    recs = mobj.select(TEST_DB, TEST_COLLECT, filters={DEF_FLD: unique_val})
     assert len(recs) == 1
 
 
