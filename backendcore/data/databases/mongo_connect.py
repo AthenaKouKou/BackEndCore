@@ -12,8 +12,6 @@ from pymongo.server_api import ServerApi
 from bson.objectid import ObjectId
 import bson.json_util as bsutil
 
-import backendcore.env.env_utils as envu
-
 from backendcore.common.constants import OBJ_ID_NM
 
 # all of these will eventually be put in the env:
@@ -111,12 +109,30 @@ def get_collect(db_nm, clct_nm):
     return client[db_nm][clct_nm]
 
 
-class MongoDB(obj):
+def _id_handler(rec, no_id):
+    if rec:
+        if no_id:
+            del rec[DB_ID]
+        else:
+            # eliminate the ID nesting if it's not already a string:
+            if not isinstance(rec[DB_ID], str):
+                rec[DB_ID] = rec[DB_ID][INNER_DB_ID]
+    return rec
+
+
+def _asmbl_sort_cond(sort=NO_SORT, sort_fld='_id'):
+    sort_cond = []
+    if sort != NO_SORT:
+        sort_cond.append((f'{sort_fld}', sort))
+    return sort_cond
+
+
+class MongoDB():
     """
-    Encaspulates a connection to MOngoDB.
+    Encaspulates a connection to MongoDB.
     """
 
-    def get_server_settings():
+    def _get_server_settings(self):
         settings = {
             "connectTimeoutMS": 30000,
             "socketTimeoutMS": None,
@@ -130,7 +146,7 @@ class MongoDB(obj):
             settings.update(PA_SETTINGS)
         return settings
 
-    def connectDB():
+    def _connectDB(self):
         """
         This provides a uniform way to connect to the DB across all uses.
         Returns a mongo client object... maybe we shouldn't?
@@ -146,7 +162,7 @@ class MongoDB(obj):
                 client = pm.MongoClient()
             else:
                 print("Connecting to Mongo remotely.")
-                settings = get_server_settings()
+                settings = self.get_server_settings()
                 # By default connect to our serverless cluster:
                 replicaSetOption = ""
                 if os.environ.get("SHARDED_MONGO", 0):
@@ -156,34 +172,20 @@ class MongoDB(obj):
                 # some of the below params are just Mongo default:
                 # we don't know what they mean!
                 client = pm.MongoClient(f"{cloud_mdb}://{user_nm}:{passwd}@"
-                                        + f"{cloud_svc}/{API_DB}?retryWrites=false"
+                                        + f"{cloud_svc}/{API_DB}?"
+                                        + "retryWrites=false"
                                         + replicaSetOption,
                                         tlsCAFile=certifi.where(),
                                         **settings)
         return client
 
-    def setup_connection(db_nm):
-        """
-        We were repeatedly connecting AND getting the db name...
-        so do them together.
-        """
-        connectDB()
-        return db_nm
+    def __init__(self):
+        self.client = self._connectDB()
 
-    def _id_handler(rec, no_id):
-        if rec:
-            if no_id:
-                del rec[DB_ID]
-            else:
-                # eliminate the ID nesting if it's not already a string:
-                if not isinstance(rec[DB_ID], str):
-                    rec[DB_ID] = rec[DB_ID][INNER_DB_ID]
-        return rec
-
-    def _id_from_str(str_id: str):
+    def _id_from_str(self, str_id: str):
         return ObjectId(str_id)
 
-    def read_one(db_nm, clct_nm, filters={}, no_id=False):
+    def read_one(self, db_nm, clct_nm, filters={}, no_id=False):
         """
         Fetch one record that meets filters.
         """
@@ -192,79 +194,73 @@ class MongoDB(obj):
         rec = _id_handler(rec, no_id)
         return rec
 
-    def create_id_filter(_id: str):
+    def create_id_filter(self, _id: str):
         return {MONGO_ID_NM: ObjectId(_id)}
 
-    def create_in_filter(fld_nm: str, values: list):
+    def create_in_filter(self, fld_nm: str, values: list):
         return {fld_nm: {'$in': values}}
 
-    def create_exists_filter(fld_nm: str, predicate: bool = True):
+    def create_exists_filter(self, fld_nm: str, predicate: bool = True):
         return {fld_nm: {'$exists': predicate}}
 
-    def create_or_filter(filt1: dict, filt2: dict):
+    def create_or_filter(self, filt1: dict, filt2: dict):
         return {'$or': [filt1, filt2]}
 
-    def create_and_filter(filt1: dict, filt2: dict):
+    def create_and_filter(self, filt1: dict, filt2: dict):
         return {'$and': [filt1, filt2]}
 
-    def fetch_by_id(db_nm, clct_nm, _id: str, no_id=False):
+    def fetch_by_id(self, db_nm, clct_nm, _id: str, no_id=False):
         """
         Fetch the record identified by _id if it exists.
         We convert the passed in string to an ID for our user.
         """
-        filter = create_id_filter(_id)
+        filter = self.create_id_filter(_id)
         ret = client[db_nm][clct_nm].find_one(filter)
         rec = to_json(ret)
         rec = _id_handler(rec, no_id)
         return rec
 
-    def delete_success(del_obj):
-        return del_obj.deleted_count  0
+    def delete_success(self, del_obj):
+        return del_obj.deleted_count > 0
 
-    def num_deleted(del_obj):
+    def num_deleted(self, del_obj):
         return del_obj.deleted_count
 
-    def delete(db_nm, clct_nm, filters={}):
+    def delete(self, db_nm, clct_nm, filters={}):
         """
         Delete one record that meets filters.
         """
         return client[db_nm][clct_nm].delete_one(filters)
 
-    def delete_many(db_nm, clct_nm, filters={}):
+    def delete_many(self, db_nm, clct_nm, filters={}):
         """
-        Delete one record that meets filters.
+        Delete many records that meets filters.
         """
         return client[db_nm][clct_nm].delete_many(filters)
 
-    def del_by_id(db_nm, clct_nm, _id: str):
+    def del_by_id(self, db_nm, clct_nm, _id: str):
         """
         Delete one record identified by id.
         We convert the passed in string to an ID for our user.
         """
-        filter = create_id_filter(_id)
+        filter = self.create_id_filter(_id)
         return client[db_nm][clct_nm].delete_one(filter)
 
-    def _asmbl_sort_cond(sort=NO_SORT, sort_fld='_id'):
-        sort_cond = []
-        if sort != NO_SORT:
-            sort_cond.append((f'{sort_fld}', sort))
-        return sort_cond
-
-    def read(db_nm, clct_nm, sort=NO_SORT, sort_fld=OBJ_ID_NM,
-                  no_id=False):
+    def read(self, db_nm, clct_nm, sort=NO_SORT,
+             sort_fld=OBJ_ID_NM, no_id=False):
         """
         Returns all docs from a collection.
         `sort` can be DESC, NO_SORT, or ASC.
         """
         all_docs = []
-        sort_cond = _asmbl_sort_cond(sort=sort, sort_fld=sort_fld)
-        for doc in client[db_nm][clct_nm].find(sort=sort_cond).limit(DOC_LIMIT):
+        scond = _asmbl_sort_cond(sort=sort, sort_fld=sort_fld)
+        for doc in client[db_nm][clct_nm].find(sort=scond).limit(DOC_LIMIT):
             rec = to_json(doc)
             rec = _id_handler(rec, no_id)
             all_docs.append(rec)
         return all_docs
 
-    def select_cursor(db_nm, clct_nm, filters={}, sort=NO_SORT,
+    def select_cursor(self, db_nm, clct_nm, filters={}, sort=NO_SORT,
                       sort_fld='_id', proj=NO_PROJ, limit=MAX_DB_INT):
         """
         A select that directly returns the mongo cursor.
@@ -273,14 +269,15 @@ class MongoDB(obj):
         return client[db_nm][clct_nm].find(filters, sort=sort_cond,
                                            projection=proj).limit(limit)
 
-    def select(db_nm, clct_nm, filters={}, sort=NO_SORT, sort_fld='_id',
+    def select(self, db_nm, clct_nm, filters={}, sort=NO_SORT, sort_fld='_id',
                proj=NO_PROJ, limit=DOC_LIMIT, no_id=False, exclude_flds=None):
         """
         Select records from a collection matching filters.
         """
         selected_docs = []
-        cursor = select_cursor(db_nm, clct_nm, filters=filters, sort=sort,
-                               proj=proj, limit=limit)
+        cursor = self.select_cursor(db_nm, clct_nm,
+                                    filters=filters, sort=sort,
+                                    proj=proj, limit=limit)
         for doc in cursor:
             rec = to_json(doc)
             rec = _id_handler(rec, no_id)
@@ -290,13 +287,13 @@ class MongoDB(obj):
             selected_docs.append(rec)
         return selected_docs
 
-    def count_documents(db_nm, clct_nm, filters={}):
+    def count_documents(self, db_nm, clct_nm, filters={}):
         """
         Counts the documents in a collection, with an optional filter applied.
         """
         return client[db_nm][clct_nm].count_documents(filters)
 
-    def rename(db_nm: str, clct_nm: str, nm_map: dict):
+    def rename(self, db_nm: str, clct_nm: str, nm_map: dict):
         """
         Renames specified fields on all documents in a collection.
 
@@ -318,7 +315,7 @@ class MongoDB(obj):
         return collect.update_many({},
                                    {'$rename': nm_map})
 
-    def create(db_nm: str, clct_nm: str, doc: dict, with_date=False):
+    def create(self, db_nm: str, clct_nm: str, doc: dict, with_date=False):
         """
         Returns the str() of the inserted ID, or None on failure.
         `with_date=True` adds the current date to any inserted doc.
@@ -328,12 +325,12 @@ class MongoDB(obj):
         ret = client[db_nm][clct_nm].insert_one(doc)
         return str(ret.inserted_id)
 
-    def add_fld_to_all(db_nm, clct_nm, new_fld, value):
+    def add_fld_to_all(self, db_nm, clct_nm, new_fld, value):
         collect = get_collect(db_nm, clct_nm)
         return collect.update_many({}, {'$set': {new_fld: value}},
                                    upsert=False)
 
-    def update_fld(db_nm, clct_nm, filters, fld_nm, fld_val):
+    def update_fld(self, db_nm, clct_nm, filters, fld_nm, fld_val):
         """
         This should only be used when we just want to update a single
         field.
@@ -342,7 +339,7 @@ class MongoDB(obj):
         collect = get_collect(db_nm, clct_nm)
         return collect.update_one(filters, {'$set': {fld_nm: fld_val}})
 
-    def update_fld_for_many(db_nm, clct_nm, filters, fld_nm, fld_val):
+    def update_fld_for_many(self, db_nm, clct_nm, filters, fld_nm, fld_val):
         """
         This should only be used when we just want to update a single
         field in many records.
@@ -351,11 +348,11 @@ class MongoDB(obj):
         collect = get_collect(db_nm, clct_nm)
         return collect.update_many(filters, {'$set': {fld_nm: fld_val}})
 
-    def update(db_nm, clct_nm, filters, update_dict):
+    def update(self, db_nm, clct_nm, filters, update_dict):
         collect = get_collect(db_nm, clct_nm)
         return collect.update_one(filters, {'$set': update_dict})
 
-    def upsert(db_nm, clct_nm, filters, update_dict):
+    def upsert(self, db_nm, clct_nm, filters, update_dict):
         collect = get_collect(db_nm, clct_nm)
         ret = collect.update_one(filters, {'$set': update_dict}, upsert=True)
         rec_id = ret.upserted_id
@@ -364,13 +361,13 @@ class MongoDB(obj):
             rec_id = rec[DB_ID]
         return str(rec_id)
 
-    def update_success(update_obj):
-        return update_obj.matched_count  0
+    def update_success(self, update_obj):
+        return update_obj.matched_count > 0
 
-    def num_updated(update_obj):
+    def num_updated(self, update_obj):
         return update_obj.modified_count
 
-    def search_collection(db_nm, clct_nm, fld_nm, regex, active=False):
+    def search_collection(self, db_nm, clct_nm, fld_nm, regex, active=False):
         """
         Searches a collection for occurences of regex in fld_nm.
         """
@@ -384,12 +381,12 @@ class MongoDB(obj):
                 match_list.append(to_json(doc))
         return match_list
 
-    def append_to_list(db_nm, clct_nm, filter_fld_nm, filter_fld_val,
+    def append_to_list(self, db_nm, clct_nm, filter_fld_nm, filter_fld_val,
                        list_nm, new_list_item):
         collect = get_collect(db_nm, clct_nm)
         collect.update_one({filter_fld_nm: filter_fld_val},
                            {'$push': {list_nm: new_list_item}},
                            upsert=True)
 
-    def aggregate(db_nm, clct_nm, pipeline):
+    def aggregate(self, db_nm, clct_nm, pipeline):
         return client[db_nm][clct_nm].aggregate(pipeline, allowDiskUse=True)
