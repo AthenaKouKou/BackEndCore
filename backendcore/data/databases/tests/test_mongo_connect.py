@@ -113,23 +113,21 @@ def test_id_handler_with_id(rec_w_id):
     assert isinstance(new_rec[mdb.DB_ID], str)
 
 
-@pytest.mark.skip('Cutting over to mongo_connect.')
-def test_connectDB():
+def test_init_mongo():
+    assert isinstance(mdb.MongoDB(), mdb.MongoDB)
+
+
+@pytest.fixture(scope='function')
+def mongo_obj():
+    return mdb.MongoDB()
+
+
+def test_connectDB(mongo_obj):
     """
     We should be able to connect to our DB!
     """
-    connection = mdb.connectDB()
+    connection = mongo_obj._connectDB()
     assert connection is not None
-
-
-@pytest.mark.skip('Cutting over to mongo_connect.')
-def test_get_db_variant():
-    """
-    Test we get the proper DB name: since we are
-    running tests, TEST_DB should be true!
-    """
-    db_var = mdb.get_db_variant(mdb.API_DB)
-    assert db_var == mdb.TEST_PREFIX + mdb.API_DB
 
 
 @pytest.mark.skip('Cutting over to mongo_connect.')

@@ -146,7 +146,7 @@ class MongoDB():
             settings.update(PA_SETTINGS)
         return settings
 
-    def _connectDB(self):
+    def _connectDB(self, local_db=True):
         """
         This provides a uniform way to connect to the DB across all uses.
         Returns a mongo client object... maybe we shouldn't?
@@ -157,7 +157,7 @@ class MongoDB():
         global client
         if client is None:  # not connected yet!
             print("Setting client because it is None.")
-            if os.environ.get("LOCAL_MONGO", REMOTE) == LOCAL:
+            if local_db:
                 print("Connecting to Mongo locally.")
                 client = pm.MongoClient()
             else:
@@ -179,8 +179,8 @@ class MongoDB():
                                         **settings)
         return client
 
-    def __init__(self):
-        self.client = self._connectDB()
+    def __init__(self, local_db=True):
+        self.client = self._connectDB(local_db=local_db)
 
     def _id_from_str(self, str_id: str):
         return ObjectId(str_id)
