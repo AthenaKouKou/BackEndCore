@@ -43,11 +43,12 @@ def some_docs():
     General mongo test fixture.
     Creates a bunch o' docs, then deletes them after test runs.
     """
+    db = mdb.MongoDB()
     for i in range(RECS_TO_TEST):
-        mdb.insert_doc(TEST_DB, TEST_COLLECT, {DEF_FLD: f'val{i}'})
+        db.create(TEST_DB, TEST_COLLECT, {DEF_FLD: f'val{i}'})
     yield
     for i in range(RECS_TO_TEST):
-        mdb.del_one(TEST_DB, TEST_COLLECT, filters={DEF_FLD: f'val{i}'})
+        db.delete(TEST_DB, TEST_COLLECT, filters={DEF_FLD: f'val{i}'})
 
 
 @pytest.fixture(scope='function')
@@ -162,7 +163,6 @@ def test_update(mobj, a_doc):
     assert len(recs) == 1
 
 
-@pytest.mark.skip('Cutting over to mongo_connect.')
 def test_select_cursor_no_filter(mobj, some_docs):
     """
     This should return all records in a collection.
@@ -173,7 +173,6 @@ def test_select_cursor_no_filter(mobj, some_docs):
     assert isinstance(cursor, pymongo.cursor.Cursor)
 
 
-@pytest.mark.skip('Cutting over to mongo_connect.')
 def test_select_no_filter(mobj, some_docs):
     """
     This should return all records in a collection.
@@ -193,7 +192,7 @@ def test_select_w_filter(mobj, some_docs):
     chance. Enough for our lifetimes.
     """
     unique_val = rand_fld_val()
-    mdb.insert_doc(TEST_DB, TEST_COLLECT, {DEF_FLD: unique_val})
+    mdb.create(TEST_DB, TEST_COLLECT, {DEF_FLD: unique_val})
     recs = mobj.select(TEST_DB, TEST_COLLECT, filters={DEF_FLD: unique_val})
     mdb.del_one(TEST_DB, TEST_COLLECT, filters={DEF_FLD: unique_val})
     assert len(recs) == 1
