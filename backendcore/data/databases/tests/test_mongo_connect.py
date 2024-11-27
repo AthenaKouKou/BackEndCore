@@ -245,47 +245,42 @@ def test_delete_many(mobj, a_doc):
     assert mobj.read_one(TEST_DB, TEST_COLLECT, filters=DEF_PAIR) is None
 
 
-@pytest.mark.skip('Cutting over to mongo_connect.')
 def test_delete_success(mobj, a_doc):
     """
-    Make sure that deleted one can properly detect if a record has been
+    Make sure that delete can properly detect if a record has been
     deleted.
     """
-    result = mdb.delete(TEST_DB, TEST_COLLECT, filters=DEF_PAIR)
-    assert mdb.delete_success(result) == True
+    result = mobj.delete(TEST_DB, TEST_COLLECT, filters=DEF_PAIR)
+    assert mobj.delete_success(result) == True
 
 
-@pytest.mark.skip('Cutting over to mongo_connect.')
 def test_delete_no_success(mobj, a_doc):
     """
     Make sure that deleted one can properly detect if a record has not been
     deleted.
     """
-    result = mdb.delete(TEST_DB, TEST_COLLECT, filters={DEF_FLD: BAD_VAL})
-    assert mdb.delete_success(result) == False
+    result = mobj.delete(TEST_DB, TEST_COLLECT, filters={DEF_FLD: BAD_VAL})
+    assert mobj.delete_success(result) == False
 
 
-@pytest.mark.skip('Cutting over to mongo_connect.')
 def test_num_deleted_single(mobj, a_doc):
     """
     Make sure that num_deleted can properly detect if a single record has been
     deleted.
     """
-    result = mdb.delete(TEST_DB, TEST_COLLECT, filters=DEF_PAIR)
-    assert mdb.num_deleted(result) == 1
+    result = mobj.delete(TEST_DB, TEST_COLLECT, filters=DEF_PAIR)
+    assert mobj.num_deleted(result) == 1
 
 
-@pytest.mark.skip('Cutting over to mongo_connect.')
 def test_num_deleted_multiple(mobj, some_docs):
     """
     Make sure that num_deleted can properly detect if several records have been
     deleted.
     """
-    result = mdb.delete_many(TEST_DB, TEST_COLLECT, filters={})
-    assert mdb.num_deleted(result) > 1
+    result = mobj.delete_many(TEST_DB, TEST_COLLECT, filters={})
+    assert mobj.num_deleted(result) > 1
 
 
-@pytest.mark.skip('Cutting over to mongo_connect.')
 def test_num_deleted_none(mobj, a_doc):
     """
     Make sure that num_deleted can properly detect if no records have been
@@ -295,24 +290,22 @@ def test_num_deleted_none(mobj, a_doc):
     assert mobj.num_deleted(result) == 0
 
 
-@pytest.mark.skip('Cutting over to mongo_connect.')
 def test_update_success(mobj, a_doc):
     """
     Make sure that updated one can properly detect if a record has been
     updated.
     """
-    result = mdb.update(TEST_DB, TEST_COLLECT, DEF_PAIR, DEF_PAIR)
-    assert mdb.update_success(result) == True
+    result = mobj.update(TEST_DB, TEST_COLLECT, DEF_PAIR, DEF_PAIR)
+    assert mobj.update_success(result) == True
 
 
-@pytest.mark.skip('Cutting over to mongo_connect.')
 def test_update_no_success(mobj, a_doc):
     """
     Make sure that updated one can properly detect if a record has not been
     updated.
     """
-    result = mdb.update(TEST_DB, TEST_COLLECT, {DEF_FLD: BAD_VAL}, DEF_PAIR)
-    assert mdb.update_success(result) == False
+    result = mobj.update(TEST_DB, TEST_COLLECT, {DEF_FLD: BAD_VAL}, DEF_PAIR)
+    assert mobj.update_success(result) == False
 
 
 @pytest.mark.skip('Cutting over to mongo_connect.')
