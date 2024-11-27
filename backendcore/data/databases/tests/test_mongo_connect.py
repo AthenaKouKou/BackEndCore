@@ -308,61 +308,55 @@ def test_update_no_success(mobj, a_doc):
     assert mobj.update_success(result) == False
 
 
-@pytest.mark.skip('Cutting over to mongo_connect.')
 def test_num_updated_single(mobj, a_doc):
     """
     Make sure that num_updated can properly detect if a single record has been
     updated.
     """
-    result = mdb.update(TEST_DB, TEST_COLLECT, DEF_PAIR, {DEF_FLD: 'new val'})
-    assert mdb.num_updated(result) == 1
+    result = mobj.update(TEST_DB, TEST_COLLECT, DEF_PAIR, {DEF_FLD: 'new val'})
+    assert mobj.num_updated(result) == 1
 
 
-@pytest.mark.skip('Cutting over to mongo_connect.')
 def test_num_updated_multiple(mobj, some_docs):
     """
     Make sure that num_updated can properly detect if several records have been
     updated.
     """
-    result = mdb.update_fld_for_many(TEST_DB, TEST_COLLECT, {}, 'new field', 'new val')
-    assert mdb.num_updated(result) > 1
+    result = mobj.update_fld_for_many(TEST_DB, TEST_COLLECT, {}, 'new field', 'new val')
+    assert mobj.num_updated(result) > 1
 
 
-@pytest.mark.skip('Cutting over to mongo_connect.')
 def test_num_updated_none(mobj, a_doc):
     """
     Make sure that num_updated can properly detect if no records have been
     updated.
     """
-    result = mdb.update(TEST_DB, TEST_COLLECT, {DEF_FLD: BAD_VAL}, DEF_PAIR)
-    assert mdb.num_updated(result) == 0
+    result = mobj.update(TEST_DB, TEST_COLLECT, {DEF_FLD: BAD_VAL}, DEF_PAIR)
+    assert mobj.num_updated(result) == 0
 
 
-@pytest.mark.skip('Cutting over to mongo_connect.')
 def test_add_fld_to_all(mobj, some_docs):
     """
     Testing updating all records with some new field.
     """
-    mdb.add_fld_to_all(TEST_DB, TEST_COLLECT, NEW_FLD, NEW_VAL)
+    mobj.add_fld_to_all(TEST_DB, TEST_COLLECT, NEW_FLD, NEW_VAL)
     for i in range(RECS_TO_TEST):
-        rec = mdb.read_one(TEST_DB, TEST_COLLECT)
+        rec = mobj.read_one(TEST_DB, TEST_COLLECT)
         assert rec[NEW_FLD] == NEW_VAL
 
 
-@pytest.mark.skip('Cutting over to mongo_connect.')
 def test_append_to_list(mobj, a_doc):
     """
     Test appending to an interior doc list.
     `a_doc` initiliazes an empty list, so our new val should be
     at `[LIST_FLD][0]`.
     """
-    mdb.append_to_list(TEST_DB, TEST_COLLECT, DEF_FLD, DEF_VAL,
+    mobj.append_to_list(TEST_DB, TEST_COLLECT, DEF_FLD, DEF_VAL,
                        LIST_FLD, 1)  # any old val will do!
-    rec = mdb.read_one(TEST_DB, TEST_COLLECT, filters=DEF_PAIR)
+    rec = mobj.read_one(TEST_DB, TEST_COLLECT, filters=DEF_PAIR)
     assert rec[LIST_FLD][0] == 1
 
 
-@pytest.mark.skip('Cutting over to mongo_connect.')
 def test_rename_fld(mobj, some_docs):
     """
     Test renaming a field.
