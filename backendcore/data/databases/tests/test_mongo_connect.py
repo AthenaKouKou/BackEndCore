@@ -153,40 +153,39 @@ def test_update_fld(mobj, a_doc):
     assert len(recs) == 1
 
 
-@pytest.mark.skip('Cutting over to mongo_connect.')
-def test_update_doc(a_doc):
+def test_update(mobj, a_doc):
     unique_val = rand_fld_val()
-    mdb.update_doc(TEST_DB, TEST_COLLECT, DEF_PAIR,
-                   {DEF_FLD: unique_val, LIST_FLD: ['something']})
-    recs = mdb.select(TEST_DB, TEST_COLLECT,
-                      filters={DEF_FLD: unique_val, LIST_FLD: ['something']})
+    mobj.update(TEST_DB, TEST_COLLECT, DEF_PAIR,
+                {DEF_FLD: unique_val, LIST_FLD: ['something']})
+    recs = mobj.select(TEST_DB, TEST_COLLECT,
+                       filters={DEF_FLD: unique_val, LIST_FLD: ['something']})
     assert len(recs) == 1
 
 
 @pytest.mark.skip('Cutting over to mongo_connect.')
-def test_select_cursor_no_filter(some_docs):
+def test_select_cursor_no_filter(mobj, some_docs):
     """
     This should return all records in a collection.
     We test with >= since someone may have left other docs
     in our test_db.
     """
-    cursor = mdb.select_cursor(TEST_DB, TEST_COLLECT, filters={})
+    cursor = mobj.select_cursor(TEST_DB, TEST_COLLECT, filters={})
     assert isinstance(cursor, pymongo.cursor.Cursor)
 
 
 @pytest.mark.skip('Cutting over to mongo_connect.')
-def test_select_no_filter(some_docs):
+def test_select_no_filter(mobj, some_docs):
     """
     This should return all records in a collection.
     We test with >= since someone may have left other docs
     in our test_db.
     """
-    recs = mdb.select(TEST_DB, TEST_COLLECT, filters={})
+    recs = mobj.select(TEST_DB, TEST_COLLECT, filters={})
     assert len(recs) >= RECS_TO_TEST
 
 
 @pytest.mark.skip('Cutting over to mongo_connect.')
-def test_select_w_filter(some_docs):
+def test_select_w_filter(mobj, some_docs):
     """
     This should return all records in a collection matching the
     filter.
@@ -195,13 +194,13 @@ def test_select_w_filter(some_docs):
     """
     unique_val = rand_fld_val()
     mdb.insert_doc(TEST_DB, TEST_COLLECT, {DEF_FLD: unique_val})
-    recs = mdb.select(TEST_DB, TEST_COLLECT, filters={DEF_FLD: unique_val})
+    recs = mobj.select(TEST_DB, TEST_COLLECT, filters={DEF_FLD: unique_val})
     mdb.del_one(TEST_DB, TEST_COLLECT, filters={DEF_FLD: unique_val})
     assert len(recs) == 1
 
 
 @pytest.mark.skip('Cutting over to mongo_connect.')
-def test_fetch_one_no_filter(a_doc):
+def test_fetch_one_no_filter(mobj, a_doc):
     """
     Tests that a fetch with no filter retieves the rec we inserted
     in the fixture.
@@ -211,7 +210,7 @@ def test_fetch_one_no_filter(a_doc):
 
 
 @pytest.mark.skip('Cutting over to mongo_connect.')
-def test_fetch_one_bad_filter(a_doc):
+def test_fetch_one_bad_filter(mobj, a_doc):
     """
     Tests that a fetch with a bad filter fails.
     """
@@ -220,7 +219,7 @@ def test_fetch_one_bad_filter(a_doc):
 
 
 @pytest.mark.skip('Cutting over to mongo_connect.')
-def test_fetch_one_good_filter(a_doc):
+def test_fetch_one_good_filter(mobj, a_doc):
     """
     Tests that a fetch with a good filter works.
     """
@@ -229,7 +228,7 @@ def test_fetch_one_good_filter(a_doc):
 
 
 @pytest.mark.skip('Cutting over to mongo_connect.')
-def test_del_one_that_exists(a_doc):
+def test_del_one_that_exists(mobj, a_doc):
     """
     Make sure deleting a doc that exists deletes 1 record.
     """
@@ -238,7 +237,7 @@ def test_del_one_that_exists(a_doc):
 
 
 @pytest.mark.skip('Cutting over to mongo_connect.')
-def test_del_one_that_dont_exist(a_doc):
+def test_del_one_that_dont_exist(mobj, a_doc):
     """
     Make sure deleting a doc that doesn't exist deletes 0 records.
     """
@@ -247,7 +246,7 @@ def test_del_one_that_dont_exist(a_doc):
 
 
 @pytest.mark.skip('Cutting over to mongo_connect.')
-def test_del_many(a_doc):
+def test_del_many(mobj, a_doc):
     """
     Make sure deleting many docs leaves none behind.
     """
@@ -256,7 +255,7 @@ def test_del_many(a_doc):
 
 
 @pytest.mark.skip('Cutting over to mongo_connect.')
-def test_delete_success(a_doc):
+def test_delete_success(mobj, a_doc):
     """
     Make sure that deleted one can properly detect if a record has been
     deleted.
@@ -266,7 +265,7 @@ def test_delete_success(a_doc):
 
 
 @pytest.mark.skip('Cutting over to mongo_connect.')
-def test_delete_no_success(a_doc):
+def test_delete_no_success(mobj, a_doc):
     """
     Make sure that deleted one can properly detect if a record has not been
     deleted.
@@ -276,7 +275,7 @@ def test_delete_no_success(a_doc):
 
 
 @pytest.mark.skip('Cutting over to mongo_connect.')
-def test_num_deleted_single(a_doc):
+def test_num_deleted_single(mobj, a_doc):
     """
     Make sure that num_deleted can properly detect if a single record has been
     deleted.
@@ -286,7 +285,7 @@ def test_num_deleted_single(a_doc):
 
 
 @pytest.mark.skip('Cutting over to mongo_connect.')
-def test_num_deleted_multiple(some_docs):
+def test_num_deleted_multiple(mobj, some_docs):
     """
     Make sure that num_deleted can properly detect if several records have been
     deleted.
@@ -296,7 +295,7 @@ def test_num_deleted_multiple(some_docs):
 
 
 @pytest.mark.skip('Cutting over to mongo_connect.')
-def test_num_deleted_none(a_doc):
+def test_num_deleted_none(mobj, a_doc):
     """
     Make sure that num_deleted can properly detect if no records have been
     deleted.
@@ -306,38 +305,37 @@ def test_num_deleted_none(a_doc):
 
 
 @pytest.mark.skip('Cutting over to mongo_connect.')
-def test_update_success(a_doc):
+def test_update_success(mobj, a_doc):
     """
     Make sure that updated one can properly detect if a record has been
     updated.
     """
-    result = mdb.update_doc(TEST_DB, TEST_COLLECT, DEF_PAIR, DEF_PAIR)
+    result = mdb.update(TEST_DB, TEST_COLLECT, DEF_PAIR, DEF_PAIR)
     assert mdb.update_success(result) == True
 
 
 @pytest.mark.skip('Cutting over to mongo_connect.')
-def test_update_no_success(a_doc):
+def test_update_no_success(mobj, a_doc):
     """
     Make sure that updated one can properly detect if a record has not been
     updated.
     """
-    result = mdb.update_doc(TEST_DB, TEST_COLLECT, {DEF_FLD: BAD_VAL}, DEF_PAIR)
+    result = mdb.update(TEST_DB, TEST_COLLECT, {DEF_FLD: BAD_VAL}, DEF_PAIR)
     assert mdb.update_success(result) == False
 
 
 @pytest.mark.skip('Cutting over to mongo_connect.')
-def test_num_updated_single(a_doc):
+def test_num_updated_single(mobj, a_doc):
     """
     Make sure that num_updated can properly detect if a single record has been
     updated.
     """
-    result = mdb.update_doc(TEST_DB, TEST_COLLECT, DEF_PAIR,
-                            {DEF_FLD: 'new val'})
+    result = mdb.update(TEST_DB, TEST_COLLECT, DEF_PAIR, {DEF_FLD: 'new val'})
     assert mdb.num_updated(result) == 1
 
 
 @pytest.mark.skip('Cutting over to mongo_connect.')
-def test_num_updated_multiple(some_docs):
+def test_num_updated_multiple(mobj, some_docs):
     """
     Make sure that num_updated can properly detect if several records have been
     updated.
@@ -347,17 +345,17 @@ def test_num_updated_multiple(some_docs):
 
 
 @pytest.mark.skip('Cutting over to mongo_connect.')
-def test_num_updated_none(a_doc):
+def test_num_updated_none(mobj, a_doc):
     """
     Make sure that num_updated can properly detect if no records have been
     updated.
     """
-    result = mdb.update_doc(TEST_DB, TEST_COLLECT, {DEF_FLD: BAD_VAL}, DEF_PAIR)
+    result = mdb.update(TEST_DB, TEST_COLLECT, {DEF_FLD: BAD_VAL}, DEF_PAIR)
     assert mdb.num_updated(result) == 0
 
 
 @pytest.mark.skip('Cutting over to mongo_connect.')
-def test_add_fld_to_all(some_docs):
+def test_add_fld_to_all(mobj, some_docs):
     """
     Testing updating all records with some new field.
     """
@@ -368,7 +366,7 @@ def test_add_fld_to_all(some_docs):
 
 
 @pytest.mark.skip('Cutting over to mongo_connect.')
-def test_append_to_list(a_doc):
+def test_append_to_list(mobj, a_doc):
     """
     Test appending to an interior doc list.
     `a_doc` initiliazes an empty list, so our new val should be
@@ -381,7 +379,7 @@ def test_append_to_list(a_doc):
 
 
 @pytest.mark.skip('Cutting over to mongo_connect.')
-def test_rename_fld(some_docs):
+def test_rename_fld(mobj, some_docs):
     """
     Test renaming a field.
     """
@@ -391,13 +389,13 @@ def test_rename_fld(some_docs):
         assert rec[NEW_FLD]
 
 
-@pytest.mark.skip('Cutting over to mongo_connect.')
-def test_insert_doc():
+def test_create(mobj):
     """
     There should not be more than one of these after insert,
     but let's test just that there is at least one.
     """
     unique_val = rand_fld_val()
-    mdb.insert_doc(TEST_DB, TEST_COLLECT, {DEF_FLD: unique_val})
-    recs = mdb.select(TEST_DB, TEST_COLLECT, filters={DEF_FLD: unique_val})
+    mobj.create(TEST_DB, TEST_COLLECT, {DEF_FLD: unique_val})
+    recs = mobj.select(TEST_DB, TEST_COLLECT, filters={DEF_FLD: unique_val})
     assert len(recs) >= 1
+    mobj.delete(TEST_DB, TEST_COLLECT, {DEF_FLD: unique_val})
