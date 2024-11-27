@@ -183,7 +183,6 @@ def test_select_no_filter(mobj, some_docs):
     assert len(recs) >= RECS_TO_TEST
 
 
-@pytest.mark.skip('Cutting over to mongo_connect.')
 def test_select_w_filter(mobj, some_docs):
     """
     This should return all records in a collection matching the
@@ -192,65 +191,58 @@ def test_select_w_filter(mobj, some_docs):
     chance. Enough for our lifetimes.
     """
     unique_val = rand_fld_val()
-    mdb.create(TEST_DB, TEST_COLLECT, {DEF_FLD: unique_val})
+    mobj.create(TEST_DB, TEST_COLLECT, {DEF_FLD: unique_val})
     recs = mobj.select(TEST_DB, TEST_COLLECT, filters={DEF_FLD: unique_val})
-    mdb.del_one(TEST_DB, TEST_COLLECT, filters={DEF_FLD: unique_val})
+    mobj.delete(TEST_DB, TEST_COLLECT, filters={DEF_FLD: unique_val})
     assert len(recs) == 1
 
 
-@pytest.mark.skip('Cutting over to mongo_connect.')
-def test_fetch_one_no_filter(mobj, a_doc):
+def test_read_one_no_filter(mobj, a_doc):
     """
     Tests that a fetch with no filter retieves the rec we inserted
     in the fixture.
     """
-    rec = mdb.fetch_one(TEST_DB, TEST_COLLECT, filters={})
+    rec = mobj.read_one(TEST_DB, TEST_COLLECT, filters={})
     assert rec is not None
 
 
-@pytest.mark.skip('Cutting over to mongo_connect.')
-def test_fetch_one_bad_filter(mobj, a_doc):
+def test_read_one_bad_filter(mobj, a_doc):
     """
     Tests that a fetch with a bad filter fails.
     """
-    rec = mdb.fetch_one(TEST_DB, TEST_COLLECT, filters={DEF_FLD: BAD_VAL})
+    rec = mobj.read_one(TEST_DB, TEST_COLLECT, filters={DEF_FLD: BAD_VAL})
     assert rec is None
 
 
-@pytest.mark.skip('Cutting over to mongo_connect.')
-def test_fetch_one_good_filter(mobj, a_doc):
+def test_read_one_good_filter(mobj, a_doc):
     """
     Tests that a fetch with a good filter works.
     """
-    rec = mdb.fetch_one(TEST_DB, TEST_COLLECT, filters=DEF_PAIR)
-    assert rec is not None
+    assert mobj.read_one(TEST_DB, TEST_COLLECT, filters=DEF_PAIR)
 
 
-@pytest.mark.skip('Cutting over to mongo_connect.')
-def test_del_one_that_exists(mobj, a_doc):
+def test_delete_that_exists(mobj, a_doc):
     """
     Make sure deleting a doc that exists deletes 1 record.
     """
-    result = mdb.del_one(TEST_DB, TEST_COLLECT, filters=DEF_PAIR)
+    result = mobj.delete(TEST_DB, TEST_COLLECT, filters=DEF_PAIR)
     assert result.deleted_count == 1
 
 
-@pytest.mark.skip('Cutting over to mongo_connect.')
-def test_del_one_that_dont_exist(mobj, a_doc):
+def test_delete_that_doesnt_exist(mobj, a_doc):
     """
     Make sure deleting a doc that doesn't exist deletes 0 records.
     """
-    result = mdb.del_one(TEST_DB, TEST_COLLECT, filters={DEF_FLD: BAD_VAL})
+    result = mobj.delete(TEST_DB, TEST_COLLECT, filters={DEF_FLD: BAD_VAL})
     assert result.deleted_count == 0
 
 
-@pytest.mark.skip('Cutting over to mongo_connect.')
-def test_del_many(mobj, a_doc):
+def test_delete_many(mobj, a_doc):
     """
     Make sure deleting many docs leaves none behind.
     """
-    mdb.del_many(TEST_DB, TEST_COLLECT, filters=DEF_PAIR)
-    assert mdb.fetch_one(TEST_DB, TEST_COLLECT, filters=DEF_PAIR) is None
+    mobj.delete_many(TEST_DB, TEST_COLLECT, filters=DEF_PAIR)
+    assert mobj.read_one(TEST_DB, TEST_COLLECT, filters=DEF_PAIR) is None
 
 
 @pytest.mark.skip('Cutting over to mongo_connect.')
@@ -259,7 +251,7 @@ def test_delete_success(mobj, a_doc):
     Make sure that deleted one can properly detect if a record has been
     deleted.
     """
-    result = mdb.del_one(TEST_DB, TEST_COLLECT, filters=DEF_PAIR)
+    result = mdb.delete(TEST_DB, TEST_COLLECT, filters=DEF_PAIR)
     assert mdb.delete_success(result) == True
 
 
@@ -269,7 +261,7 @@ def test_delete_no_success(mobj, a_doc):
     Make sure that deleted one can properly detect if a record has not been
     deleted.
     """
-    result = mdb.del_one(TEST_DB, TEST_COLLECT, filters={DEF_FLD: BAD_VAL})
+    result = mdb.delete(TEST_DB, TEST_COLLECT, filters={DEF_FLD: BAD_VAL})
     assert mdb.delete_success(result) == False
 
 
@@ -279,7 +271,7 @@ def test_num_deleted_single(mobj, a_doc):
     Make sure that num_deleted can properly detect if a single record has been
     deleted.
     """
-    result = mdb.del_one(TEST_DB, TEST_COLLECT, filters=DEF_PAIR)
+    result = mdb.delete(TEST_DB, TEST_COLLECT, filters=DEF_PAIR)
     assert mdb.num_deleted(result) == 1
 
 
@@ -289,7 +281,7 @@ def test_num_deleted_multiple(mobj, some_docs):
     Make sure that num_deleted can properly detect if several records have been
     deleted.
     """
-    result = mdb.del_many(TEST_DB, TEST_COLLECT, filters={})
+    result = mdb.delete_many(TEST_DB, TEST_COLLECT, filters={})
     assert mdb.num_deleted(result) > 1
 
 
@@ -299,8 +291,8 @@ def test_num_deleted_none(mobj, a_doc):
     Make sure that num_deleted can properly detect if no records have been
     deleted.
     """
-    result = mdb.del_one(TEST_DB, TEST_COLLECT, filters={DEF_FLD: BAD_VAL})
-    assert mdb.num_deleted(result) == 0
+    result = mobj.delete(TEST_DB, TEST_COLLECT, filters={DEF_FLD: BAD_VAL})
+    assert mobj.num_deleted(result) == 0
 
 
 @pytest.mark.skip('Cutting over to mongo_connect.')
@@ -360,7 +352,7 @@ def test_add_fld_to_all(mobj, some_docs):
     """
     mdb.add_fld_to_all(TEST_DB, TEST_COLLECT, NEW_FLD, NEW_VAL)
     for i in range(RECS_TO_TEST):
-        rec = mdb.fetch_one(TEST_DB, TEST_COLLECT)
+        rec = mdb.read_one(TEST_DB, TEST_COLLECT)
         assert rec[NEW_FLD] == NEW_VAL
 
 
@@ -373,7 +365,7 @@ def test_append_to_list(mobj, a_doc):
     """
     mdb.append_to_list(TEST_DB, TEST_COLLECT, DEF_FLD, DEF_VAL,
                        LIST_FLD, 1)  # any old val will do!
-    rec = mdb.fetch_one(TEST_DB, TEST_COLLECT, filters=DEF_PAIR)
+    rec = mdb.read_one(TEST_DB, TEST_COLLECT, filters=DEF_PAIR)
     assert rec[LIST_FLD][0] == 1
 
 
@@ -382,9 +374,9 @@ def test_rename_fld(mobj, some_docs):
     """
     Test renaming a field.
     """
-    mdb.rename(TEST_DB, TEST_COLLECT, {DEF_FLD: NEW_FLD})
+    mobj.rename(TEST_DB, TEST_COLLECT, {DEF_FLD: NEW_FLD})
     for i in range(RECS_TO_TEST):
-        rec = mdb.fetch_one(TEST_DB, TEST_COLLECT)
+        rec = mobj.read_one(TEST_DB, TEST_COLLECT)
         assert rec[NEW_FLD]
 
 
