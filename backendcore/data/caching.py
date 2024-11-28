@@ -62,7 +62,7 @@ class DataCollection(object):
                              + f'{cache_nm=}')
         else:
             self.caches[cache_nm] = self
-        self.db_nm = dbc.setup_connection(db_nm)
+        self.db_nm = db_nm
         self.collect_nm = collect_nm
         self.key_fld = key_fld
         self.sort_fld = sort_fld

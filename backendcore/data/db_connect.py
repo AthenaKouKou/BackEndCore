@@ -2,8 +2,15 @@
 This is the interface to our database, whatever our database may be.
 """
 import os
+from functools import wraps
 
 import backendcore.data.databases.mongo_connect as mdb
+
+# For now, get the following from mongo:
+from backendcore.data.databases.mongo_connect import (
+    DOC_LIMIT,
+    MAX_DB_INT,
+)
 
 REMOTE = "0"
 LOCAL = "1"
@@ -29,33 +36,47 @@ DUP = "Can't add duplicate"
 database = None
 
 
-def set_db(db) -> None:
-    global database
-    database = db
-
-
-def setup_connection(db_nm):
+def setup_connection():
     """
     Sets up connection to appropriate DB.
-    The return of db_nm is an artefact of earlier
-    architecture. We should work to make it
-    unnecessary.
     """
-    global database
-    if database is None:
-        db_type = os.environ.get('DATABASE', MONGO)
+    db = None
+    db_type = os.environ.get('DATABASE', MONGO)
     if db_type == MONGO:
         local = os.environ.get("LOCAL_MONGO", REMOTE) == LOCAL
-        database = mdb.MongoDB(local_db=local)
-    return db_nm
+        db = mdb.MongoDB(local_db=local)
+    return db
 
 
-def fetch_one(db_nm, clct_nm, filters={}, no_id=False):
+def needs_db(fn):
+    """
+    Should be used to decorate any function that directly uses the DB.
+    Functions that call functions that use the DB don't need this
+    decorator.
+    """
+    @wraps(fn)
+    def wrapper(*args, **kwargs):
+        global database
+        if not database:
+            database = setup_connection()
+        return fn(*args, **kwargs)
+    return wrapper
+
+
+@needs_db
+def read_one(db_nm, clct_nm, filters={}, no_id=False):
     """
     Fetch one record that meets filters.
     """
     return database.read_one(db_nm, clct_nm, filters=filters,
                              no_id=no_id)
+
+
+def fetch_one(db_nm, clct_nm, filters={}, no_id=False):
+    """
+    Old name for read_one: eliminate eventually!
+    """
+    return read_one(db_nm, clct_nm, filters=filters, no_id=no_id)
 
 
 # def create_in_filter(fld_nm: str, values: list):
@@ -74,13 +95,13 @@ def fetch_one(db_nm, clct_nm, filters={}, no_id=False):
 #     return {'$and': [filt1, filt2]}
 
 
-# def fetch_by_id(db_nm, clct_nm, _id: str, no_id=False):
-#     """
-#     Fetch the record identified by _id if it exists.
-#     We convert the passed in string to an ID for our user.
-#     """
-#     rec = {}
-#     return rec
+@needs_db
+def fetch_by_id(db_nm, clct_nm, _id: str, no_id=False):
+    """
+    Fetch the record identified by _id if it exists.
+    We convert the passed in string to an ID for our user.
+    """
+    return database.fetch_by_id(db_nm, clct_nm, _id, no_id=no_id)
 
 
 # def delete_success(del_obj):
@@ -121,41 +142,51 @@ def fetch_one(db_nm, clct_nm, filters={}, no_id=False):
 #     return sort_cond
 
 
-# def fetch_all(db_nm, clct_nm, sort=NO_SORT, sort_fld=OBJ_ID_NM,
-#               no_id=False):
-#     """
-#     Returns all docs from a collection.
-#     `sort` can be DESC, NO_SORT, or ASC.
-#     """
-#     return all_docs
+@needs_db
+def read(db_nm, clct_nm, sort=NO_SORT, sort_fld=None,
+         no_id=False):
+    if not database:
+        raise ValueError('No database is connected')
+    return database.read(db_nm, clct_nm, sort=sort,
+                         sort_fld=sort_fld,
+                         no_id=no_id)
 
 
-# def select_cursor(db_nm, clct_nm, filters={}, sort=NO_SORT,
-#                   sort_fld='_id', proj=NO_PROJ, limit=MAX_DB_INT):
-#     """
-#     A select that directly returns the mongo cursor.
-#     """
-#     sort_cond = _asmbl_sort_cond(sort=sort, sort_fld=sort_fld)
-#     return database[db_nm][clct_nm].find(filters, sort=sort_cond,
-#                                        projection=proj).limit(limit)
+@needs_db
+def fetch_all(db_nm, clct_nm, sort=NO_SORT, sort_fld=None,
+              no_id=False):
+    return read(db_nm, clct_nm, sort=sort,
+                sort_fld=sort_fld, no_id=no_id)
 
 
-# def select(db_nm, clct_nm, filters={}, sort=NO_SORT, sort_fld='_id',
-#            proj=NO_PROJ, limit=DOC_LIMIT, no_id=False, exclude_flds=None):
-#     """
-#     Select records from a collection matching filters.
-#     """
-#     selected_docs = []
-#     cursor = select_cursor(db_nm, clct_nm, filters=filters, sort=sort,
-#                            proj=proj, limit=limit)
-#     for doc in cursor:
-#         rec = to_json(doc)
-#         rec = _id_handler(rec, no_id)
-#         if exclude_flds:
-#             for fld_nm in exclude_flds:
-#                 del rec[fld_nm]
-#         selected_docs.append(rec)
-#     return selected_docs
+@needs_db
+def select_cursor(db_nm, clct_nm, filters={}, sort=NO_SORT,
+                  sort_fld='_id', proj=NO_PROJ, limit=MAX_DB_INT):
+    """
+    A select that directly returns the db cursor.
+    """
+    return database.select_cursor(db_nm, clct_nm,
+                                  filters=filters,
+                                  sort=sort,
+                                  sort_fld=sort_fld,
+                                  proj=proj,
+                                  limit=limit)
+
+
+@needs_db
+def select(db_nm, clct_nm, filters={}, sort=NO_SORT, sort_fld='_id',
+           proj=NO_PROJ, limit=DOC_LIMIT, no_id=False, exclude_flds=None):
+    """
+    Select records from a collection matching filters.
+    """
+    return database.select(db_nm, clct_nm,
+                           filters=filters,
+                           sort=sort,
+                           sort_fld=sort_fld,
+                           proj=proj,
+                           limit=limit,
+                           no_id=no_id,
+                           exclude_flds=exclude_flds)
 
 
 # def count_documents(db_nm, clct_nm, filters={}):
@@ -188,15 +219,18 @@ def fetch_one(db_nm, clct_nm, filters={}, no_id=False):
 #                                {'$rename': nm_map})
 
 
-# def insert_doc(db_nm: str, clct_nm: str, doc: dict, with_date=False):
-#     """
-#     Returns the str() of the inserted ID, or None on failure.
-#     `with_date=True` adds the current date to any inserted doc.
-#     """
-#     if with_date:
-#         print('with_date format is not supported at present time')
-#     ret = database[db_nm][clct_nm].insert_one(doc)
-#     return str(ret.inserted_id)
+def create(db_nm: str, clct_nm: str, doc: dict, with_date=False):
+    """
+    Returns the str() of the inserted ID, or None on failure.
+    `with_date=True` adds the current date to any inserted doc.
+    """
+    if with_date:
+        print('with_date format is not supported at present time')
+    return database.create(db_nm, clct_nm, doc)
+
+
+def insert_doc(db_nm: str, clct_nm: str, doc: dict, with_date=False):
+    return create(db_nm, clct_nm, doc, with_date=with_date)
 
 
 # def add_fld_to_all(db_nm, clct_nm, new_fld, value):

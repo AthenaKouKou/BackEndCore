@@ -34,11 +34,6 @@ MONGO_DB_LOC = 'backendcore.data.databases.mongo_connect'
 MONGO_DB_OBJ = f'{MONGO_DB_LOC}.MongoDB'
 
 
-@pytest.fixture(scope='function')
-def create_db():
-    dbc.set_db(mdb.MongoDB(local_db=True))
-
-
 def rand_fld_val():
     """
     We should only get a duplicate every billion or so tests.
@@ -47,44 +42,34 @@ def rand_fld_val():
 
 
 @patch(f'{MONGO_DB_OBJ}.read_one', autospec=True, return_value={})
-def test_fetch_one_no_filter(mock_read_one, create_db):
+def test_read_one_no_filter(mock_read_one):
     """
-    Tests that a fetch with no filter retieves the rec we inserted
+    Tests that a fetch with no filter retrieves the rec we inserted
     in the fixture.
     """
-    rec = dbc.fetch_one(TEST_DB, TEST_COLLECT, filters={})
+    rec = dbc.read_one(TEST_DB, TEST_COLLECT, filters={})
     assert rec is not None
 
 
-@pytest.mark.skip('Cutting over to new multi-db model.')
-def test_fetch_one_bad_filter(a_doc):
+@patch(f'{MONGO_DB_OBJ}.read_one', autospec=True, return_value=None)
+def test_read_one_bad_filter(a_doc):
     """
     Tests that a fetch with a bad filter fails.
     """
-    rec = dbc.fetch_one(TEST_DB, TEST_COLLECT, filters={DEF_FLD: BAD_VAL})
+    rec = dbc.read_one(TEST_DB, TEST_COLLECT, filters={DEF_FLD: BAD_VAL})
     assert rec is None
 
 
-@pytest.mark.skip('Cutting over to new multi-db model.')
-def test_fetch_one_good_filter(a_doc):
+@patch(f'{MONGO_DB_OBJ}.read_one', autospec=True, return_value={})
+def test_read_one_good_filter(a_doc):
     """
     Tests that a fetch with a good filter works.
     """
-    rec = dbc.fetch_one(TEST_DB, TEST_COLLECT, filters=DEF_PAIR)
+    rec = dbc.read_one(TEST_DB, TEST_COLLECT, filters=DEF_PAIR)
     assert rec is not None
 
 
-@pytest.mark.skip('Cutting over to new multi-db model.')
-def test_is_valid_id():
-    assert dbc.is_valid_id(GOOD_ID)
-
-
-@pytest.mark.skip('Cutting over to new multi-db model.')
-def test_is_not_valid_id():
-    assert not dbc.is_valid_id(BAD_ID)
-
-
-@pytest.mark.skip('Cutting over to new multi-db model.')
+@patch(f'{MONGO_DB_OBJ}.fetch_by_id', autospec=True, return_value={})
 def test_fetch_by_id(a_doc):
     ret = dbc.fetch_by_id(TEST_DB, TEST_COLLECT, a_doc)
     assert ret is not None
@@ -92,7 +77,7 @@ def test_fetch_by_id(a_doc):
 
 @pytest.mark.skip('Cutting over to new multi-db model.')
 def test_del_by_id(new_doc):
-    rec1 = dbc.fetch_one(TEST_DB, TEST_COLLECT)
+    rec1 = dbc.read_one(TEST_DB, TEST_COLLECT)
     rec_id = rec1[str(dbc.DB_ID)]
     dbc.del_by_id(TEST_DB, TEST_COLLECT, rec_id)
     assert dbc.fetch_by_id(TEST_DB, TEST_COLLECT, rec_id) is None
@@ -137,7 +122,7 @@ def test_select_w_filter(some_docs):
     chance. Enough for our lifetimes.
     """
     unique_val = rand_fld_val()
-    dbc.insert_doc(TEST_DB, TEST_COLLECT, {DEF_FLD: unique_val})
+    dbc.create(TEST_DB, TEST_COLLECT, {DEF_FLD: unique_val})
     recs = dbc.select(TEST_DB, TEST_COLLECT, filters={DEF_FLD: unique_val})
     dbc.del_one(TEST_DB, TEST_COLLECT, filters={DEF_FLD: unique_val})
     assert len(recs) == 1
@@ -167,7 +152,7 @@ def test_del_many(a_doc):
     Make sure deleting many docs leaves none behind.
     """
     dbc.del_many(TEST_DB, TEST_COLLECT, filters=DEF_PAIR)
-    assert dbc.fetch_one(TEST_DB, TEST_COLLECT, filters=DEF_PAIR) is None
+    assert dbc.read_one(TEST_DB, TEST_COLLECT, filters=DEF_PAIR) is None
 
 
 @pytest.mark.skip('Cutting over to new multi-db model.')
@@ -278,7 +263,7 @@ def test_add_fld_to_all(some_docs):
     """
     dbc.add_fld_to_all(TEST_DB, TEST_COLLECT, NEW_FLD, NEW_VAL)
     for i in range(RECS_TO_TEST):
-        rec = dbc.fetch_one(TEST_DB, TEST_COLLECT)
+        rec = dbc.read_one(TEST_DB, TEST_COLLECT)
         assert rec[NEW_FLD] == NEW_VAL
 
 
@@ -291,7 +276,7 @@ def test_append_to_list(a_doc):
     """
     dbc.append_to_list(TEST_DB, TEST_COLLECT, DEF_FLD, DEF_VAL,
                        LIST_FLD, 1)  # any old val will do!
-    rec = dbc.fetch_one(TEST_DB, TEST_COLLECT, filters=DEF_PAIR)
+    rec = dbc.read_one(TEST_DB, TEST_COLLECT, filters=DEF_PAIR)
     assert rec[LIST_FLD][0] == 1
 
 
@@ -302,17 +287,16 @@ def test_rename_fld(some_docs):
     """
     dbc.rename(TEST_DB, TEST_COLLECT, {DEF_FLD: NEW_FLD})
     for i in range(RECS_TO_TEST):
-        rec = dbc.fetch_one(TEST_DB, TEST_COLLECT)
+        rec = dbc.read_one(TEST_DB, TEST_COLLECT)
         assert rec[NEW_FLD]
 
 
-@pytest.mark.skip('Cutting over to new multi-db model.')
-def test_insert_doc():
+def test_create():
     """
     There should not be more than one of these after insert,
     but let's test just that there is at least one.
     """
     unique_val = rand_fld_val()
-    dbc.insert_doc(TEST_DB, TEST_COLLECT, {DEF_FLD: unique_val})
+    dbc.create(TEST_DB, TEST_COLLECT, {DEF_FLD: unique_val})
     recs = dbc.select(TEST_DB, TEST_COLLECT, filters={DEF_FLD: unique_val})
     assert len(recs) >= 1
