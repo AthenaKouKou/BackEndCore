@@ -14,8 +14,6 @@ import backendcore.data.databases.mongo_connect as mdb
 TEST_DB = 'test_db'
 TEST_COLLECT = 'test_collect'
 
-RECS_TO_TEST = 10  # 10 is arbitrary!
-
 DEF_FLD = 'fld0'
 DEF_VAL = 'def_val'
 
@@ -52,7 +50,7 @@ def test_read_one_no_filter(mock_read_one):
 
 
 @patch(f'{MONGO_DB_OBJ}.read_one', autospec=True, return_value=None)
-def test_read_one_bad_filter(a_doc):
+def test_read_one_bad_filter(mock_read_one):
     """
     Tests that a fetch with a bad filter fails.
     """
@@ -61,7 +59,7 @@ def test_read_one_bad_filter(a_doc):
 
 
 @patch(f'{MONGO_DB_OBJ}.read_one', autospec=True, return_value={})
-def test_read_one_good_filter(a_doc):
+def test_read_one_good_filter(mock_read_one):
     """
     Tests that a fetch with a good filter works.
     """
@@ -70,8 +68,8 @@ def test_read_one_good_filter(a_doc):
 
 
 @patch(f'{MONGO_DB_OBJ}.fetch_by_id', autospec=True, return_value={})
-def test_fetch_by_id(a_doc):
-    ret = dbc.fetch_by_id(TEST_DB, TEST_COLLECT, a_doc)
+def test_fetch_by_id(mock_fetch_by_id):
+    ret = dbc.fetch_by_id(TEST_DB, TEST_COLLECT, {'any': 'vals'})
     assert ret is not None
 
 
@@ -102,30 +100,10 @@ def test_update_doc(a_doc):
     assert len(recs) == 1
 
 
-@pytest.mark.skip('Cutting over to new multi-db model.')
-def test_select_no_filter(some_docs):
-    """
-    This should return all records in a collection.
-    We test with >= since someone may have left other docs
-    in our test_db.
-    """
+@patch(f'{MONGO_DB_OBJ}.select', autospec=True, return_value={})
+def test_select(mock_select):
     recs = dbc.select(TEST_DB, TEST_COLLECT, filters={})
-    assert len(recs) >= RECS_TO_TEST
-
-
-@pytest.mark.skip('Cutting over to new multi-db model.')
-def test_select_w_filter(some_docs):
-    """
-    This should return all records in a collection matching the
-    filter.
-    This record should be unique except for a 1 in BIG_INT
-    chance. Enough for our lifetimes.
-    """
-    unique_val = rand_fld_val()
-    dbc.create(TEST_DB, TEST_COLLECT, {DEF_FLD: unique_val})
-    recs = dbc.select(TEST_DB, TEST_COLLECT, filters={DEF_FLD: unique_val})
-    dbc.del_one(TEST_DB, TEST_COLLECT, filters={DEF_FLD: unique_val})
-    assert len(recs) == 1
+    assert isinstance(recs, dict)
 
 
 @pytest.mark.skip('Cutting over to new multi-db model.')
