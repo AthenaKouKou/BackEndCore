@@ -112,34 +112,45 @@ def fetch_by_id(db_nm, clct_nm, _id: str, no_id=False):
 #     return del_obj.deleted_count
 
 
-# def del_one(db_nm, clct_nm, filters={}):
-#     """
-#     Delete one record that meets filters.
-#     """
-#     return database[db_nm][clct_nm].delete_one(filters)
+@needs_db
+def delete(db_nm, clct_nm, filters={}):
+    """
+    Delete one record that meets filters.
+    """
+    return database.delete(db_nm, clct_nm, filters=filters)
 
 
-# def del_many(db_nm, clct_nm, filters={}):
-#     """
-#     Delete one record that meets filters.
-#     """
-#     return database[db_nm][clct_nm].delete_many(filters)
+def del_one(db_nm, clct_nm, filters={}):
+    return delete(db_nm, clct_nm, filters=filters)
 
 
-# def del_by_id(db_nm, clct_nm, _id: str):
-#     """
-#     Delete one record identified by id.
-#     We convert the passed in string to an ID for our user.
-#     """
-#     filter = create_id_filter(_id)
-#     return database[db_nm][clct_nm].delete_one(filter)
+@needs_db
+def delete_many(db_nm, clct_nm, filters={}):
+    """
+    Delete many records that meet filters.
+    """
+    return database.delete_many(db_nm, clct_nm,
+                                filters=filters)
 
 
-# def _asmbl_sort_cond(sort=NO_SORT, sort_fld='_id'):
-#     sort_cond = []
-#     if sort != NO_SORT:
-#         sort_cond.append((f'{sort_fld}', sort))
-#     return sort_cond
+def del_many(db_nm, clct_nm, filters={}):
+    """
+    old name for delete_many
+    """
+    return delete_many(db_nm, clct_nm, filters=filters)
+
+
+@needs_db
+def delete_by_id(db_nm, clct_nm, _id: str):
+    """
+    Delete one record identified by id.
+    We convert the passed in string to an ID for our user.
+    """
+    return database.delete_by_id(db_nm, clct_nm, _id)
+
+
+def del_by_id(db_nm, clct_nm, _id: str):
+    return delete_by_id(db_nm, clct_nm, _id)
 
 
 @needs_db
@@ -303,7 +314,3 @@ def insert_doc(db_nm: str, clct_nm: str, doc: dict, with_date=False):
 #     collect.update_one({filter_fld_nm: filter_fld_val},
 #                        {'$push': {list_nm: new_list_item}},
 #                        upsert=True)
-
-
-# def aggregate(db_nm, clct_nm, pipeline):
-#     return database[db_nm][clct_nm].aggregate(pipeline, allowDiskUse=True)

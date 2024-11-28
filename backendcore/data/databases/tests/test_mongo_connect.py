@@ -139,10 +139,10 @@ def test_fetch_by_id(mobj, a_doc):
     assert ret is not None
 
 
-def test_del_by_id(mobj, new_doc):
+def test_delete_by_id(mobj, new_doc):
     rec1 = mobj.read_one(TEST_DB, TEST_COLLECT)
     rec_id = rec1[str(mdb.DB_ID)]
-    mobj.del_by_id(TEST_DB, TEST_COLLECT, rec_id)
+    mobj.delete_by_id(TEST_DB, TEST_COLLECT, rec_id)
     assert mobj.fetch_by_id(TEST_DB, TEST_COLLECT, rec_id) is None
 
 

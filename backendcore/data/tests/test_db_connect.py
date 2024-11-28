@@ -73,12 +73,10 @@ def test_fetch_by_id(mock_fetch_by_id):
     assert ret is not None
 
 
-@pytest.mark.skip('Cutting over to new multi-db model.')
-def test_del_by_id(new_doc):
-    rec1 = dbc.read_one(TEST_DB, TEST_COLLECT)
-    rec_id = rec1[str(dbc.DB_ID)]
-    dbc.del_by_id(TEST_DB, TEST_COLLECT, rec_id)
-    assert dbc.fetch_by_id(TEST_DB, TEST_COLLECT, rec_id) is None
+@patch(f'{MONGO_DB_OBJ}.delete_by_id', autospec=True,
+       return_value='Not none')
+def test_delete_by_id(mock_delete_by_id):
+    assert dbc.delete_by_id(TEST_DB, TEST_COLLECT, 'some id') is not None
 
 
 @pytest.mark.skip('Cutting over to new multi-db model.')
@@ -106,31 +104,19 @@ def test_select(mock_select):
     assert isinstance(recs, dict)
 
 
-@pytest.mark.skip('Cutting over to new multi-db model.')
-def test_del_one_that_exists(a_doc):
-    """
-    Make sure deleting a doc that exists deletes 1 record.
-    """
-    result = dbc.del_one(TEST_DB, TEST_COLLECT, filters=DEF_PAIR)
-    assert result.deleted_count == 1
+@patch(f'{MONGO_DB_OBJ}.delete', autospec=True,
+       return_value='Not none')
+def test_delete(mock_delete):
+    assert dbc.delete(TEST_DB, TEST_COLLECT) is not None
 
 
-@pytest.mark.skip('Cutting over to new multi-db model.')
-def test_del_one_that_dont_exist(a_doc):
-    """
-    Make sure deleting a doc that doesn't exist deletes 0 records.
-    """
-    result = dbc.del_one(TEST_DB, TEST_COLLECT, filters={DEF_FLD: BAD_VAL})
-    assert result.deleted_count == 0
-
-
-@pytest.mark.skip('Cutting over to new multi-db model.')
-def test_del_many(a_doc):
+@patch(f'{MONGO_DB_OBJ}.delete_many', autospec=True,
+       return_value='Not none')
+def test_delete_many(mock_delete_many):
     """
     Make sure deleting many docs leaves none behind.
     """
-    dbc.del_many(TEST_DB, TEST_COLLECT, filters=DEF_PAIR)
-    assert dbc.read_one(TEST_DB, TEST_COLLECT, filters=DEF_PAIR) is None
+    assert dbc.delete_many(TEST_DB, TEST_COLLECT) is not None
 
 
 @pytest.mark.skip('Cutting over to new multi-db model.')

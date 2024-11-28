@@ -238,7 +238,7 @@ class MongoDB():
         """
         return client[db_nm][clct_nm].delete_many(filters)
 
-    def del_by_id(self, db_nm, clct_nm, _id: str):
+    def delete_by_id(self, db_nm, clct_nm, _id: str):
         """
         Delete one record identified by id.
         We convert the passed in string to an ID for our user.
