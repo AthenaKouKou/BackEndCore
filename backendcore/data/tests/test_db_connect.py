@@ -178,7 +178,7 @@ def test_delete_many(mock_delete_many):
     assert dbc.delete_many(TEST_DB, TEST_COLLECT) is not None
 
 
-@pytest.mark.skip('Cutting over to new multi-db model.')
+@pytest.mark.skip('Delete result tests will await rewrite of their functions.')
 def test_delete_success(a_doc):
     """
     Make sure that deleted one can properly detect if a record has been
@@ -188,7 +188,7 @@ def test_delete_success(a_doc):
     assert dbc.delete_success(result) == True
 
 
-@pytest.mark.skip('Cutting over to new multi-db model.')
+@pytest.mark.skip('Delete result tests will await rewrite of their functions.')
 def test_delete_no_success(a_doc):
     """
     Make sure that deleted one can properly detect if a record has not been
@@ -198,7 +198,7 @@ def test_delete_no_success(a_doc):
     assert dbc.delete_success(result) == False
 
 
-@pytest.mark.skip('Cutting over to new multi-db model.')
+@pytest.mark.skip('Delete result tests will await rewrite of their functions.')
 def test_num_deleted_single(a_doc):
     """
     Make sure that num_deleted can properly detect if a single record has been
@@ -208,7 +208,7 @@ def test_num_deleted_single(a_doc):
     assert dbc.num_deleted(result) == 1
 
 
-@pytest.mark.skip('Cutting over to new multi-db model.')
+@pytest.mark.skip('Delete result tests will await rewrite of their functions.')
 def test_num_deleted_multiple(some_docs):
     """
     Make sure that num_deleted can properly detect if several records have been
@@ -218,7 +218,7 @@ def test_num_deleted_multiple(some_docs):
     assert dbc.num_deleted(result) > 1
 
 
-@pytest.mark.skip('Cutting over to new multi-db model.')
+@pytest.mark.skip('Delete result tests will await rewrite of their functions.')
 def test_num_deleted_none(a_doc):
     """
     Make sure that num_deleted can properly detect if no records have been
@@ -228,44 +228,35 @@ def test_num_deleted_none(a_doc):
     assert dbc.num_deleted(result) == 0
 
 
-@pytest.mark.skip('Cutting over to new multi-db model.')
-def test_add_fld_to_all(some_docs):
+@patch(f'{MONGO_DB_OBJ}.add_fld_to_all', autospec=True, return_value=RET_CONST)
+def test_add_fld_to_all(mock_add_fld_to_all):
     """
     Testing updating all records with some new field.
     """
-    dbc.add_fld_to_all(TEST_DB, TEST_COLLECT, NEW_FLD, NEW_VAL)
-    for i in range(RECS_TO_TEST):
-        rec = dbc.read_one(TEST_DB, TEST_COLLECT)
-        assert rec[NEW_FLD] == NEW_VAL
+    ret = dbc.add_fld_to_all(TEST_DB, TEST_COLLECT, NEW_FLD, NEW_VAL)
+    assert ret == RET_CONST
 
 
-@pytest.mark.skip('Cutting over to new multi-db model.')
-def test_append_to_list(a_doc):
+@patch(f'{MONGO_DB_OBJ}.append_to_list', autospec=True, return_value=RET_CONST)
+def test_append_to_list(mock_append_to_list):
     """
     Test appending to an interior doc list.
-    `a_doc` initiliazes an empty list, so our new val should be
-    at `[LIST_FLD][0]`.
     """
-    dbc.append_to_list(TEST_DB, TEST_COLLECT, DEF_FLD, DEF_VAL,
-                       LIST_FLD, 1)  # any old val will do!
-    rec = dbc.read_one(TEST_DB, TEST_COLLECT, filters=DEF_PAIR)
-    assert rec[LIST_FLD][0] == 1
+    assert dbc.append_to_list(TEST_DB, TEST_COLLECT, 'any fld', 'any val',
+                              'any list', 'any list val') == RET_CONST
 
 
-@pytest.mark.skip('Cutting over to new multi-db model.')
-def test_rename_fld(some_docs):
+@patch(f'{MONGO_DB_OBJ}.rename', autospec=True, return_value=RET_CONST)
+def test_rename(some_docs):
     """
     Test renaming a field.
     """
-    dbc.rename(TEST_DB, TEST_COLLECT, {DEF_FLD: NEW_FLD})
-    for i in range(RECS_TO_TEST):
-        rec = dbc.read_one(TEST_DB, TEST_COLLECT)
-        assert rec[NEW_FLD]
+    assert dbc.rename(TEST_DB, TEST_COLLECT, {DEF_FLD: NEW_FLD}) == RET_CONST
 
 
 def test_create():
     """
-    There should not be more than one of these after insert,
+    There should not be more than one of these after create,
     but let's test just that there is at least one.
     """
     unique_val = rand_fld_val()

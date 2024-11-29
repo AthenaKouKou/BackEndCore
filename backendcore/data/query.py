@@ -17,9 +17,8 @@ def fetch_list(db_nm: str, collect_nm: str, sort_fld=NAME):
     """
     Fetch all of some docs: returns a list.
     """
-    db_nm = dbc.setup_connection(db_nm)
-    return dbc.fetch_all(db_nm, collect_nm, no_id=True,
-                         sort=dbc.ASC, sort_fld=sort_fld)
+    return dbc.read(db_nm, collect_nm, no_id=True,
+                    sort=dbc.ASC, sort_fld=sort_fld)
 
 
 def list_to_dict(key, recs: list, del_key=False) -> dict:

@@ -45,6 +45,7 @@ def setup_connection():
     if db_type == MONGO:
         local = os.environ.get("LOCAL_MONGO", REMOTE) == LOCAL
         db = mdb.MongoDB(local_db=local)
+        print(f'{db=}')
     return db
 
 
@@ -207,29 +208,15 @@ def select(db_nm, clct_nm, filters={}, sort=NO_SORT, sort_fld='_id',
 #     return database[db_nm][clct_nm].count_documents(filters)
 
 
-# def rename(db_nm: str, clct_nm: str, nm_map: dict):
-#     """
-#     Renames specified fields on all documents in a collection.
-
-#     Parameters
-#     ----------
-#     db_nm: str
-#         The database name.
-#     clct_nm: str
-#         The name of the database collection.
-#     nm_map: dict
-#         A dictionary. The keys are the current field names. Each key maps
-#         to the desired field name:
-#         {
-#             "old_nm1": "new_nm1",
-#             "old_nm2": "new_nm2",
-#         }
-#     """
-#     collect = database[db_nm][clct_nm]
-#     return collect.update_many({},
-#                                {'$rename': nm_map})
+@needs_db
+def rename(db_nm: str, clct_nm: str, nm_map: dict):
+    """
+    Renames specified fields on all documents in a collection.
+    """
+    return database.rename(db_nm, clct_nm, nm_map)
 
 
+@needs_db
 def create(db_nm: str, clct_nm: str, doc: dict, with_date=False):
     """
     Returns the str() of the inserted ID, or None on failure.
@@ -244,10 +231,9 @@ def insert_doc(db_nm: str, clct_nm: str, doc: dict, with_date=False):
     return create(db_nm, clct_nm, doc, with_date=with_date)
 
 
-# def add_fld_to_all(db_nm, clct_nm, new_fld, value):
-#     collect = get_collect(db_nm, clct_nm)
-#     return collect.update_many({}, {'$set': {new_fld: value}},
-#                                upsert=False)
+@needs_db
+def add_fld_to_all(db_nm, clct_nm, new_fld, value):
+    return database.add_fld_to_all(db_nm, clct_nm, new_fld, value)
 
 
 @needs_db
@@ -321,9 +307,12 @@ def num_updated(update_obj):
 #     return match_list
 
 
-# def append_to_list(db_nm, clct_nm, filter_fld_nm, filter_fld_val,
-#                    list_nm, new_list_item):
-#     collect = get_collect(db_nm, clct_nm)
-#     collect.update_one({filter_fld_nm: filter_fld_val},
-#                        {'$push': {list_nm: new_list_item}},
-#                        upsert=True)
+@needs_db
+def append_to_list(db_nm, clct_nm, filter_fld_nm, filter_fld_val,
+                   list_nm, new_list_item):
+    return database.append_to_list(db_nm,
+                                   clct_nm,
+                                   filter_fld_nm,
+                                   filter_fld_val,
+                                   list_nm,
+                                   new_list_item)

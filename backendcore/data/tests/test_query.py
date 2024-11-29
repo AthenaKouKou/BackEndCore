@@ -56,9 +56,8 @@ TEST_RECS = [
     {'x': 19, 'y': 20},
 ]
 
-@patch('backendcore.data.db_connect.setup_connection', autospec=True, return_value='Some DB name')
-@patch('backendcore.data.db_connect.fetch_all', autospec=True, return_value=TEST_LIST)
-def test_fetch_list(mock_setup, mock_fetch):
+@patch('backendcore.data.db_connect.read', autospec=True, return_value=TEST_LIST)
+def test_fetch_list(mock_read):
     ret = qry.fetch_list('Some DB name', 'Some collection name')
     assert isinstance(ret, list)
     assert len(ret) == len(TEST_LIST)
