@@ -109,6 +109,57 @@ def test_upsert(mock_upsert):
     assert ret == RET_CONST
 
 
+@pytest.mark.skip('Update success must be re-written before testing.')
+def test_update_success(a_doc):
+    """
+    Make sure that updated one can properly detect if a record has been
+    updated.
+    """
+    result = dbc.update_doc(TEST_DB, TEST_COLLECT, DEF_PAIR, DEF_PAIR)
+    assert dbc.update_success(result) == True
+
+
+@pytest.mark.skip('Update success must be re-written before testing.')
+def test_update_no_success(a_doc):
+    """
+    Make sure that updated one can properly detect if a record has not been
+    updated.
+    """
+    result = dbc.update_doc(TEST_DB, TEST_COLLECT, {DEF_FLD: BAD_VAL}, DEF_PAIR)
+    assert dbc.update_success(result) == False
+
+
+@pytest.mark.skip('Update success must be re-written before testing.')
+def test_num_updated_single(a_doc):
+    """
+    Make sure that num_updated can properly detect if a single record has been
+    updated.
+    """
+    result = dbc.update_doc(TEST_DB, TEST_COLLECT, DEF_PAIR,
+                            {DEF_FLD: 'new val'})
+    assert dbc.num_updated(result) == 1
+
+
+@pytest.mark.skip('num updated must be re-written before testing.')
+def test_num_updated_multiple(some_docs):
+    """
+    Make sure that num_updated can properly detect if several records have been
+    updated.
+    """
+    result = dbc.update_fld_for_many(TEST_DB, TEST_COLLECT, {}, 'new field', 'new val')
+    assert dbc.num_updated(result) > 1
+
+
+@pytest.mark.skip('num updated must be re-written before testing.')
+def test_num_updated_none(a_doc):
+    """
+    Make sure that num_updated can properly detect if no records have been
+    updated.
+    """
+    result = dbc.update_doc(TEST_DB, TEST_COLLECT, {DEF_FLD: BAD_VAL}, DEF_PAIR)
+    assert dbc.num_updated(result) == 0
+
+
 @patch(f'{MONGO_DB_OBJ}.select', autospec=True, return_value={})
 def test_select(mock_select):
     recs = dbc.select(TEST_DB, TEST_COLLECT, filters={})
@@ -178,57 +229,6 @@ def test_num_deleted_none(a_doc):
     """
     result = dbc.del_one(TEST_DB, TEST_COLLECT, filters={DEF_FLD: BAD_VAL})
     assert dbc.num_deleted(result) == 0
-
-
-@pytest.mark.skip('Cutting over to new multi-db model.')
-def test_update_success(a_doc):
-    """
-    Make sure that updated one can properly detect if a record has been
-    updated.
-    """
-    result = dbc.update_doc(TEST_DB, TEST_COLLECT, DEF_PAIR, DEF_PAIR)
-    assert dbc.update_success(result) == True
-
-
-@pytest.mark.skip('Cutting over to new multi-db model.')
-def test_update_no_success(a_doc):
-    """
-    Make sure that updated one can properly detect if a record has not been
-    updated.
-    """
-    result = dbc.update_doc(TEST_DB, TEST_COLLECT, {DEF_FLD: BAD_VAL}, DEF_PAIR)
-    assert dbc.update_success(result) == False
-
-
-@pytest.mark.skip('Cutting over to new multi-db model.')
-def test_num_updated_single(a_doc):
-    """
-    Make sure that num_updated can properly detect if a single record has been
-    updated.
-    """
-    result = dbc.update_doc(TEST_DB, TEST_COLLECT, DEF_PAIR,
-                            {DEF_FLD: 'new val'})
-    assert dbc.num_updated(result) == 1
-
-
-@pytest.mark.skip('Cutting over to new multi-db model.')
-def test_num_updated_multiple(some_docs):
-    """
-    Make sure that num_updated can properly detect if several records have been
-    updated.
-    """
-    result = dbc.update_fld_for_many(TEST_DB, TEST_COLLECT, {}, 'new field', 'new val')
-    assert dbc.num_updated(result) > 1
-
-
-@pytest.mark.skip('Cutting over to new multi-db model.')
-def test_num_updated_none(a_doc):
-    """
-    Make sure that num_updated can properly detect if no records have been
-    updated.
-    """
-    result = dbc.update_doc(TEST_DB, TEST_COLLECT, {DEF_FLD: BAD_VAL}, DEF_PAIR)
-    assert dbc.num_updated(result) == 0
 
 
 @pytest.mark.skip('Cutting over to new multi-db model.')

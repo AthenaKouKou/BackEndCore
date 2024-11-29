@@ -294,12 +294,14 @@ def upsert_doc(db_nm, clct_nm, filters, update_dict):
     return upsert(db_nm, clct_nm, filters, update_dict)
 
 
-# def update_success(update_obj):
-#     return update_obj.matched_count > 0
+@needs_db
+def update_success(update_obj):
+    return database.update_success(update_obj)
 
 
-# def num_updated(update_obj):
-#     return update_obj.modified_count
+@needs_db
+def num_updated(update_obj):
+    return database.num_updated(update_obj)
 
 
 # def search_collection(db_nm, clct_nm, fld_nm, regex, active=False):
