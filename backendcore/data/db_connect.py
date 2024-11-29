@@ -270,19 +270,28 @@ def insert_doc(db_nm: str, clct_nm: str, doc: dict, with_date=False):
 #     return collect.update_many(filters, {'$set': {fld_nm: fld_val}})
 
 
-# def update_doc(db_nm, clct_nm, filters, update_dict):
-#     collect = get_collect(db_nm, clct_nm)
-#     return collect.update_one(filters, {'$set': update_dict})
+@needs_db
+def update(db_nm, clct_nm, filters, update_dict):
+    return database.update(db_nm, clct_nm, filters, update_dict)
 
 
-# def upsert_doc(db_nm, clct_nm, filters, update_dict):
-#     collect = get_collect(db_nm, clct_nm)
-#     ret = collect.update_one(filters, {'$set': update_dict}, upsert=True)
-#     rec_id = ret.upserted_id
-#     if not rec_id:  # we updated, not inserted
-#         rec = collect.find_one(update_dict)
-#         rec_id = rec[DB_ID]
-#     return str(rec_id)
+def update_doc(db_nm, clct_nm, filters, update_dict):
+    """
+    The old name for update.
+    """
+    return update(db_nm, clct_nm, filters, update_dict)
+
+
+@needs_db
+def upsert(db_nm, clct_nm, filters, update_dict):
+    return database.upsert(db_nm, clct_nm, filters, update_dict)
+
+
+def upsert_doc(db_nm, clct_nm, filters, update_dict):
+    """
+    The old name: replace when found.
+    """
+    return upsert(db_nm, clct_nm, filters, update_dict)
 
 
 # def update_success(update_obj):

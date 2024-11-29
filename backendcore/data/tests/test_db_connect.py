@@ -88,14 +88,25 @@ def test_update_fld(a_doc):
     assert len(recs) == 1
 
 
-@pytest.mark.skip('Cutting over to new multi-db model.')
-def test_update_doc(a_doc):
-    unique_val = rand_fld_val()
-    dbc.update_doc(TEST_DB, TEST_COLLECT, DEF_PAIR,
-                   {DEF_FLD: unique_val, LIST_FLD: ['something']})
-    recs = dbc.select(TEST_DB, TEST_COLLECT,
-                      filters={DEF_FLD: unique_val, LIST_FLD: ['something']})
-    assert len(recs) == 1
+RET_CONST = 17
+
+
+@patch(f'{MONGO_DB_OBJ}.update', autospec=True, return_value=RET_CONST)
+def test_update(mock_update):
+    """
+    Just testing we get back the return of the installed db.
+    """
+    ret = dbc.update(TEST_DB, TEST_COLLECT, {}, {})
+    assert ret == RET_CONST
+
+
+@patch(f'{MONGO_DB_OBJ}.upsert', autospec=True, return_value=RET_CONST)
+def test_upsert(mock_upsert):
+    """
+    Just testing we get back the return of the installed db.
+    """
+    ret = dbc.upsert(TEST_DB, TEST_COLLECT, {}, {})
+    assert ret == RET_CONST
 
 
 @patch(f'{MONGO_DB_OBJ}.select', autospec=True, return_value={})
