@@ -250,16 +250,18 @@ def insert_doc(db_nm: str, clct_nm: str, doc: dict, with_date=False):
 #                                upsert=False)
 
 
-# def update_fld(db_nm, clct_nm, filters, fld_nm, fld_val):
-#     """
-#     This should only be used when we just want to update a single
-#     field.
-#     To update more than one field in a doc, use `update_doc`.
-#     """
-#     collect = get_collect(db_nm, clct_nm)
-#     return collect.update_one(filters, {'$set': {fld_nm: fld_val}})
+@needs_db
+def update_fld(db_nm, clct_nm, filters, fld_nm, fld_val):
+    """
+    This should only be used when we just want to update a single
+    field.
+    To update more than one field in a doc, use `update_doc`.
+    """
+    return database.update_fld(db_nm, clct_nm, filters,
+                               fld_nm, fld_val)
 
 
+# @needs_db
 # def update_fld_for_many(db_nm, clct_nm, filters, fld_nm, fld_val):
 #     """
 #     This should only be used when we just want to update a single

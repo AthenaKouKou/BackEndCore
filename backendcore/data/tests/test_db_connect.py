@@ -19,6 +19,8 @@ DEF_VAL = 'def_val'
 
 DEF_PAIR = {DEF_FLD: DEF_VAL}
 
+RET_CONST = 17
+
 LIST_FLD = 'a_list'
 
 NEW_FLD = 'fld1'
@@ -79,16 +81,11 @@ def test_delete_by_id(mock_delete_by_id):
     assert dbc.delete_by_id(TEST_DB, TEST_COLLECT, 'some id') is not None
 
 
-@pytest.mark.skip('Cutting over to new multi-db model.')
+@patch(f'{MONGO_DB_OBJ}.update_fld', autospec=True, return_value=RET_CONST)
 def test_update_fld(a_doc):
-    unique_val = rand_fld_val()
-    dbc.update_fld(TEST_DB, TEST_COLLECT, DEF_PAIR,
-                   DEF_FLD, unique_val)
-    recs = dbc.select(TEST_DB, TEST_COLLECT, filters={DEF_FLD: unique_val})
-    assert len(recs) == 1
-
-
-RET_CONST = 17
+    assert dbc.update_fld(TEST_DB, TEST_COLLECT,
+                          DEF_PAIR, DEF_FLD,
+                          'Any value') == RET_CONST
 
 
 @patch(f'{MONGO_DB_OBJ}.update', autospec=True, return_value=RET_CONST)
