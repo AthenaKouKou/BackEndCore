@@ -251,7 +251,7 @@ def test_delete_success(mobj, a_doc):
     deleted.
     """
     result = mobj.delete(TEST_DB, TEST_COLLECT, filters=DEF_PAIR)
-    assert mobj.delete_success(result) == True
+    assert result.succeeded() == True
 
 
 def test_delete_no_success(mobj, a_doc):
@@ -260,7 +260,7 @@ def test_delete_no_success(mobj, a_doc):
     deleted.
     """
     result = mobj.delete(TEST_DB, TEST_COLLECT, filters={DEF_FLD: BAD_VAL})
-    assert mobj.delete_success(result) == False
+    assert result.succeeded() == False
 
 
 def test_num_deleted_single(mobj, a_doc):
@@ -269,7 +269,7 @@ def test_num_deleted_single(mobj, a_doc):
     deleted.
     """
     result = mobj.delete(TEST_DB, TEST_COLLECT, filters=DEF_PAIR)
-    assert mobj.num_deleted(result) == 1
+    assert result.del_count() == 1
 
 
 def test_num_deleted_multiple(mobj, some_docs):
@@ -278,7 +278,7 @@ def test_num_deleted_multiple(mobj, some_docs):
     deleted.
     """
     result = mobj.delete_many(TEST_DB, TEST_COLLECT, filters={})
-    assert mobj.num_deleted(result) > 1
+    assert result.del_count() > 1
 
 
 def test_num_deleted_none(mobj, a_doc):
@@ -287,7 +287,7 @@ def test_num_deleted_none(mobj, a_doc):
     deleted.
     """
     result = mobj.delete(TEST_DB, TEST_COLLECT, filters={DEF_FLD: BAD_VAL})
-    assert mobj.num_deleted(result) == 0
+    assert result.del_count() == 0
 
 
 def test_update_success(mobj, a_doc):
@@ -296,7 +296,7 @@ def test_update_success(mobj, a_doc):
     updated.
     """
     result = mobj.update(TEST_DB, TEST_COLLECT, DEF_PAIR, DEF_PAIR)
-    assert mobj.update_success(result) == True
+    assert result.succeeded() == True
 
 
 def test_update_no_success(mobj, a_doc):
@@ -305,7 +305,7 @@ def test_update_no_success(mobj, a_doc):
     updated.
     """
     result = mobj.update(TEST_DB, TEST_COLLECT, {DEF_FLD: BAD_VAL}, DEF_PAIR)
-    assert mobj.update_success(result) == False
+    assert result.succeeded() == False
 
 
 def test_num_updated_single(mobj, a_doc):
@@ -314,7 +314,7 @@ def test_num_updated_single(mobj, a_doc):
     updated.
     """
     result = mobj.update(TEST_DB, TEST_COLLECT, DEF_PAIR, {DEF_FLD: 'new val'})
-    assert mobj.num_updated(result) == 1
+    assert result.mod_count() == 1
 
 
 def test_num_updated_multiple(mobj, some_docs):
@@ -323,7 +323,7 @@ def test_num_updated_multiple(mobj, some_docs):
     updated.
     """
     result = mobj.update_fld_for_many(TEST_DB, TEST_COLLECT, {}, 'new field', 'new val')
-    assert mobj.num_updated(result) > 1
+    assert result.mod_count() > 1
 
 
 def test_num_updated_none(mobj, a_doc):
@@ -332,7 +332,7 @@ def test_num_updated_none(mobj, a_doc):
     updated.
     """
     result = mobj.update(TEST_DB, TEST_COLLECT, {DEF_FLD: BAD_VAL}, DEF_PAIR)
-    assert mobj.num_updated(result) == 0
+    assert result.mod_count() == 0
 
 
 def test_add_fld_to_all(mobj, some_docs):
