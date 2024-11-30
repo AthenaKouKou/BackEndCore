@@ -12,6 +12,8 @@ from pymongo.server_api import ServerApi
 from bson.objectid import ObjectId
 import bson.json_util as bsutil
 
+import backendcore.data.databases.common as cmn
+
 from backendcore.common.constants import OBJ_ID_NM
 
 # all of these will eventually be put in the env:
@@ -85,6 +87,15 @@ DUP = "Can't add duplicate"
 # For now, client is a global singleton.
 # Maybe one day we will need a... client per thread? I dunno.
 client = None
+
+
+def create_del_ret(mongo_ret):
+    cmn.DeleteReturn(mongo_ret.deleted_count)
+
+
+def create_update_ret(mongo_ret):
+    cmn.UpdateReturn(mongo_ret.modified_count,
+                     mongo_ret.matched_count)
 
 
 def is_valid_id(rec_id: str):
