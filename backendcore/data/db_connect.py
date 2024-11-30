@@ -44,9 +44,8 @@ database = None
 
 
 def setup_connection(db_nm: str):
-    """
-    To make cutting over to multi-db model easier.
-    """
+    if os.environ.get("TEST_DB") == "1":
+        db_nm = 'test_' + db_nm
     return db_nm
 
 
