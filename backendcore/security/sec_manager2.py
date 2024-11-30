@@ -253,13 +253,12 @@ def create_sec_doc(name, users):
     """
     Used to add new sec protocol docs to the database
     """
-    db_nm = dbc.setup_connection(dbc.USER_DB)
-    return dbc.insert_doc(db_nm, SEC_COLLECT, {PROT_NM: name, USERS: users})
+    return dbc.insert_doc(dbc.USER_DB, SEC_COLLECT,
+                          {PROT_NM: name, USERS: users})
 
 
 def fetch_sec_users(name):
-    db_nm = dbc.setup_connection(dbc.USER_DB)
-    return dbc.fetch_one(db_nm, SEC_COLLECT, {PROT_NM: name})[USERS]
+    return dbc.fetch_one(dbc.USER_DB, SEC_COLLECT, {PROT_NM: name})[USERS]
 
 
 JOURNAL_CODE = os.environ.get('JOURNAL_CODE', '')
