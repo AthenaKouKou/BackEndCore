@@ -95,7 +95,7 @@ def create_del_ret(mongo_ret):
 
 def create_update_ret(mongo_ret):
     return cmn.UpdateReturn(mongo_ret.modified_count,
-                     mongo_ret.matched_count)
+                            mongo_ret.matched_count)
 
 
 def is_valid_id(rec_id: str):
@@ -343,7 +343,8 @@ class MongoDB():
         To update more than one field in a doc, use `update_doc`.
         """
         collect = get_collect(db_nm, clct_nm)
-        mongo_update_obj = collect.update_one(filters, {'$set': {fld_nm: fld_val}})
+        mongo_update_obj = collect.update_one(filters,
+                                              {'$set': {fld_nm: fld_val}})
         return create_update_ret(mongo_update_obj)
 
     def update_fld_for_many(self, db_nm, clct_nm, filters, fld_nm, fld_val):
@@ -353,7 +354,8 @@ class MongoDB():
         To update more than one field in a doc, use `update_doc`.
         """
         collect = get_collect(db_nm, clct_nm)
-        mongo_update_obj = collect.update_many(filters, {'$set': {fld_nm: fld_val}})
+        mongo_update_obj = collect.update_many(filters,
+                                               {'$set': {fld_nm: fld_val}})
         return create_update_ret(mongo_update_obj)
 
     def update(self, db_nm, clct_nm, filters, update_dict):
