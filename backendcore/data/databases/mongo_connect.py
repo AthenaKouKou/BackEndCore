@@ -90,11 +90,11 @@ client = None
 
 
 def create_del_ret(mongo_ret):
-    cmn.DeleteReturn(mongo_ret.deleted_count)
+    return cmn.DeleteReturn(mongo_ret.deleted_count)
 
 
 def create_update_ret(mongo_ret):
-    cmn.UpdateReturn(mongo_ret.modified_count,
+    return cmn.UpdateReturn(mongo_ret.modified_count,
                      mongo_ret.matched_count)
 
 
@@ -229,23 +229,19 @@ class MongoDB():
         rec = _id_handler(rec, no_id)
         return rec
 
-    def delete_success(self, del_obj):
-        return del_obj.deleted_count > 0
-
-    def num_deleted(self, del_obj):
-        return del_obj.deleted_count
-
     def delete(self, db_nm, clct_nm, filters={}):
         """
         Delete one record that meets filters.
         """
-        return client[db_nm][clct_nm].delete_one(filters)
+        mongo_del_obj = client[db_nm][clct_nm].delete_one(filters)
+        return create_del_ret(mongo_del_obj)
 
     def delete_many(self, db_nm, clct_nm, filters={}):
         """
         Delete many records that meet filters.
         """
-        return client[db_nm][clct_nm].delete_many(filters)
+        mongo_del_obj = client[db_nm][clct_nm].delete_many(filters)
+        return create_del_ret(mongo_del_obj)
 
     def delete_by_id(self, db_nm, clct_nm, _id: str):
         """
@@ -253,7 +249,8 @@ class MongoDB():
         We convert the passed in string to an ID for our user.
         """
         filter = self.create_id_filter(_id)
-        return client[db_nm][clct_nm].delete_one(filter)
+        mongo_del_obj = client[db_nm][clct_nm].delete_one(filter)
+        return create_del_ret(mongo_del_obj)
 
     def read(self, db_nm, clct_nm, sort=NO_SORT,
              sort_fld=OBJ_ID_NM, no_id=False):
@@ -346,7 +343,8 @@ class MongoDB():
         To update more than one field in a doc, use `update_doc`.
         """
         collect = get_collect(db_nm, clct_nm)
-        return collect.update_one(filters, {'$set': {fld_nm: fld_val}})
+        mongo_update_obj = collect.update_one(filters, {'$set': {fld_nm: fld_val}})
+        return create_update_ret(mongo_update_obj)
 
     def update_fld_for_many(self, db_nm, clct_nm, filters, fld_nm, fld_val):
         """
@@ -355,11 +353,13 @@ class MongoDB():
         To update more than one field in a doc, use `update_doc`.
         """
         collect = get_collect(db_nm, clct_nm)
-        return collect.update_many(filters, {'$set': {fld_nm: fld_val}})
+        mongo_update_obj = collect.update_many(filters, {'$set': {fld_nm: fld_val}})
+        return create_update_ret(mongo_update_obj)
 
     def update(self, db_nm, clct_nm, filters, update_dict):
         collect = get_collect(db_nm, clct_nm)
-        return collect.update_one(filters, {'$set': update_dict})
+        mongo_update_obj = collect.update_one(filters, {'$set': update_dict})
+        return create_update_ret(mongo_update_obj)
 
     def upsert(self, db_nm, clct_nm, filters, update_dict):
         collect = get_collect(db_nm, clct_nm)
@@ -369,12 +369,6 @@ class MongoDB():
             rec = collect.find_one(update_dict)
             rec_id = rec[DB_ID]
         return str(rec_id)
-
-    def update_success(self, update_obj):
-        return update_obj.matched_count > 0
-
-    def num_updated(self, update_obj):
-        return update_obj.modified_count
 
     def search_collection(self, db_nm, clct_nm, fld_nm, regex, active=False):
         """

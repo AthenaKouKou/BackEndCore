@@ -123,12 +123,12 @@ def fetch_by_id(db_nm, clct_nm, _id: str, no_id=False):
     return database.fetch_by_id(db_nm, clct_nm, _id, no_id=no_id)
 
 
-# def delete_success(del_obj):
-#     return del_obj.deleted_count > 0
+def delete_success(del_obj):
+    return del_obj.succeeded()
 
 
-# def num_deleted(del_obj):
-#     return del_obj.deleted_count
+def num_deleted(del_obj):
+    return del_obj.del_count()
 
 
 @needs_db
@@ -300,14 +300,12 @@ def upsert_doc(db_nm, clct_nm, filters, update_dict):
     return upsert(db_nm, clct_nm, filters, update_dict)
 
 
-@needs_db
 def update_success(update_obj):
-    return database.update_success(update_obj)
+    return update_obj.succeeded()
 
 
-@needs_db
 def num_updated(update_obj):
-    return database.num_updated(update_obj)
+    return update_obj.mod_count()
 
 
 # def search_collection(db_nm, clct_nm, fld_nm, regex, active=False):
