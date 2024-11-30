@@ -43,7 +43,14 @@ DUP = "Can't add duplicate"
 database = None
 
 
-def setup_connection():
+def setup_connection(db_nm: str):
+    """
+    To make cutting over to multi-db model easier.
+    """
+    return db_nm
+
+
+def get_db():
     """
     Sets up connection to appropriate DB.
     """
@@ -66,7 +73,7 @@ def needs_db(fn):
     def wrapper(*args, **kwargs):
         global database
         if not database:
-            database = setup_connection()
+            database = get_db()
         return fn(*args, **kwargs)
     return wrapper
 
