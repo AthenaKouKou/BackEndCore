@@ -98,6 +98,11 @@ def fetch_one(db_nm, clct_nm, filters={}, no_id=False):
     return read_one(db_nm, clct_nm, filters=filters, no_id=no_id)
 
 
+@needs_db
+def create_id_filter(_id: str):
+    return database.create_id_filter(_id)
+
+
 # def create_in_filter(fld_nm: str, values: list):
 #     return {fld_nm: {'$in': values}}
 
