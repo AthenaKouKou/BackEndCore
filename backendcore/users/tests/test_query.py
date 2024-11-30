@@ -23,10 +23,6 @@ SOME_PAST_DATE = '2020-01-01'
 LAST_LOGIN_DATE = '2022-01-01'
 
 
-# We can do this globally here because it's not running on the server.
-db_nm = dbc.setup_connection(dbc.USER_DB)
-
-
 def gen_new_user_email():
     """
     We will generate a valid, random email address.
@@ -142,7 +138,8 @@ def test_update_pw(a_user):
     Rather than try to sort through all the encryption,
     we'll just make sure their rest token is blanked out.
     """
-    dbc.update_fld(db_nm, usr.USER_COLLECT, {usr.EMAIL: A_USERS_EMAIL},
+    dbc.update_fld(dbc.USER_DB,
+                   usr.USER_COLLECT, {usr.EMAIL: A_USERS_EMAIL},
                    usr.PW_RES_TOK, 'some token value')
     usr.update_pw(A_USERS_EMAIL, TEST_SALT, 'ff3d599da14a41add6f74')
     user = usr.fetch_user(A_USERS_EMAIL)

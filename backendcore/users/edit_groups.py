@@ -21,13 +21,11 @@ TEST_EDIT_GROUP = {
 
 
 def fetch_edit_groups() -> list:
-    db_nm = dbc.setup_connection(EDIT_GRP_DB)
-    return dbc.fetch_all(db_nm, EDIT_GRP_COLLECT)
+    return dbc.fetch_all(EDIT_GRP_DB, EDIT_GRP_COLLECT)
 
 
 def fetch_edit_group(name: str) -> dict:
-    db_nm = dbc.setup_connection(EDIT_GRP_DB)
-    return dbc.fetch_one(db_nm, EDIT_GRP_COLLECT,
+    return dbc.fetch_one(EDIT_GRP_DB, EDIT_GRP_COLLECT,
                          filters={NAME: name})
 
 
@@ -57,13 +55,12 @@ themselves.
 
 
 def add_edit_grp(edit_grp_dict):
-    db_nm = dbc.setup_connection(EDIT_GRP_DB)
-    return dbc.insert_doc(db_nm, EDIT_GRP_COLLECT, edit_grp_dict)
+    return dbc.insert_doc(EDIT_GRP_DB, EDIT_GRP_COLLECT, edit_grp_dict)
 
 
 def del_edit_grp(edit_grp_nm):
-    db_nm = dbc.setup_connection(EDIT_GRP_DB)
-    return dbc.del_one(db_nm, EDIT_GRP_COLLECT, {NAME: edit_grp_nm})
+    return dbc.del_one(EDIT_GRP_DB, EDIT_GRP_COLLECT,
+                       {NAME: edit_grp_nm})
 
 
 def main():

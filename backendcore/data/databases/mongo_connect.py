@@ -87,10 +87,6 @@ DUP = "Can't add duplicate"
 client = None
 
 
-def time_str_from_rec(date_rec: dict):
-    return date_rec.get(DATE_KEY)
-
-
 def is_valid_id(rec_id: str):
     return isinstance(rec_id, str) and (len(rec_id) == DB_ID_LEN)
 
@@ -131,7 +127,6 @@ class MongoDB():
     """
     Encaspulates a connection to MongoDB.
     """
-
     def _get_server_settings(self):
         settings = {
             "connectTimeoutMS": 30000,
@@ -193,6 +188,9 @@ class MongoDB():
         rec = to_json(rec)
         rec = _id_handler(rec, no_id)
         return rec
+
+    def time_str_from_rec(self, date_rec: dict):
+        return date_rec.get(DATE_KEY)
 
     def create_id_filter(self, _id: str):
         return {MONGO_ID_NM: ObjectId(_id)}

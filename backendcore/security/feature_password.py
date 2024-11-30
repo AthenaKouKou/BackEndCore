@@ -30,8 +30,7 @@ def fetch_by_password(password: str, user_id: str):
     Fetch a record based upon a unique password.
     """
     print(f'Fetching {password} for {user_id}')
-    db_nm = dbc.setup_connection(FT_PW_DB)
-    return dbc.fetch_one(db_nm, FT_PW_COLLECTION,
+    return dbc.fetch_one(FT_PW_DB, FT_PW_COLLECTION,
                          filters={PSWD: password, USER: user_id})
 
 
@@ -51,8 +50,7 @@ def is_valid_feature(feature):
 
 
 def del_password_by_id(_id: str):
-    db_nm = dbc.setup_connection(FT_PW_DB)
-    return dbc.del_by_id(db_nm, FT_PW_COLLECTION, _id)
+    return dbc.del_by_id(FT_PW_DB, FT_PW_COLLECTION, _id)
 
 
 def add_password(password: str, user: str,
@@ -67,12 +65,14 @@ def add_password(password: str, user: str,
     # through carefully!
     if not is_valid_feature(feature):
         return None
-    db_nm = dbc.setup_connection(FT_PW_DB)
-    return dbc.insert_doc(db_nm, FT_PW_COLLECTION, {PSWD: password, USER: user,
-                                                    CREATE_DATE:
-                                                    tfmt.get_today(),
-                                                    EXPIRE_DATE: None, FEATURE:
-                                                    feature})
+    return dbc.insert_doc(FT_PW_DB,
+                          FT_PW_COLLECTION,
+                          {PSWD: password,
+                           USER: user,
+                           CREATE_DATE:
+                           tfmt.get_today(),
+                           EXPIRE_DATE: None,
+                           FEATURE: feature})
 
 
 def password_exists(password: str, user_id: str):

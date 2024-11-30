@@ -41,9 +41,7 @@ RPT_RECIPS = 'rpt_recipients'
 
 
 def list_users():
-    db_nm = dbc.setup_connection(dbc.USER_DB)
-    users = dbc.fetch_all(db_nm, USER_COLLECT)
-    return users
+    return dbc.read(dbc.USER_DB, USER_COLLECT)
 
 
 def fetch_by_key(user_id: str):
@@ -51,8 +49,7 @@ def fetch_by_key(user_id: str):
     User IDs must be unique in our db, so we can fetch a unique
     record based on just user_id.
     """
-    db_nm = dbc.setup_connection(dbc.USER_DB)
-    return dbc.fetch_one(db_nm, USER_COLLECT,
+    return dbc.fetch_one(dbc.USER_DB, USER_COLLECT,
                          filters={EMAIL: user_id})
 
 
@@ -72,12 +69,11 @@ def create_user(email: str, firstname: str, lastname: str,
     Otherwise, return the new user's id.
     We hash the password here.
     """
-    db_nm = dbc.setup_connection(dbc.USER_DB)
     if exists(email):
         raise ValueError(f'{email=} already exists in userDB')
     else:
         hashed_pw = hash_str_and_salt(passwd, salt)
-        return dbc.insert_doc(db_nm, USER_COLLECT,
+        return dbc.insert_doc(dbc.USER_DB, USER_COLLECT,
                               {EMAIL: email,
                                FIRST_NAME: firstname,
                                LAST_NAME: lastname,
@@ -99,11 +95,10 @@ def delete(user_id: str):
     If the user user_id doesn't exist, raise ValueError.
     Otherwise, return SUCCESS
     """
-    db_nm = dbc.setup_connection(dbc.USER_DB)
     if not exists(user_id):
         raise ValueError(f'{user_id=} is not in the database.')
     else:
-        dbc.del_one(db_nm, USER_COLLECT, {EMAIL: user_id})
+        dbc.delete(dbc.USER_DB, USER_COLLECT, {EMAIL: user_id})
         return SUCCESS
 
 
@@ -143,23 +138,22 @@ def add_login(user_id: str, date=None):
     Records a new login.
     Potentially passing a date is useful for testing.
     """
-    db_nm = dbc.setup_connection(dbc.USER_DB)
     if exists(user_id):
         print(f'adding login for {user_id=}')
         if date is None:
             date = tfmt.get_today()
-        dbc.append_to_list(db_nm, LOGIN_COLLECT, EMAIL, user_id, LOGINS, date)
+        dbc.append_to_list(dbc.USER_DB, LOGIN_COLLECT, EMAIL,
+                           user_id, LOGINS, date)
 
 
 def fetch_logins(user_id: str):
     """
     Fetches all logins for a user as a list.
     """
-    db_nm = dbc.setup_connection(dbc.USER_DB)
     print('Calling fetch_logins')
     if exists(user_id):
-        return dbc.fetch_one(db_nm, LOGIN_COLLECT,
-                             filters={EMAIL: user_id})
+        return dbc.read_one(dbc.USER_DB, LOGIN_COLLECT,
+                            filters={EMAIL: user_id})
 
 
 def get_last_login(user_id):
@@ -178,7 +172,6 @@ def add_rpt_recip(user_id: str, rec_email: str):
     Of course the `else` clause isn't needed...
     but it makes the code clearer.
     """
-    db_nm = dbc.setup_connection(dbc.USER_DB)
     if not isinstance(rec_email, str):
         raise TypeError(f'Recipient email must be a str; {rec_email=}')
     if not vld.is_valid_email(rec_email):
@@ -188,7 +181,7 @@ def add_rpt_recip(user_id: str, rec_email: str):
         if RPT_RECIPS not in user:
             user[RPT_RECIPS] = []
         user[RPT_RECIPS].append(rec_email)
-        dbc.update_fld(db_nm, USER_COLLECT, {EMAIL: user_id},
+        dbc.update_fld(dbc.USER_DB, USER_COLLECT, {EMAIL: user_id},
                        RPT_RECIPS, user[RPT_RECIPS])
         return user[RPT_RECIPS]
     else:
@@ -203,11 +196,11 @@ def replace_rpt_recips(user_id: str, recips: list):
     Of course the `else` clause isn't needed...
     but it makes the code clearer.
     """
-    db_nm = dbc.setup_connection(dbc.USER_DB)
     if not isinstance(recips, list):
         raise TypeError(f'Recipients must be a list: {recips=}')
     if exists(user_id):
-        ret = dbc.update_fld(db_nm, USER_COLLECT, {EMAIL: user_id},
+        ret = dbc.update_fld(dbc.USER_DB, USER_COLLECT,
+                             {EMAIL: user_id},
                              RPT_RECIPS, recips)
         return ret
     else:
@@ -231,11 +224,11 @@ def update_pw_reset_token(user_id: str, salt: str, hashed_token: str):
     """
     Updates password resets for a user_id.
     """
-    db_nm = dbc.setup_connection(dbc.USER_DB)
-    return dbc.update_doc(db_nm, USER_COLLECT, {EMAIL: user_id},
-                          {PW_RES_SALT: salt,
-                           PW_RES_TOK: hashed_token,
-                           PW_RES_TOK_ISS_TIME: tfmt.now()})
+    return dbc.update(dbc.USER_DB, USER_COLLECT,
+                      {EMAIL: user_id},
+                      {PW_RES_SALT: salt,
+                       PW_RES_TOK: hashed_token,
+                       PW_RES_TOK_ISS_TIME: tfmt.now()})
 
 
 def update_pw(user_id, salt, hashed_pw):
@@ -244,13 +237,14 @@ def update_pw(user_id, salt, hashed_pw):
     and then blanks out the reset salt/token/issue_time,
     so that if they need to reset again, they must get a new token.
     """
-    db_nm = dbc.setup_connection(dbc.USER_DB)
-    return dbc.update_doc(db_nm, USER_COLLECT, {EMAIL: user_id},
-                          {SALT: salt,
-                          PASSWORD: hashed_pw,
-                          PW_RES_SALT: '',
-                          PW_RES_TOK: '',
-                          PW_RES_TOK_ISS_TIME: ''})
+    return dbc.update(dbc.USER_DB,
+                      USER_COLLECT,
+                      {EMAIL: user_id},
+                      {SALT: salt,
+                       PASSWORD: hashed_pw,
+                       PW_RES_SALT: '',
+                       PW_RES_TOK: '',
+                       PW_RES_TOK_ISS_TIME: ''})
 
 
 def get_auth_key(user_id):
@@ -265,8 +259,8 @@ def fetch_by_auth_key(key: str) -> dict:
     """
     Fetch a user by their authorization key.
     """
-    db_nm = dbc.setup_connection(dbc.USER_DB)
-    return dbc.fetch_one(db_nm, USER_COLLECT, filters={KEY: key})
+    return dbc.fetch_one(dbc.USER_DB, USER_COLLECT,
+                         filters={KEY: key})
 
 
 def fetch_id_by_auth_key(key: str) -> str:
@@ -278,15 +272,15 @@ def fetch_id_by_auth_key(key: str) -> str:
 
 
 def update_auth_key(user_id, auth_key):
-    db_nm = dbc.setup_connection(dbc.USER_DB)
-    return dbc.update_doc(db_nm, USER_COLLECT, {EMAIL: user_id},
-                          {KEY: auth_key, ISSUE_TIME: tfmt.now()})
+    return dbc.update(dbc.USER_DB,
+                      USER_COLLECT,
+                      {EMAIL: user_id},
+                      {KEY: auth_key, ISSUE_TIME: tfmt.now()})
 
 
 def update_pay_prov_sid(user_id, session_id):
-    db_nm = dbc.setup_connection(dbc.USER_DB)
     return dbc.update_fld(
-        db_nm,
+        dbc.USER_DB,
         USER_COLLECT,
         {EMAIL: user_id},
         PAY_PROV_SID,
@@ -296,9 +290,8 @@ def update_pay_prov_sid(user_id, session_id):
 
 def clear_pay_prov_sid(sid):
     assert isinstance(sid, str)
-    db_nm = dbc.setup_connection(dbc.USER_DB)
     return dbc.update_fld(
-        db_nm,
+        dbc.USER_DB,
         USER_COLLECT,
         {PAY_PROV_SID: sid},
         PAY_PROV_SID,
@@ -310,9 +303,8 @@ def update_pay_prov_user_id(sid: str, pay_prov_user_id: str):
     """
     Identifies a user by his session id and sets his payment provider id.
     """
-    db_nm = dbc.setup_connection(dbc.USER_DB)
     return dbc.update_fld(
-        db_nm,
+        dbc.USER_DB,
         USER_COLLECT,
         {PAY_PROV_SID: sid},
         PAY_PROV_USER_ID,
@@ -343,7 +335,6 @@ def create_test_user():
 
 
 def create_test_user_with_pay_prov_sid(sid=TEST_PAY_PROV_SID):
-    db_nm = dbc.setup_connection(dbc.USER_DB)
     create_user(
         TEST_EMAIL,
         'test',
@@ -355,7 +346,7 @@ def create_test_user_with_pay_prov_sid(sid=TEST_PAY_PROV_SID):
         'an org'
     )
     dbc.update_fld(
-        db_nm,
+        dbc.USER_DB,
         USER_COLLECT,
         {EMAIL: TEST_EMAIL},
         PAY_PROV_SID,

@@ -65,12 +65,10 @@ def list_to_dict_multi_key(primary_key, secondary_key, recs: list,
 
 
 def add(db_nm: str, collect_nm: str, rec: dict):
-    db_nm = dbc.setup_connection(db_nm)
     return dbc.insert_doc(db_nm, collect_nm, rec)
 
 
 def delete_by_code(db_nm: str, collect_nm: str, code: str, code_nm=CODE):
-    db_nm = dbc.setup_connection(db_nm)
     return dbc.del_one(db_nm, collect_nm, {code_nm: code})
 
 

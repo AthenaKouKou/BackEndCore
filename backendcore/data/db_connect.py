@@ -72,6 +72,11 @@ def needs_db(fn):
 
 
 @needs_db
+def time_str_from_rec(rec):
+    return database.time_str_from_rec(rec)
+
+
+@needs_db
 def read_one(db_nm, clct_nm, filters={}, no_id=False):
     """
     Fetch one record that meets filters.
