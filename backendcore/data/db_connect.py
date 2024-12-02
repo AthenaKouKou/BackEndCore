@@ -82,6 +82,10 @@ def create_id_filter(_id):
     return database.create_id_filter(_id)
 
 
+def get_db_id_len():
+    return database.get_id_len()
+
+
 @needs_db
 def time_str_from_rec(rec):
     return database.time_str_from_rec(rec)
