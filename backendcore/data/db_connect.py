@@ -89,7 +89,7 @@ def is_valid_id(rec_id):
 
 @needs_db
 def get_db_id_len():
-    return database.get_id_len()
+    return database.get_db_id_len()
 
 
 @needs_db
