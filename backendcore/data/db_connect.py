@@ -78,6 +78,11 @@ def needs_db(fn):
 
 
 @needs_db
+def create_id_filter(_id):
+    return database.create_id_filter(_id)
+
+
+@needs_db
 def time_str_from_rec(rec):
     return database.time_str_from_rec(rec)
 
