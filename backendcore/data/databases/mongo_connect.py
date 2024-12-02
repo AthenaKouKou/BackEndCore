@@ -189,6 +189,10 @@ class MongoDB():
     def get_db_id_len():
         return DB_ID_LEN
 
+    @staticmethod
+    def is_valid_id(rec_id):
+        return is_valid_id(rec_id)
+
     def __init__(self, local_db=True):
         self.client = self._connectDB(local_db=local_db)
 

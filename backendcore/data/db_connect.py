@@ -82,6 +82,12 @@ def create_id_filter(_id):
     return database.create_id_filter(_id)
 
 
+@needs_db
+def is_valid_id(rec_id):
+    return database.is_valid_id(rec_id)
+
+
+@needs_db
 def get_db_id_len():
     return database.get_id_len()
 
