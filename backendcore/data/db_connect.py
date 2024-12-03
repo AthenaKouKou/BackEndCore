@@ -79,11 +79,6 @@ def needs_db(fn):
 
 
 @needs_db
-def create_id_filter(_id):
-    return database.create_id_filter(_id)
-
-
-@needs_db
 def is_valid_id(rec_id):
     return database.is_valid_id(rec_id)
 
@@ -117,11 +112,6 @@ def fetch_one(db_nm, clct_nm, filters={}, no_id=False):
 @needs_db
 def create_id_filter(_id: str):
     return database.create_id_filter(_id)
-
-
-def is_valid_id(rec_id: str, db_type: str = MONGO ):
-    if db_type == MONGO:
-        return mdb.is_valid_id(rec_id)
 
 
 # def create_in_filter(fld_nm: str, values: list):
