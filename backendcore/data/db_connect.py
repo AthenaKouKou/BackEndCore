@@ -79,6 +79,21 @@ def needs_db(fn):
 
 
 @needs_db
+def create_id_filter(_id):
+    return database.create_id_filter(_id)
+
+
+@needs_db
+def is_valid_id(rec_id):
+    return database.is_valid_id(rec_id)
+
+
+@needs_db
+def get_db_id_len():
+    return database.get_db_id_len()
+
+
+@needs_db
 def time_str_from_rec(rec):
     return database.time_str_from_rec(rec)
 
