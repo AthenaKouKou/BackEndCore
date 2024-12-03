@@ -9,6 +9,7 @@ import backendcore.data.databases.mongo_connect as mdb
 # For now, get the following from mongo:
 from backendcore.data.databases.mongo_connect import (  # noqa F401
     API_DB,
+    DB_ID_LEN,
     DOC_LIMIT,
     DSRC_DB,
     GEO_DB,
@@ -101,6 +102,11 @@ def fetch_one(db_nm, clct_nm, filters={}, no_id=False):
 @needs_db
 def create_id_filter(_id: str):
     return database.create_id_filter(_id)
+
+
+def is_valid_id(rec_id: str, db_type: str = MONGO ):
+    if db_type == MONGO:
+        return mdb.is_valid_id(rec_id)
 
 
 # def create_in_filter(fld_nm: str, values: list):
