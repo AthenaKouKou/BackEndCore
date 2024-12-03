@@ -168,7 +168,7 @@ class MongoDB():
                 client = pm.MongoClient()
             else:
                 print("Connecting to Mongo remotely.")
-                settings = self.get_server_settings()
+                settings = self._get_server_settings()
                 # By default connect to our serverless cluster:
                 replicaSetOption = ""
                 if os.environ.get("SHARDED_MONGO", 0):
