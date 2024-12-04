@@ -19,8 +19,7 @@ from backendcore.common.constants import OBJ_ID_NM
 # all of these will eventually be put in the env:
 user_nm = os.getenv('MONGO_USER_NM', 'gcallah')
 # default should be serverless instance!
-cloud_svc = os.getenv('MONGO_HOST', 'koukoumongo1.yud9b.mongodb.net')
-replicaSet = "atlas-e383j2-shard-0"
+cloud_svc = os.getenv('MONGO_HOST', 'datamixmaster.26rvk.mongodb.net')
 passwd = os.environ.get("MONGO_PASSWD", '')
 cloud_mdb = "mongodb+srv"
 db_params = "retryWrites=false&w=majority"
@@ -171,9 +170,6 @@ class MongoDB():
                 settings = self.get_server_settings()
                 # By default connect to our serverless cluster:
                 replicaSetOption = ""
-                if os.environ.get("SHARDED_MONGO", 0):
-                    replicaSetOption = f"&w=majority&replicaSet={replicaSet}"
-                print(replicaSetOption)
                 # do we need a default DB?
                 # some of the below params are just Mongo default:
                 # we don't know what they mean!
