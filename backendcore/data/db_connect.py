@@ -104,7 +104,7 @@ def read_one(db_nm, clct_nm, filters={}, no_id=False):
 
 def fetch_one(db_nm, clct_nm, filters={}, no_id=False):
     """
-    Old name for read_one: eliminate eventually!
+    Deprecated name for read_one: eliminate eventually!
     """
     return read_one(db_nm, clct_nm, filters=filters, no_id=no_id)
 
