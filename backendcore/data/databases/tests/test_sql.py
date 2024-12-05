@@ -1,7 +1,7 @@
 import pytest
 import pymongo
 
-import backendcore.data.databases.sqlite_connect as sqltdb
+import backendcore.data.databases.sql_connect as sql
 
 TEST_DB = 'test_db'
 TEST_COLLECT = 'test_collect'
@@ -25,7 +25,7 @@ BIG_INT = 10**32
 
 @pytest.fixture(scope='module')
 def sqltobj():
-    return sqltdb.SQLite()
+    return sql.SQLite()
 
 
 def test_connectDB(sqltobj):
