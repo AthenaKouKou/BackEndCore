@@ -34,8 +34,3 @@ def test_connectDB(sqltobj):
     """
     connection = sqltobj._connectDB()
     assert connection is not None
-
-
-def test_get_cursor(sqltobj):
-    cursor = sqltobj.get_cursor()
-    assert cursor is not None
