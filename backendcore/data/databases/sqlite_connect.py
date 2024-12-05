@@ -14,7 +14,10 @@ class SQLite():
 
     def _connectDB(self):
         global con
-        db = os.environ.get(SQLITE_DB_NM, 'sqlite_local.db')
+        db = os.environ.get(SQLITE_DB_NM)
+        if db is None:
+            raise ValueError(f'Set {SQLITE_DB_NM} to the \
+                              path of your sqlite db in env.')
         if con is None:
             print('Connecting to local server.')
             con = sqlt.connect(db)
