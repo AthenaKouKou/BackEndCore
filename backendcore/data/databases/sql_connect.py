@@ -3,21 +3,29 @@ import sqlalchemy as sqla
 con = None
 SQLITE_DB_NM = 'SQLITE_DB_NM'
 
+SQLITE_MEM = 'sqllite_mem'
+SQLITE_MEM_STR = 'sqlite+pysqlite:///:memory:'
+
+DB_TABLE = {
+    SQLITE_MEM: SQLITE_MEM_STR,
+}
+
 engine = None
 
 
-class SQLite():
+class SqlDB():
     """
-    Encaspulates a connection to a SQLite Server.
+    Encaspulates a connection to a SQL Server.
     """
-    def __init__(self) -> None:
+    def __init__(self, variant=SQLITE_MEM) -> None:
+        self.variant = variant
         global engine
         if engine is None:
             engine = self._connectDB()
 
     def _connectDB(self):
-        print('Connecting to local, in-memory server.')
-        return sqla.create_engine("sqlite+pysqlite:///:memory:", echo=True)
+        connect_str = DB_TABLE[self.variant]
+        return sqla.create_engine(connect_str, echo=True)
 
     def create(self, record: dict):
         """
@@ -50,8 +58,7 @@ class SQLite():
 
 
 def main():
-    sqlDB = SQLite()
-    print(f'{sqlDB=}')
+    sqlDB = SqlDB()
     sqlDB.create({})
     print(sqlDB.read())
 

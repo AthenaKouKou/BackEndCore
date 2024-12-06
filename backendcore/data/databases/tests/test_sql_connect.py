@@ -25,7 +25,7 @@ BIG_INT = 10**32
 
 @pytest.fixture(scope='module')
 def sqltobj():
-    return sql.SQLite()
+    return sql.SqlDB()
 
 
 def test_connectDB(sqltobj):
