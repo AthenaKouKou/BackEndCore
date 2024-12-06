@@ -5,4 +5,5 @@ pymongo==4.8.0
 python-dateutil
 pytz
 sendgrid
+SQLAlchemy
 validators==0.33.0

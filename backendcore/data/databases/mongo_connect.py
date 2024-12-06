@@ -257,7 +257,7 @@ class MongoDB():
         return create_del_ret(mongo_del_obj)
 
     def read(self, db_nm, clct_nm, sort=NO_SORT,
-             sort_fld=OBJ_ID_NM, no_id=False):
+             sort_fld=OBJ_ID_NM, no_id=False) -> list:
         """
         Returns all docs from a collection.
         `sort` can be DESC, NO_SORT, or ASC.
