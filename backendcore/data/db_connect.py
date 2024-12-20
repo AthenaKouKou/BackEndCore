@@ -5,6 +5,7 @@ import os
 from functools import wraps
 
 import backendcore.data.databases.mongo_connect as mdb
+import backendcore.data.databases.sql_connect as sdb
 
 # For now, get the following from mongo:
 from backendcore.data.databases.mongo_connect import (  # noqa F401
@@ -20,6 +21,10 @@ from backendcore.data.databases.mongo_connect import (  # noqa F401
     USER_DB,
 )
 
+from backendcore.data.databases.sql_connect import (
+    SQLITE_MEM,
+)
+
 REMOTE = "0"
 LOCAL = "1"
 
@@ -33,8 +38,10 @@ FAILURE = -1
 
 # Databases supported:
 MONGO = 'MongoDB'
+SQL = 'SQL'
 MY_SQL = 'MySQL'
 SQLITE = 'SQLite'
+
 
 # DB messages:
 DUP = "Can't add duplicate"
@@ -60,6 +67,9 @@ def get_db():
         local = os.environ.get("LOCAL_MONGO", REMOTE) == LOCAL
         db = mdb.MongoDB(local_db=local)
         print(f'{db=}')
+    if db_type == SQL:
+        sql_variant = os.environ.get('SQL_VARIANT', SQLITE_MEM)
+        db = sdb.SqlDB(variant=sql_variant)
     return db
 
 
