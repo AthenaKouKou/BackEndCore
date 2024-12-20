@@ -33,13 +33,13 @@ class SqlDB():
         Return?
         """
         print(record)
-        with engine.connect() as conn:
+        # 'Begin once' mode - so we don't need to explicitly commit every time
+        with engine.begin() as conn:
             conn.execute(sqla.text("CREATE TABLE some_table (x int, y int)"))
             conn.execute(
                 sqla.text("INSERT INTO some_table (x, y) VALUES (:x, :y)"),
                 [{"x": 1, "y": 1}, {"x": 2, "y": 4}],
             )
-            conn.commit()
         return con
 
     def read(self):
