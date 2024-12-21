@@ -42,6 +42,7 @@ class SqlDB():
             )
 
     def read(self):
+        # result._metadata.keys to get field names.
         recs = []
         with engine.connect() as conn:
             res = conn.execute(sqla.text("SELECT * from some_table"))
