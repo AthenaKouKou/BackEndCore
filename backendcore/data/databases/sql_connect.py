@@ -27,7 +27,7 @@ class SqlDB():
         connect_str = DB_TABLE[self.variant]
         return sqla.create_engine(connect_str, echo=True)
 
-    def create(self, record: dict):
+    def create(self, table: str, record: dict):
         """
         This will also create the table for the moment!
         Return?
@@ -35,12 +35,11 @@ class SqlDB():
         print(record)
         # 'Begin once' mode - so we don't need to explicitly commit every time
         with engine.begin() as conn:
-            conn.execute(sqla.text("CREATE TABLE some_table (x int, y int)"))
+            conn.execute(sqla.text(f"CREATE TABLE {table} (x int, y int)"))
             conn.execute(
-                sqla.text("INSERT INTO some_table (x, y) VALUES (:x, :y)"),
+                sqla.text(f"INSERT INTO {table} (x, y) VALUES (:x, :y)"),
                 [{"x": 1, "y": 1}, {"x": 2, "y": 4}],
             )
-        return con
 
     def read(self):
         recs = []
