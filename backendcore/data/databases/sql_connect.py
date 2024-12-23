@@ -1,7 +1,5 @@
 import sqlalchemy as sqla
 
-from backendcore.common.constants import OBJ_ID_NM
-
 con = None
 SQLITE_DB_NM = 'SQLITE_DB_NM'
 
