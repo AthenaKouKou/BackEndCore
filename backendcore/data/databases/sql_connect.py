@@ -50,20 +50,19 @@ class SqlDB():
 
     # def read(self, db_nm, clct_nm, sort=NO_SORT,
     #          sort_fld=OBJ_ID_NM, no_id=False):
-    def read(self):
+    def read(self, clct_nm):
         # result._metadata.keys to get field names.
         fields = []
-        all_docs = {}
+        all_docs = []
         with engine.connect() as conn:
-            res = conn.execute(sqla.text("SELECT * from some_table"))
+            res = conn.execute(sqla.text(f"SELECT * from {clct_nm}"))
             for field in res._metadata.keys:
                 fields.append(field)
             for rec in res:
                 doc = {}
                 for i in range(len(fields)):
                     doc[fields[i]] = rec[i]
-                id = doc[OBJ_ID_NM]
-                all_docs[id] = doc
+                all_docs.append(doc)
         return all_docs
 
     def update(self):
@@ -76,7 +75,7 @@ class SqlDB():
 def main():
     sqlDB = SqlDB()
     sqlDB.create('some_table', {})
-    print(f'recs = {sqlDB.read()}')
+    print(f'recs = {sqlDB.read('some_table')}')
 
 
 if __name__ == '__main__':
