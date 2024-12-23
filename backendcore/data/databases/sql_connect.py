@@ -39,9 +39,12 @@ class SqlDB():
         print(record)
         # 'Begin once' mode - so we don't need to explicitly commit every time
         with engine.begin() as conn:
-            conn.execute(sqla.text(f"CREATE TABLE {table} (_id int, x int, y int)"))
+            conn.execute(sqla.text(
+                f"CREATE TABLE {table} (_id int, x int, y int)")
+                )
             conn.execute(
-                sqla.text(f"INSERT INTO {table} (_id, x, y) VALUES (:_id, :x, :y)"),
+                sqla.text(f"INSERT INTO {table} \
+                          (_id, x, y) VALUES (:_id, :x, :y)"),
                 [{"_id": 0, "x": 1, "y": 1}, {"_id": 1, "x": 2, "y": 4}],
             )
 
@@ -49,7 +52,6 @@ class SqlDB():
     #          sort_fld=OBJ_ID_NM, no_id=False):
     def read(self):
         # result._metadata.keys to get field names.
-        recs = []
         fields = []
         all_docs = {}
         with engine.connect() as conn:
@@ -75,6 +77,7 @@ def main():
     sqlDB = SqlDB()
     sqlDB.create('some_table', {})
     print(f'recs = {sqlDB.read()}')
+
 
 if __name__ == '__main__':
     main()
