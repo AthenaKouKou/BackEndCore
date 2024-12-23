@@ -34,3 +34,17 @@ def test_connectDB(sqltobj):
     """
     connection = sqltobj._connectDB()
     assert connection is not None
+
+
+def test_create(sqltobj):
+    connection = sqltobj._connectDB()
+    res = sqltobj.create(TEST_COLLECT, {})
+    assert res is not None
+
+
+def test_read(sqltobj):
+    connection = sqltobj._connectDB()
+    # sqltobj.create(TEST_COLLECT, {})
+    res = sqltobj.read(TEST_COLLECT)
+    assert res is not None
+    assert len(res) > 0
