@@ -15,5 +15,6 @@ setup(
         'python-dateutil',
         'pytz',
         'validators==0.33.0',
+        'SQLAlchemy',
     ],
 )
