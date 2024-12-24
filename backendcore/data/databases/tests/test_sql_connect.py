@@ -28,6 +28,10 @@ def sqltobj():
     return sql.SqlDB()
 
 
+def test_main():
+    assert sql.main() == 0
+
+
 def test_connectDB(sqltobj):
     """
     We should be able to connect to our DB!

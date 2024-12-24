@@ -86,7 +86,8 @@ class SqlDB():
 def main():
     sqlDB = SqlDB()
     print(sqlDB.create('some_table', {}))
-    print(f'recs = {sqlDB.read('some_table')}')
+    print(f'recs = {sqlDB.read("some_table")}')
+    return 0
 
 
 if __name__ == '__main__':
