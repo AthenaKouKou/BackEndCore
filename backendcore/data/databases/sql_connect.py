@@ -32,7 +32,7 @@ class SqlDB():
     def _connectDB(self):
         connect_str = DB_TABLE[self.variant]
         return sqla.create_engine(connect_str, echo=True)
-    
+
     def _get_metadata(self):
         return self.mdata
 
@@ -48,6 +48,7 @@ class SqlDB():
         self.mdata.create_all(engine)
         return new_table
 
+    # def create(self, db_nm: str, clct_nm: str, doc: dict, with_date=False):
     def create(self, table: str, record: dict):
         """
         This will also create the table for the moment!
@@ -59,6 +60,7 @@ class SqlDB():
             ('y', sqla.Integer),
         ]
         new_table = self.create_table(table, table_cols)
+        ic(new_table)
         # 'Begin once' mode - so we don't need to explicitly commit every time
         with engine.begin() as conn:
             res = conn.execute(
