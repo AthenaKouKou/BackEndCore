@@ -22,6 +22,11 @@ BAD_VAL = "Scooby-dooby-doo!"
 
 BIG_INT = 10**32
 
+TABLE_COLS = [
+            ('x', sql.Integer),
+            ('y', sql.Integer),
+        ]
+
 
 @pytest.fixture(scope='module')
 def sqltobj():
@@ -39,10 +44,10 @@ def test_connectDB(sqltobj):
     connection = sqltobj._connectDB()
     assert connection is not None
 
-
 def test_create(sqltobj):
     connection = sqltobj._connectDB()
-    res = sqltobj.create(TEST_COLLECT, {})
+    new_table = sqltobj.create_table(TEST_COLLECT, TABLE_COLS)
+    res = sqltobj.create(TEST_DB, new_table, {})
     assert res is not None
 
 

@@ -1,4 +1,5 @@
 import sqlalchemy as sqla
+from sqlalchemy import Integer
 from icecream import ic
 
 from backendcore.common.constants import OBJ_ID_NM
@@ -51,6 +52,8 @@ class SqlDB():
     def create(self, db_nm: str, clct_nm: str, doc: dict, with_date=False):
         """
         Enter a document or set of documents into a table.
+        Right now takes the actual Table in clct_nm,
+        I need to write a get_collect so it can take a string.
         """
         ic(db_nm)
         # 'Begin once' mode - so we don't need to explicitly commit every time
@@ -97,22 +100,22 @@ class SqlDB():
 
 def main():
     sqlDB = SqlDB()
-    
+
     table_cols = [
-            ('x', sqla.Integer),
-            ('y', sqla.Integer),
+            ('x', Integer),
+            ('y', Integer),
         ]
     collect = 'some_collection'
     new_table = sqlDB.create_table(collect, table_cols)
     ic(new_table)
-    
+
     doc = [
         {"_id": 0, "x": 1, "y": 1},
         {"_id": 1, "x": 2, "y": 4},
         ]
     ic(sqlDB.create('some_db', new_table, doc))
     ic(sqlDB.read(collect))
-    
+
     return 0
 
 
