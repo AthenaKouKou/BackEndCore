@@ -48,26 +48,14 @@ class SqlDB():
         self.mdata.create_all(engine)
         return new_table
 
-    # def create(self, db_nm: str, clct_nm: str, doc: dict, with_date=False):
-    def create(self, table: str, record: dict):
+    def create(self, db_nm: str, clct_nm: str, doc: dict, with_date=False):
         """
-        This will also create the table for the moment!
-        Return?
+        Enter a document or set of documents into a table.
         """
-        print(record)
-        table_cols = [
-            ('x', sqla.Integer),
-            ('y', sqla.Integer),
-        ]
-        new_table = self.create_table(table, table_cols)
-        ic(new_table)
+        ic(db_nm)
         # 'Begin once' mode - so we don't need to explicitly commit every time
         with engine.begin() as conn:
-            res = conn.execute(
-                sqla.text(f"INSERT INTO {table} \
-                          (_id, x, y) VALUES (:_id, :x, :y)"),
-                [{"_id": 0, "x": 1, "y": 1}, {"_id": 1, "x": 2, "y": 4}],
-            )
+            res = conn.execute(sqla.insert(clct_nm), doc)
             return res
 
     def _read_recs_to_objs(self, res):
@@ -109,8 +97,22 @@ class SqlDB():
 
 def main():
     sqlDB = SqlDB()
-    print(sqlDB.create('some_table', {}))
-    print(f'recs = {sqlDB.read("some_table")}')
+    
+    table_cols = [
+            ('x', sqla.Integer),
+            ('y', sqla.Integer),
+        ]
+    collect = 'some_collection'
+    new_table = sqlDB.create_table(collect, table_cols)
+    ic(new_table)
+    
+    doc = [
+        {"_id": 0, "x": 1, "y": 1},
+        {"_id": 1, "x": 2, "y": 4},
+        ]
+    ic(sqlDB.create('some_db', new_table, doc))
+    ic(sqlDB.read(collect))
+    
     return 0
 
 
