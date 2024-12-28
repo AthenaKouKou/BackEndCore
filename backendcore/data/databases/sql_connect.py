@@ -49,16 +49,19 @@ class SqlDB():
         self.mdata.create_all(engine)
         return new_table
 
+    # def get_collect(self, db_nm: str, clct_nm: str):
+    def get_collect(self, clct_nm: str):
+        return self.mdata.tables.get(clct_nm)
+
     def create(self, db_nm: str, clct_nm: str, doc: dict, with_date=False):
         """
         Enter a document or set of documents into a table.
-        Right now takes the actual Table in clct_nm,
-        I need to write a get_collect so it can take a string.
         """
-        ic(db_nm)
+        ic('Unused db_nm:', db_nm)
+        collect = self.get_collect(clct_nm)
         # 'Begin once' mode - so we don't need to explicitly commit every time
         with engine.begin() as conn:
-            res = conn.execute(sqla.insert(clct_nm), doc)
+            res = conn.execute(sqla.insert(collect), doc)
             return res
 
     def _read_recs_to_objs(self, res):
@@ -113,7 +116,7 @@ def main():
         {"_id": 0, "x": 1, "y": 1},
         {"_id": 1, "x": 2, "y": 4},
         ]
-    ic(sqlDB.create('some_db', new_table, doc))
+    ic(sqlDB.create('some_db', collect, doc))
     ic(sqlDB.read(collect))
 
     return 0

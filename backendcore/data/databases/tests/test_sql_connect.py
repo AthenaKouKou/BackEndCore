@@ -44,16 +44,23 @@ def test_connectDB(sqltobj):
     connection = sqltobj._connectDB()
     assert connection is not None
 
-def test_create(sqltobj):
-    connection = sqltobj._connectDB()
+
+def test_create_table(sqltobj):
     new_table = sqltobj.create_table(TEST_COLLECT, TABLE_COLS)
-    res = sqltobj.create(TEST_DB, new_table, {})
+    assert new_table is not None
+
+
+def test_create(sqltobj):
+    res = sqltobj.create(TEST_DB, TEST_COLLECT, {})
     assert res is not None
 
 
 def test_read(sqltobj):
-    connection = sqltobj._connectDB()
-    # sqltobj.create(TEST_COLLECT, {})
     res = sqltobj.read(TEST_COLLECT)
     assert res is not None
     assert len(res) > 0
+
+
+def test_get_collect(sqltobj):
+    res = sqltobj.get_collect(TEST_COLLECT)
+    assert res is not None
