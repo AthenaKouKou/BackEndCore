@@ -17,6 +17,8 @@ DB_TABLE = {
 engine = None
 
 NO_SORT = 0
+DESC = -1
+ASC = 1
 
 
 class SqlDB():
@@ -58,6 +60,8 @@ class SqlDB():
         Enter a document or set of documents into a table.
         """
         ic('Unused db_nm:', db_nm)
+        if with_date:
+            print('with_date format is not supported at present time')
         collect = self.get_collect(clct_nm)
         # 'Begin once' mode - so we don't need to explicitly commit every time
         with engine.begin() as conn:
@@ -79,18 +83,27 @@ class SqlDB():
                 doc[fields[i]] = rec[i]
             all_docs.append(doc)
         return all_docs
+    
+    def _text_wrap(self, name):
+        return sqla.text(f"\'{name}\'")
+    
+    def _asmbl_sort_slct(self, slct, sort=ASC, sort_fld=OBJ_ID_NM):
+        if sort == ASC:
+            return slct.order_by(self._text_wrap(sort_fld)).asc()
+        if sort == DESC:
+            return slct.order_by(self._text_wrap(sort_fld)).desc()
 
-    # def read(self, db_nm, clct_nm, sort=NO_SORT,
-    #          sort_fld=OBJ_ID_NM, no_id=False):
-    def read(self, clct_nm):
+    def read(self, db_nm, clct_nm,
+             sort=NO_SORT, sort_fld=OBJ_ID_NM, no_id=False):
         """
         Returns all docs from a collection.
         `sort` can be DESC, NO_SORT, or ASC.
         """
-        # ic(db_nm, sort, sort_fld, no_id)
+        ic(db_nm, sort, sort_fld, no_id)
         all_docs = []
+        collect = self.get_collect(clct_nm)
         with engine.connect() as conn:
-            res = conn.execute(sqla.text(f"SELECT * from {clct_nm}"))
+            res = conn.execute(sqla.select(collect))
             all_docs = self._read_recs_to_objs(res)
         return all_docs
 
@@ -108,6 +121,7 @@ def main():
             ('x', Integer),
             ('y', Integer),
         ]
+    db = 'some_db'
     collect = 'some_collection'
     new_table = sqlDB.create_table(collect, table_cols)
     ic(new_table)
@@ -116,8 +130,8 @@ def main():
         {"_id": 0, "x": 1, "y": 1},
         {"_id": 1, "x": 2, "y": 4},
         ]
-    ic(sqlDB.create('some_db', collect, doc))
-    ic(sqlDB.read(collect))
+    ic(sqlDB.create(db, collect, doc))
+    ic(sqlDB.read(db, collect))
 
     return 0
 

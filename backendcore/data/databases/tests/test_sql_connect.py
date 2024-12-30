@@ -56,7 +56,7 @@ def test_create(sqltobj):
 
 
 def test_read(sqltobj):
-    res = sqltobj.read(TEST_COLLECT)
+    res = sqltobj.read(TEST_DB, TEST_COLLECT)
     assert res is not None
     assert len(res) > 0
 
