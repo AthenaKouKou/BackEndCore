@@ -83,10 +83,10 @@ class SqlDB():
                 doc[fields[i]] = rec[i]
             all_docs.append(doc)
         return all_docs
-    
+
     def _text_wrap(self, name):
         return sqla.text(f"\'{name}\'")
-    
+
     def _asmbl_sort_slct(self, slct, sort=ASC, sort_fld=OBJ_ID_NM):
         if sort == ASC:
             return slct.order_by(self._text_wrap(sort_fld)).asc()
