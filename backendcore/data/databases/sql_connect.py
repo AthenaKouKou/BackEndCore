@@ -20,6 +20,25 @@ NO_SORT = 0
 DESC = -1
 ASC = 1
 
+_type_py2sql_dict = {
+ int: sqla.sql.sqltypes.BigInteger,
+ str: sqla.sql.sqltypes.Unicode,
+ float: sqla.sql.sqltypes.Float,
+ bytes: sqla.sql.sqltypes.LargeBinary,
+ bool: sqla.sql.sqltypes.Boolean,
+ list: sqla.sql.sqltypes.ARRAY,
+ dict: sqla.sql.sqltypes.JSON
+}
+
+def _type_py2sql(pytype):
+    '''Return the closest sql type for a given python type'''
+    if pytype in _type_py2sql_dict:
+        return _type_py2sql_dict[pytype]
+    else:
+        raise NotImplementedError(
+            f"You may add custom `sqltype` to ` \
+            {str(pytype)} \
+            ` assignment in `_type_py2sql_dict`.")
 
 class SqlDB():
     """
@@ -57,8 +76,22 @@ class SqlDB():
 
     def get_field(self, collect, col_nm: str):
         return collect.c.get(col_nm)
+    
+    def _create_clct_from_doc(self, clct_nm: str, doc: dict):
+        """
+        Creates a new table where each field is the datatype
+        of that field in the supplied document.
+        """
+        if type(doc) == list:
+            doc = doc.pop()
+        columns = []
+        for column in doc:
+            tp = _type_py2sql(type(doc[column]))
+            columns.append((column, tp))
+        res = self.create_table(clct_nm, columns)
+        return self.get_collect(clct_nm)
 
-    def create(self, db_nm: str, clct_nm: str, doc: dict, with_date=False):
+    def create(self, db_nm: str, clct_nm: str, doc, with_date=False):
         """
         Enter a document or set of documents into a table.
         """
@@ -66,7 +99,9 @@ class SqlDB():
         if with_date:
             print('with_date format is not supported at present time')
         collect = self.get_collect(clct_nm)
-        # 'Begin once' mode - so we don't need to explicitly commit every time
+        # If collection doesn't exist, create it based on doc
+        if not collect:
+            collect = self._create_clct_from_doc(clct_nm, doc)
         with engine.begin() as conn:
             res = conn.execute(sqla.insert(collect), doc)
             return res
@@ -112,6 +147,16 @@ class SqlDB():
             res = conn.execute(stmt)
             all_docs = self._read_recs_to_objs(res)
         return all_docs
+
+    # def select(self, db_nm, clct_nm, filters={}, sort=NO_SORT, sort_fld='_id',
+    #         proj=NO_PROJ, limit=DOC_LIMIT, no_id=False, exclude_flds=None):
+    def select(self, db_nm, clct_nm, filters={}, sort=NO_SORT, sort_fld='_id',
+            proj=None, limit=None, no_id=False, exclude_flds=None):
+        """
+        Select records from a collection matching filters.
+        """
+        ic(proj, limit, no_id, exclude_flds)
+        return self.read(db_nm, clct_nm, sort=sort, sort_fld=sort_fld )
 
     def update(self):
         pass
