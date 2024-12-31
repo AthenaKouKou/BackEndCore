@@ -55,6 +55,9 @@ class SqlDB():
     def get_collect(self, clct_nm: str):
         return self.mdata.tables.get(clct_nm)
 
+    def get_field(self, collect, col_nm: str):
+        return collect.c.get(col_nm)
+
     def create(self, db_nm: str, clct_nm: str, doc: dict, with_date=False):
         """
         Enter a document or set of documents into a table.
@@ -87,11 +90,14 @@ class SqlDB():
     def _text_wrap(self, name):
         return sqla.text(f"\'{name}\'")
 
-    def _asmbl_sort_slct(self, slct, sort=ASC, sort_fld=OBJ_ID_NM):
+    def _asmbl_sort_slct(self, clct_nm, sort=ASC, sort_fld=OBJ_ID_NM):
+        collect = self.get_collect(clct_nm)
+        stmt = sqla.select(collect)
         if sort == ASC:
-            return slct.order_by(self._text_wrap(sort_fld)).asc()
+            return stmt.order_by(self.get_field(collect, sort_fld).asc())
         if sort == DESC:
-            return slct.order_by(self._text_wrap(sort_fld)).desc()
+            return stmt.order_by(self.get_field(collect, sort_fld).desc())
+        return stmt
 
     def read(self, db_nm, clct_nm,
              sort=NO_SORT, sort_fld=OBJ_ID_NM, no_id=False):
@@ -101,9 +107,9 @@ class SqlDB():
         """
         ic(db_nm, sort, sort_fld, no_id)
         all_docs = []
-        collect = self.get_collect(clct_nm)
+        stmt = self._asmbl_sort_slct(clct_nm, sort=sort, sort_fld=sort_fld)
         with engine.connect() as conn:
-            res = conn.execute(sqla.select(collect))
+            res = conn.execute(stmt)
             all_docs = self._read_recs_to_objs(res)
         return all_docs
 
@@ -131,7 +137,7 @@ def main():
         {"_id": 1, "x": 2, "y": 4},
         ]
     ic(sqlDB.create(db, collect, doc))
-    ic(sqlDB.read(db, collect))
+    ic(sqlDB.read(db, collect, sort=DESC))
 
     return 0
 
