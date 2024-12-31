@@ -30,6 +30,7 @@ _type_py2sql_dict = {
  dict: sqla.sql.sqltypes.JSON
 }
 
+
 def _type_py2sql(pytype):
     '''Return the closest sql type for a given python type'''
     if pytype in _type_py2sql_dict:
@@ -39,6 +40,7 @@ def _type_py2sql(pytype):
             f"You may add custom `sqltype` to ` \
             {str(pytype)} \
             ` assignment in `_type_py2sql_dict`.")
+
 
 class SqlDB():
     """
@@ -76,19 +78,19 @@ class SqlDB():
 
     def get_field(self, collect, col_nm: str):
         return collect.c.get(col_nm)
-    
+
     def _create_clct_from_doc(self, clct_nm: str, doc: dict):
         """
         Creates a new table where each field is the datatype
         of that field in the supplied document.
         """
-        if type(doc) == list:
+        if isinstance(doc, list):
             doc = doc.pop()
         columns = []
         for column in doc:
             tp = _type_py2sql(type(doc[column]))
             columns.append((column, tp))
-        res = self.create_table(clct_nm, columns)
+        self.create_table(clct_nm, columns)
         return self.get_collect(clct_nm)
 
     def create(self, db_nm: str, clct_nm: str, doc, with_date=False):
@@ -100,7 +102,7 @@ class SqlDB():
             print('with_date format is not supported at present time')
         collect = self.get_collect(clct_nm)
         # If collection doesn't exist, create it based on doc
-        if not collect:
+        if collect is None:
             collect = self._create_clct_from_doc(clct_nm, doc)
         with engine.begin() as conn:
             res = conn.execute(sqla.insert(collect), doc)
@@ -148,15 +150,16 @@ class SqlDB():
             all_docs = self._read_recs_to_objs(res)
         return all_docs
 
-    # def select(self, db_nm, clct_nm, filters={}, sort=NO_SORT, sort_fld='_id',
-    #         proj=NO_PROJ, limit=DOC_LIMIT, no_id=False, exclude_flds=None):
+    # def select(self, db_nm, clct_nm, filters={}, sort=NO_SORT,
+    #            sort_fld='_id', proj=NO_PROJ, limit=DOC_LIMIT,
+    #            no_id=False, exclude_flds=None):
     def select(self, db_nm, clct_nm, filters={}, sort=NO_SORT, sort_fld='_id',
-            proj=None, limit=None, no_id=False, exclude_flds=None):
+               proj=None, limit=None, no_id=False, exclude_flds=None):
         """
         Select records from a collection matching filters.
         """
         ic(proj, limit, no_id, exclude_flds)
-        return self.read(db_nm, clct_nm, sort=sort, sort_fld=sort_fld )
+        return self.read(db_nm, clct_nm, sort=sort, sort_fld=sort_fld)
 
     def update(self):
         pass
