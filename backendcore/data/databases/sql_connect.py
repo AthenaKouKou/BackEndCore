@@ -19,6 +19,9 @@ engine = None
 NO_SORT = 0
 DESC = -1
 ASC = 1
+NO_PROJ = []
+DOC_LIMIT = 100000
+
 
 _type_py2sql_dict = {
  int: sqla.sql.sqltypes.BigInteger,
@@ -74,7 +77,10 @@ class SqlDB():
 
     # def get_collect(self, db_nm: str, clct_nm: str):
     def get_collect(self, clct_nm: str):
-        return self.mdata.tables.get(clct_nm)
+        clct = self.mdata.tables.get(clct_nm)
+        if clct is None:
+            raise ValueError(f"No such collection: {clct_nm}")
+        return clct
 
     def get_field(self, collect, col_nm: str):
         return collect.c.get(col_nm)
@@ -127,8 +133,7 @@ class SqlDB():
     def _text_wrap(self, name):
         return sqla.text(f"\'{name}\'")
 
-    def _asmbl_sort_slct(self, clct_nm, sort=ASC, sort_fld=OBJ_ID_NM):
-        collect = self.get_collect(clct_nm)
+    def _asmbl_sort_slct(self, collect, sort=ASC, sort_fld=OBJ_ID_NM):
         stmt = sqla.select(collect)
         if sort == ASC:
             return stmt.order_by(self.get_field(collect, sort_fld).asc())
@@ -136,36 +141,58 @@ class SqlDB():
             return stmt.order_by(self.get_field(collect, sort_fld).desc())
         return stmt
 
-    def read(self, db_nm, clct_nm,
+    def read(self, db_nm, clct_nm, filters={},
              sort=NO_SORT, sort_fld=OBJ_ID_NM, no_id=False):
         """
         Returns all docs from a collection.
         `sort` can be DESC, NO_SORT, or ASC.
         """
-        ic(db_nm, sort, sort_fld, no_id)
+        # ic(db_nm, sort, sort_fld, no_id)
         all_docs = []
-        stmt = self._asmbl_sort_slct(clct_nm, sort=sort, sort_fld=sort_fld)
+        collect = self.get_collect(clct_nm)
+        stmt = self._asmbl_sort_slct(collect, sort=sort, sort_fld=sort_fld)
+        stmt = self._filter_to_where(collect, stmt, filters)
         with engine.connect() as conn:
             res = conn.execute(stmt)
             all_docs = self._read_recs_to_objs(res)
         return all_docs
 
-    # def select(self, db_nm, clct_nm, filters={}, sort=NO_SORT,
-    #            sort_fld='_id', proj=NO_PROJ, limit=DOC_LIMIT,
-    #            no_id=False, exclude_flds=None):
-    def select(self, db_nm, clct_nm, filters={}, sort=NO_SORT, sort_fld='_id',
-               proj=None, limit=None, no_id=False, exclude_flds=None):
+    def read_one(self, db_nm, clct_nm, filters={}, no_id=False):
+        ic(db_nm, clct_nm, filters, no_id)
+        return self.read(db_nm, clct_nm, filters=filters,
+                         no_id=no_id)
+
+    def fetch_by_id(self, db_nm, clct_nm, _id: str, no_id=False):
+        ic(db_nm, clct_nm, _id, no_id)
+
+    def _filter_to_where(self, clct, slct, filter={}):
+        """
+        Converts a basic {field: val} filter to a WHERE clause
+        Should add other mongo operators.
+        """
+        if not len(filter.keys()):
+            return slct
+        field = filter.keys()[0]
+        return slct.where(self.get_field(clct, field) ==
+                          filter[field])
+
+    def select(self, db_nm, clct_nm, filters={}, sort=NO_SORT,
+               sort_fld='_id', proj=NO_PROJ, limit=DOC_LIMIT,
+               no_id=False, exclude_flds=None):
         """
         Select records from a collection matching filters.
+        Filters are tricky, need to convert between
+        all mongo filters and sql WHEREs.
         """
         ic(proj, limit, no_id, exclude_flds)
-        return self.read(db_nm, clct_nm, sort=sort, sort_fld=sort_fld)
+        return self.read(db_nm, clct_nm, filters=filters,
+                         sort=sort, sort_fld=sort_fld)
 
-    def update(self):
-        pass
+    def update(self, db_nm, clct_nm, filters, update_dict):
+        ic(db_nm, clct_nm, filters, update_dict)
 
-    def delete(self):
-        pass
+    def delete(self, db_nm, clct_nm, filters={}):
+        ic(db_nm, clct_nm, filters)
 
 
 def main():
