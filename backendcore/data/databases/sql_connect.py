@@ -35,7 +35,7 @@ _type_py2sql_dict = {
 
 
 def _type_py2sql(pytype):
-    '''Return the closest sql type for a given python type'''
+    '''Return the closest sqla type for a given python type'''
     if pytype in _type_py2sql_dict:
         return _type_py2sql_dict[pytype]
     else:
@@ -141,6 +141,17 @@ class SqlDB():
             return stmt.order_by(self.get_field(collect, sort_fld).desc())
         return stmt
 
+    def _filter_to_where(self, clct, slct, filter={}):
+        """
+        Converts a basic {field: val} filter to a WHERE clause
+        Should add other mongo operators.
+        """
+        if not len(filter.keys()):
+            return slct
+        field = list(filter.keys())[0]
+        return slct.where(self.get_field(clct, field) ==
+                          filter[field])
+
     def read(self, db_nm, clct_nm, filters={},
              sort=NO_SORT, sort_fld=OBJ_ID_NM, no_id=False):
         """
@@ -158,23 +169,17 @@ class SqlDB():
         return all_docs
 
     def read_one(self, db_nm, clct_nm, filters={}, no_id=False):
-        ic(db_nm, clct_nm, filters, no_id)
-        return self.read(db_nm, clct_nm, filters=filters,
+        res = self.read(db_nm, clct_nm, filters=filters,
                          no_id=no_id)
+        if len(res):
+            return res.pop()
+        return None
 
     def fetch_by_id(self, db_nm, clct_nm, _id: str, no_id=False):
+        """
+        tbi
+        """
         ic(db_nm, clct_nm, _id, no_id)
-
-    def _filter_to_where(self, clct, slct, filter={}):
-        """
-        Converts a basic {field: val} filter to a WHERE clause
-        Should add other mongo operators.
-        """
-        if not len(filter.keys()):
-            return slct
-        field = filter.keys()[0]
-        return slct.where(self.get_field(clct, field) ==
-                          filter[field])
 
     def select(self, db_nm, clct_nm, filters={}, sort=NO_SORT,
                sort_fld='_id', proj=NO_PROJ, limit=DOC_LIMIT,
@@ -213,7 +218,7 @@ def main():
         ]
     ic(sqlDB.create(db, collect, doc))
     ic(sqlDB.read(db, collect, sort=DESC))
-
+    ic(sqlDB.read_one(db, collect))
     return 0
 
 
