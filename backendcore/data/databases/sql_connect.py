@@ -179,11 +179,11 @@ class SqlDB():
 
     def read_one(self, db_nm, clct_nm, filters={}, no_id=False):
         res = self.read(db_nm, clct_nm, filters=filters,
-                         no_id=no_id)
+                        no_id=no_id)
         if len(res):
             return res.pop()
         return None
-    
+
     def exclude_flds(self, flds, res):
         for fld_nm in flds:
             for rec in res:
@@ -199,7 +199,7 @@ class SqlDB():
         if proj != NO_PROJ or limit != DOC_LIMIT:
             raise NotImplementedError('select() proj, limit params')
         res = self.read(db_nm, clct_nm, filters=filters,
-                         sort=sort, sort_fld=sort_fld)
+                        sort=sort, sort_fld=sort_fld)
         if exclude_flds:
             res = self.exclude_flds(exclude_flds, res)
         return res
