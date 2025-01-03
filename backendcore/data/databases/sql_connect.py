@@ -35,7 +35,7 @@ _type_py2sql_dict = {
 
 
 def _type_py2sql(pytype):
-    '''Return the closest sql type for a given python type'''
+    '''Return the closest sqla type for a given python type'''
     if pytype in _type_py2sql_dict:
         return _type_py2sql_dict[pytype]
     else:
@@ -76,14 +76,22 @@ class SqlDB():
         return new_table
 
     # def get_collect(self, db_nm: str, clct_nm: str):
-    def get_collect(self, clct_nm: str):
+    def get_collect(self, clct_nm: str, doc={}):
         clct = self.mdata.tables.get(clct_nm)
+        # If collection doesn't exist, create it based on doc
         if clct is None:
-            raise ValueError(f"No such collection: {clct_nm}")
+            clct = self._create_clct_from_doc(clct_nm, doc)
         return clct
 
     def get_field(self, collect, col_nm: str):
-        return collect.c.get(col_nm)
+        """
+        Need to create column if it doesn't exist
+        But that requires a migration.
+        """
+        field = collect.c.get(col_nm)
+        if field is None:
+            raise ValueError(f'No such field: {col_nm}')
+        return field
 
     def _create_clct_from_doc(self, clct_nm: str, doc: dict):
         """
@@ -103,13 +111,12 @@ class SqlDB():
         """
         Enter a document or set of documents into a table.
         """
-        ic('Unused db_nm:', db_nm)
+        print('Unused db_nm:', db_nm)
         if with_date:
-            print('with_date format is not supported at present time')
-        collect = self.get_collect(clct_nm)
-        # If collection doesn't exist, create it based on doc
-        if collect is None:
-            collect = self._create_clct_from_doc(clct_nm, doc)
+            raise NotImplementedError(
+                'with_date format is not supported at present time')
+        collect = self.get_collect(clct_nm, doc=doc)
+        ic(collect)
         with engine.begin() as conn:
             res = conn.execute(sqla.insert(collect), doc)
             return res
@@ -141,13 +148,26 @@ class SqlDB():
             return stmt.order_by(self.get_field(collect, sort_fld).desc())
         return stmt
 
+    def _filter_to_where(self, clct, slct, filter={}):
+        """
+        Converts a basic {field: val} filter to a WHERE clause
+        Should add other mongo operators.
+        """
+        if not len(filter.keys()):
+            return slct
+        field = list(filter.keys())[0]
+        stmt = slct.where(self.get_field(clct, field) ==
+                          filter[field])
+        return stmt
+
     def read(self, db_nm, clct_nm, filters={},
              sort=NO_SORT, sort_fld=OBJ_ID_NM, no_id=False):
         """
         Returns all docs from a collection.
         `sort` can be DESC, NO_SORT, or ASC.
         """
-        # ic(db_nm, sort, sort_fld, no_id)
+        if no_id:
+            raise NotImplementedError('read() no_id param')
         all_docs = []
         collect = self.get_collect(clct_nm)
         stmt = self._asmbl_sort_slct(collect, sort=sort, sort_fld=sort_fld)
@@ -158,41 +178,50 @@ class SqlDB():
         return all_docs
 
     def read_one(self, db_nm, clct_nm, filters={}, no_id=False):
-        ic(db_nm, clct_nm, filters, no_id)
-        return self.read(db_nm, clct_nm, filters=filters,
-                         no_id=no_id)
+        res = self.read(db_nm, clct_nm, filters=filters,
+                        no_id=no_id)
+        if len(res):
+            return res.pop()
+        return None
 
-    def fetch_by_id(self, db_nm, clct_nm, _id: str, no_id=False):
-        ic(db_nm, clct_nm, _id, no_id)
-
-    def _filter_to_where(self, clct, slct, filter={}):
-        """
-        Converts a basic {field: val} filter to a WHERE clause
-        Should add other mongo operators.
-        """
-        if not len(filter.keys()):
-            return slct
-        field = filter.keys()[0]
-        return slct.where(self.get_field(clct, field) ==
-                          filter[field])
+    def exclude_flds(self, flds, res):
+        for fld_nm in flds:
+            for rec in res:
+                del rec[fld_nm]
+        return res
 
     def select(self, db_nm, clct_nm, filters={}, sort=NO_SORT,
                sort_fld='_id', proj=NO_PROJ, limit=DOC_LIMIT,
                no_id=False, exclude_flds=None):
         """
         Select records from a collection matching filters.
-        Filters are tricky, need to convert between
-        all mongo filters and sql WHEREs.
         """
-        ic(proj, limit, no_id, exclude_flds)
-        return self.read(db_nm, clct_nm, filters=filters,
-                         sort=sort, sort_fld=sort_fld)
+        if proj != NO_PROJ or limit != DOC_LIMIT:
+            raise NotImplementedError('select() proj, limit params')
+        res = self.read(db_nm, clct_nm, filters=filters,
+                        sort=sort, sort_fld=sort_fld)
+        if exclude_flds:
+            res = self.exclude_flds(exclude_flds, res)
+        return res
+
+    def fetch_by_id(self, db_nm, clct_nm, _id: str, no_id=False):
+        """
+        tbi
+        """
+        raise NotImplementedError(db_nm, clct_nm, _id, no_id)
 
     def update(self, db_nm, clct_nm, filters, update_dict):
-        ic(db_nm, clct_nm, filters, update_dict)
+        """
+        tbi
+        """
+        raise NotImplementedError(db_nm, clct_nm,
+                                  filters, update_dict)
 
     def delete(self, db_nm, clct_nm, filters={}):
-        ic(db_nm, clct_nm, filters)
+        """
+        tbi
+        """
+        raise NotImplementedError(db_nm, clct_nm, filters)
 
 
 def main():
@@ -213,7 +242,7 @@ def main():
         ]
     ic(sqlDB.create(db, collect, doc))
     ic(sqlDB.read(db, collect, sort=DESC))
-
+    ic(sqlDB.read_one(db, collect))
     return 0
 
 
