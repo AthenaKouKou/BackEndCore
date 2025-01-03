@@ -1,5 +1,4 @@
 -r requirements.txt
 flake8
-html5lib
 pytest
 pytest-cov
