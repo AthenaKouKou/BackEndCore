@@ -77,6 +77,12 @@ def test_read_sorted_descending(sqltobj):
     assert res[0][sql.OBJ_ID_NM] >= res[1][sql.OBJ_ID_NM]
 
 
+def test_read_one(sqltobj):
+    res = sqltobj.read(TEST_DB, TEST_COLLECT)
+    assert res is not None
+    assert len(res) == 1
+
+
 def test_get_collect(sqltobj):
     res = sqltobj.get_collect(TEST_COLLECT)
     assert res is not None
