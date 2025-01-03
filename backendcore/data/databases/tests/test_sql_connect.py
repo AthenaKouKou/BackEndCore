@@ -78,9 +78,9 @@ def test_read_sorted_descending(sqltobj):
 
 
 def test_read_one(sqltobj):
-    res = sqltobj.read(TEST_DB, TEST_COLLECT)
+    res = sqltobj.read_one(TEST_DB, TEST_COLLECT)
     assert res is not None
-    assert len(res) == 1
+    assert isinstance(res, dict)
 
 
 def test_get_collect(sqltobj):
