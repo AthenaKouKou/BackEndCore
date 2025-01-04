@@ -21,6 +21,7 @@ DESC = -1
 ASC = 1
 NO_PROJ = []
 DOC_LIMIT = 100000
+INNER_DB_ID = '$oid'
 
 
 _type_py2sql_dict = {
@@ -159,22 +160,37 @@ class SqlDB():
         stmt = slct.where(self.get_field(clct, field) ==
                           filter[field])
         return stmt
-
+    
+    def _id_handler(rec, no_id):
+        if rec:
+            if no_id:
+                del rec[OBJ_ID_NM]
+            # else:
+            #     # eliminate the ID nesting if it's not already a string:
+            #     if not isinstance(rec[OBJ_ID_NM], str):
+            #         rec[OBJ_ID_NM] = rec[OBJ_ID_NM][INNER_DB_ID]
+        return rec
+    
+    def _asmbl_read_stmt(self, clct_nm, filters, sort, sort_fld):
+        collect = self.get_collect(clct_nm)
+        stmt = self._asmbl_sort_slct(collect, sort=sort, sort_fld=sort_fld)
+        stmt = self._filter_to_where(collect, stmt, filters)
+        return stmt
+    
     def read(self, db_nm, clct_nm, filters={},
              sort=NO_SORT, sort_fld=OBJ_ID_NM, no_id=False):
         """
         Returns all docs from a collection.
         `sort` can be DESC, NO_SORT, or ASC.
         """
-        if no_id:
-            raise NotImplementedError('read() no_id param')
         all_docs = []
-        collect = self.get_collect(clct_nm)
-        stmt = self._asmbl_sort_slct(collect, sort=sort, sort_fld=sort_fld)
-        stmt = self._filter_to_where(collect, stmt, filters)
+        stmt = self._asmbl_read_stmt(clct_nm, filters, sort, sort_fld)
         with engine.connect() as conn:
             res = conn.execute(stmt)
             all_docs = self._read_recs_to_objs(res)
+        if no_id:
+            for rec in all_docs:
+                self._id_handler(rec, no_id)
         return all_docs
 
     def read_one(self, db_nm, clct_nm, filters={}, no_id=False):
@@ -196,12 +212,14 @@ class SqlDB():
         """
         Select records from a collection matching filters.
         """
-        if proj != NO_PROJ or limit != DOC_LIMIT:
+        if proj != NO_PROJ:
             raise NotImplementedError('select() proj, limit params')
         res = self.read(db_nm, clct_nm, filters=filters,
                         sort=sort, sort_fld=sort_fld)
         if exclude_flds:
             res = self.exclude_flds(exclude_flds, res)
+        if len(res) > limit:
+            return res[:(limit - 1)]
         return res
 
     def fetch_by_id(self, db_nm, clct_nm, _id: str, no_id=False):
