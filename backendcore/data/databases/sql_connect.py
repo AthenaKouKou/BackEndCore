@@ -117,7 +117,6 @@ class SqlDB():
             raise NotImplementedError(
                 'with_date format is not supported at present time')
         collect = self.get_collect(clct_nm, doc=doc)
-        ic(collect)
         with engine.begin() as conn:
             res = conn.execute(sqla.insert(collect), doc)
             return res
@@ -149,18 +148,18 @@ class SqlDB():
             return stmt.order_by(self.get_field(collect, sort_fld).desc())
         return stmt
 
-    def _filter_to_where(self, clct, slct, filter={}):
+    def _filter_to_where(self, clct, stmt, filter={}):
         """
         Converts a basic {field: val} filter to a WHERE clause
         Should add other mongo operators.
         """
         if not len(filter.keys()):
-            return slct
+            return stmt
         field = list(filter.keys())[0]
-        stmt = slct.where(self.get_field(clct, field) ==
+        stmt = stmt.where(self.get_field(clct, field) ==
                           filter[field])
         return stmt
-    
+
     def _id_handler(rec, no_id):
         if rec:
             if no_id:
@@ -170,13 +169,13 @@ class SqlDB():
             #     if not isinstance(rec[OBJ_ID_NM], str):
             #         rec[OBJ_ID_NM] = rec[OBJ_ID_NM][INNER_DB_ID]
         return rec
-    
+
     def _asmbl_read_stmt(self, clct_nm, filters, sort, sort_fld):
         collect = self.get_collect(clct_nm)
         stmt = self._asmbl_sort_slct(collect, sort=sort, sort_fld=sort_fld)
         stmt = self._filter_to_where(collect, stmt, filters)
         return stmt
-    
+
     def read(self, db_nm, clct_nm, filters={},
              sort=NO_SORT, sort_fld=OBJ_ID_NM, no_id=False):
         """
@@ -237,9 +236,15 @@ class SqlDB():
 
     def delete(self, db_nm, clct_nm, filters={}):
         """
-        tbi
+        Deletes documents matching the filters.
         """
-        raise NotImplementedError(db_nm, clct_nm, filters)
+        collect = self.get_collect(clct_nm)
+        stmt = sqla.delete(collect)
+        stmt = self._filter_to_where(collect, stmt, filters)
+        with engine.begin() as conn:
+            res = conn.execute(stmt)
+            ic(res)
+            return res
 
 
 def main():
