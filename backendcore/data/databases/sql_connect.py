@@ -64,15 +64,31 @@ class SqlDB():
     def _get_metadata(self):
         return self.mdata
 
+    def _get_engine(self):
+        global engine
+        return engine
+
+    def _clear_mdata(self):
+        self.mdata = sqla.MetaData()
+
+    def _clear_table(self, clct_nm):
+        collect = self.get_collect(clct_nm)
+        with engine.begin() as conn:
+            conn.execute(collect.delete())
+
     def create_table(self, table_name, columns=None):
         # Sets up a new table schema and creates it in the DB
         new_table = sqla.Table(
             table_name,
             self.mdata,
             sqla.Column(OBJ_ID_NM, sqla.Integer, primary_key=True),
+            extend_existing=True,
         )
         for column in columns:
-            new_table.append_column(sqla.Column(column[0], column[1]))
+            new_table.append_column(
+                sqla.Column(column[0], column[1]),
+                replace_existing=True,
+            )
         self.mdata.create_all(engine)
         return new_table
 
@@ -81,7 +97,10 @@ class SqlDB():
         clct = self.mdata.tables.get(clct_nm)
         # If collection doesn't exist, create it based on doc
         if clct is None:
+            if doc is None:
+                raise ValueError(f'No such table: {clct_nm}')
             clct = self._create_clct_from_doc(clct_nm, doc)
+            ic('Created table:', clct)
         return clct
 
     def get_field(self, collect, col_nm: str):
@@ -103,6 +122,8 @@ class SqlDB():
             doc = doc.pop()
         columns = []
         for column in doc:
+            if column == OBJ_ID_NM:
+                continue
             tp = _type_py2sql(type(doc[column]))
             columns.append((column, tp))
         self.create_table(clct_nm, columns)
@@ -112,7 +133,8 @@ class SqlDB():
         """
         Enter a document or set of documents into a table.
         """
-        print('Unused db_nm:', db_nm)
+        print('Unused db_nm (create()):', db_nm)
+        ic(doc)
         if with_date:
             raise NotImplementedError(
                 'with_date format is not supported at present time')
@@ -182,6 +204,7 @@ class SqlDB():
         Returns all docs from a collection.
         `sort` can be DESC, NO_SORT, or ASC.
         """
+        print(f'Unused db_nm (read()): {db_nm}')
         all_docs = []
         stmt = self._asmbl_read_stmt(clct_nm, filters, sort, sort_fld)
         with engine.connect() as conn:
@@ -225,7 +248,7 @@ class SqlDB():
         """
         tbi
         """
-        raise NotImplementedError(db_nm, clct_nm, _id, no_id)
+        return self.read_one(db_nm, clct_nm, {OBJ_ID_NM: _id}, no_id)
 
     def update(self, db_nm, clct_nm, filters, update_dict):
         """
@@ -233,6 +256,9 @@ class SqlDB():
         """
         raise NotImplementedError(db_nm, clct_nm,
                                   filters, update_dict)
+        collect = self.get_collect(clct_nm)
+        stmt = sqla.update(collect)
+        stmt = self._filter_to_where(collect, stmt, filters)
 
     def delete(self, db_nm, clct_nm, filters={}):
         """
