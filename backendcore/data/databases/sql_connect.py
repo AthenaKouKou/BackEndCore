@@ -262,12 +262,13 @@ class SqlDB():
         """
         tbi
         """
-        raise NotImplementedError(db_nm, clct_nm,
-                                  filters, update_dict)
         collect = self.get_collect(clct_nm)
         stmt = sqla.update(collect)
         stmt = self._filter_to_where(collect, stmt,
                                      filters, update_dict)
+        with engine.begin() as conn:
+            res = conn.execute(stmt)
+            return res
 
     def delete(self, db_nm, clct_nm, filters={}):
         """
@@ -278,7 +279,6 @@ class SqlDB():
         stmt = self._filter_to_where(collect, stmt, filters)
         with engine.begin() as conn:
             res = conn.execute(stmt)
-            ic(res)
             return res
 
 
