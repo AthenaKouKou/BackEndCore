@@ -118,3 +118,11 @@ def test_read_one(sqltobj, table_with_docs):
 def test_get_collect(sqltobj, empty_table):
     res = sqltobj.get_collect(empty_table.name)
     assert res is not None
+
+
+def test_delete_one(sqltobj, table_with_docs):
+    beforedel = len(sqltobj.read(TEST_DB, table_with_docs.name))
+    res = sqltobj.delete(TEST_DB, table_with_docs.name,
+                         {sql.OBJ_ID_NM: 0})
+    afterdel = len(sqltobj.read(TEST_DB, table_with_docs.name))
+    assert afterdel < beforedel
