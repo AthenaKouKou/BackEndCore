@@ -170,16 +170,24 @@ class SqlDB():
             return stmt.order_by(self.get_field(collect, sort_fld).desc())
         return stmt
 
-    def _filter_to_where(self, clct, stmt, filter={}):
+    def _update_dict_to_vals(self, clct, update_dict):
+        vals = {}
+        for key in update_dict:
+            vals[self.get_field(clct, key)] = update_dict[key]
+        return vals
+
+    def _filter_to_where(self, clct, stmt, filter={}, vals=None):
         """
         Converts a basic {field: val} filter to a WHERE clause
         Should add other mongo operators.
         """
         if not len(filter.keys()):
             return stmt
-        field = list(filter.keys())[0]
-        stmt = stmt.where(self.get_field(clct, field) ==
-                          filter[field])
+        for field in list(filter.keys()):
+            stmt = stmt.where(self.get_field(clct, field) ==
+                              filter[field])
+        if vals is not None:
+            stmt = stmt.values(self._update_dict_to_vals(clct, vals))
         return stmt
 
     def _id_handler(rec, no_id):
@@ -258,7 +266,8 @@ class SqlDB():
                                   filters, update_dict)
         collect = self.get_collect(clct_nm)
         stmt = sqla.update(collect)
-        stmt = self._filter_to_where(collect, stmt, filters)
+        stmt = self._filter_to_where(collect, stmt,
+                                     filters, update_dict)
 
     def delete(self, db_nm, clct_nm, filters={}):
         """
