@@ -281,7 +281,7 @@ class SqlDB():
         with engine.begin() as conn:
             res = conn.execute(stmt)
             return res
-    
+
     def delete_by_id(self, db, clct_nm, id: str):
         """
         Delete one record identified by id.
