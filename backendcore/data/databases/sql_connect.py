@@ -270,6 +270,18 @@ class SqlDB():
             res = conn.execute(stmt)
             return res
 
+    def update_fld(self, db_nm, clct_nm, filters, fld_nm, fld_val):
+        """
+        This should only be used when we just want to update a single
+        field.
+        To update more than one field in a doc, use `update_doc`.
+        """
+        return self.update(db_nm, clct_nm, filters=filters,
+                           update_dict={fld_nm: fld_val})
+
+    def upsert(self):
+        raise NotImplementedError('upsert')
+
     def delete(self, db_nm, clct_nm, filters={}):
         """
         Deletes documents matching the filters.
@@ -289,14 +301,11 @@ class SqlDB():
         """
         return self.delete(db, clct_nm, filters={OBJ_ID_NM: id})
 
-    def update_fld(self):
-        raise NotImplementedError('update_fld')
-
-    def upsert(self):
-        raise NotImplementedError('upsert')
-
-    def delete_many(self):
-        raise NotImplementedError('delete_many')
+    def delete_many(self, db_nm, clct_nm, filters={}):
+        """
+        Delete many records that meet filters.
+        """
+        return self.delete(db_nm, clct_nm, filters=filters)
 
     def add_fld_to_all(self):
         raise NotImplementedError('add_fld_to_all')
