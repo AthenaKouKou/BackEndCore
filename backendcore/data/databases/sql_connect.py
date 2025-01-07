@@ -274,12 +274,20 @@ class SqlDB():
         """
         Deletes documents matching the filters.
         """
+        print('Unused db_nm (delete()):', db_nm)
         collect = self.get_collect(clct_nm)
         stmt = sqla.delete(collect)
         stmt = self._filter_to_where(collect, stmt, filters)
         with engine.begin() as conn:
             res = conn.execute(stmt)
             return res
+    
+    def delete_by_id(self, db, clct_nm, id: str):
+        """
+        Delete one record identified by id.
+        We convert the passed in string to an ID for our user.
+        """
+        return self.delete(db, clct_nm, filters={OBJ_ID_NM: id})
 
 
 def main():
