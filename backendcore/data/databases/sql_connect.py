@@ -289,6 +289,24 @@ class SqlDB():
         """
         return self.delete(db, clct_nm, filters={OBJ_ID_NM: id})
 
+    def update_fld(self):
+        raise NotImplementedError('update_fld')
+
+    def upsert(self):
+        raise NotImplementedError('upsert')
+
+    def delete_many(self):
+        raise NotImplementedError('delete_many')
+
+    def add_fld_to_all(self):
+        raise NotImplementedError('add_fld_to_all')
+
+    def append_to_list(self):
+        raise NotImplementedError('append_to_list')
+
+    def rename(self):
+        raise NotImplementedError('rename')
+
 
 def main():
     sqlDB = SqlDB()
