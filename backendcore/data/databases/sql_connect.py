@@ -253,15 +253,9 @@ class SqlDB():
         return res
 
     def fetch_by_id(self, db_nm, clct_nm, _id: str, no_id=False):
-        """
-        tbi
-        """
         return self.read_one(db_nm, clct_nm, {OBJ_ID_NM: _id}, no_id)
 
     def update(self, db_nm, clct_nm, filters, update_dict):
-        """
-        tbi
-        """
         collect = self.get_collect(clct_nm)
         stmt = sqla.update(collect)
         stmt = self._filter_to_where(collect, stmt,
