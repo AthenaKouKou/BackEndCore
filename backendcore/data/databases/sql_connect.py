@@ -274,9 +274,9 @@ class SqlDB():
                            update_dict={fld_nm: fld_val})
 
     def upsert(self, db_nm, clct_nm, filters, update_dict):
-        raise NotImplementedError('upsert')
-        readres = self.read_one(db_nm, clct_nm, filters=
-                                {OBJ_ID_NM: update_dict[OBJ_ID_NM]})
+        readres = self.read_one(db_nm, clct_nm, filters={
+            OBJ_ID_NM: update_dict[OBJ_ID_NM]
+        })
         if len(readres) == 0:
             return self.create(db_nm, clct_nm, update_dict)
         return self.update(db_nm, clct_nm, filters, update_dict)
