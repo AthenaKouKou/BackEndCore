@@ -274,6 +274,12 @@ class SqlDB():
                            update_dict={fld_nm: fld_val})
 
     def upsert(self, db_nm, clct_nm, filters, update_dict):
+        """
+        Updates a record if it exists, otherwise creates it.
+        Getting it based on read() feels hacky. SQLA has an
+        on_conflict_do_update() but only in the postgres dialect.
+        -Boaz 1/9/25
+        """
         readres = self.read_one(db_nm, clct_nm, filters={
             OBJ_ID_NM: update_dict[OBJ_ID_NM]
         })

@@ -67,9 +67,10 @@ def get_db():
         local = os.environ.get("LOCAL_MONGO", REMOTE) == LOCAL
         db = mdb.MongoDB(local_db=local)
         print(f'{db=}')
-    if db_type == SQL:
-        sql_variant = os.environ.get('SQL_VARIANT', SQLITE_MEM)
-        db = sdb.SqlDB(variant=sql_variant)
+    if db_type == SQL or db_type == SQLITE_MEM:
+        db = sdb.SqlDB(variant=SQLITE_MEM)
+    if db_type == MY_SQL or db_type == SQLITE:
+        db = sdb.SqlDB(variant=db_type)
     return db
 
 
