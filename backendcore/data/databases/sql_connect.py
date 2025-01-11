@@ -316,8 +316,8 @@ class SqlDB():
         ic(f'Unused db_nm (add_fld()): {db_nm}')
         with engine.begin() as conn:
             conn.execute(
-                f'alter table {clct_nm} add column \
-                {fld_nm} {_type_py2sql(type(fld_data))}'
+                sqla.text(f'alter table {clct_nm} add column \
+                {fld_nm} {_type_py2sql(type(fld_data))}')
             )
 
     def add_fld_to_all(self, db_nm, clct_nm, new_fld, value):
