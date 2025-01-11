@@ -312,8 +312,18 @@ class SqlDB():
         """
         return self.delete(db_nm, clct_nm, filters=filters)
 
-    def add_fld_to_all(self):
-        raise NotImplementedError('add_fld_to_all')
+    def add_fld(self, db_nm, clct_nm, fld_nm, fld_data=''):
+        ic(f'Unused db_nm (add_fld()): {db_nm}')
+        with engine.begin() as conn:
+            conn.execute(
+                f'alter table {clct_nm} add column \
+                {fld_nm} {_type_py2sql(type(fld_data))}'
+            )
+
+    def add_fld_to_all(self, db_nm, clct_nm, new_fld, value):
+        self.add_fld(db_nm, clct_nm, new_fld, value)
+        new_dict = {new_fld: value}
+        return self.update(db_nm, clct_nm, update_dict=new_dict)
 
     def append_to_list(self):
         raise NotImplementedError('append_to_list')
