@@ -313,11 +313,17 @@ class SqlDB():
         return self.delete(db_nm, clct_nm, filters=filters)
 
     def add_fld(self, db_nm, clct_nm, fld_nm, fld_data=''):
+        """
+        SQL Alchemy struggles with modifying table structure
+        (as SQL does generally) so I'm using a text alter command.
+        SQLA also offers Alembic for industrial-strength migration
+        but for now this is ok. -Boaz 1/10/25
+        """
         ic(f'Unused db_nm (add_fld()): {db_nm}')
         with engine.begin() as conn:
             conn.execute(
                 sqla.text(f'alter table {clct_nm} add column \
-                {fld_nm} {_type_py2sql(type(fld_data))}')
+                            {fld_nm} {_type_py2sql(type(fld_data))}')
             )
 
     def add_fld_to_all(self, db_nm, clct_nm, new_fld, value):
@@ -328,8 +334,30 @@ class SqlDB():
     def append_to_list(self):
         raise NotImplementedError('append_to_list')
 
-    def rename(self):
-        raise NotImplementedError('rename')
+    def rename(self, db_nm: str, clct_nm: str, nm_map: dict):
+        """
+        Renames specified fields on all documents in a collection.
+
+        Parameters
+        ----------
+        db_nm: str
+            The database name.
+        clct_nm: str
+            The name of the database collection.
+        nm_map: dict
+            A dictionary. The keys are the current field names. Each key maps
+            to the desired field name:
+            {
+                "old_nm1": "new_nm1",
+                "old_nm2": "new_nm2",
+            }
+        """
+        for key in nm_map:
+            with engine.begin() as conn:
+                conn.execute(
+                    sqla.text(f'alter table {clct_nm} change \
+                                {key} {nm_map[key]}')
+                )
 
 
 def main():
