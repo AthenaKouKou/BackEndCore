@@ -331,8 +331,14 @@ class SqlDB():
         new_dict = {new_fld: value}
         return self.update(db_nm, clct_nm, update_dict=new_dict)
 
-    def append_to_list(self):
-        raise NotImplementedError('append_to_list')
+    def append_to_list(self, db_nm, clct_nm, filter_fld_nm, filter_fld_val,
+                       list_nm, new_list_item):
+        filter = {filter_fld_nm: filter_fld_val}
+        doc = self.read_one(db_nm, clct_nm, filter)
+        arr = doc[list_nm]
+        arr.push(new_list_item)
+        return self.update_fld(db_nm, clct_nm, filter,
+                               fld_nm=list_nm, fld_val=arr)
 
     def rename(self, db_nm: str, clct_nm: str, nm_map: dict):
         """
