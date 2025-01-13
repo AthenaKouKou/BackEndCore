@@ -120,6 +120,19 @@ def test_get_collect(sqltobj, empty_table):
     assert res is not None
 
 
+def test_update_one_doc(sqltobj, table_with_docs):
+    id = 1
+    up_dict = {'x': 10, 'y': 100}
+    filter = {sql.OBJ_ID_NM: id}
+    sqltobj.update(TEST_DB, table_with_docs.name,
+                   filters=filter,
+                   update_dict=up_dict)
+    res = sqltobj.read_one(TEST_DB, table_with_docs.name,
+                           filters=filter)
+    assert res['x'] == 10
+    assert res['y'] == 100
+
+
 def test_delete_one(sqltobj, table_with_docs):
     beforedel = len(sqltobj.read(TEST_DB, table_with_docs.name))
     res = sqltobj.delete(TEST_DB, table_with_docs.name,
@@ -127,7 +140,16 @@ def test_delete_one(sqltobj, table_with_docs):
     afterdel = len(sqltobj.read(TEST_DB, table_with_docs.name))
     assert afterdel < beforedel
 
+
 def test_delete_many(sqltobj, table_with_docs):
-    sqltobj.delete(TEST_DB, table_with_docs.name)
+    sqltobj.delete_many(TEST_DB, table_with_docs.name)
     afterdel = len(sqltobj.read(TEST_DB, table_with_docs.name))
     assert afterdel == 0
+
+
+def test_delete_by_id(sqltobj, table_with_docs):
+    id = 1
+    sqltobj.delete_by_id(TEST_DB, table_with_docs.name, id)
+    res = sqltobj.read(TEST_DB, table_with_docs.name,
+                       filters={sql.OBJ_ID_NM: id})
+    assert len(res) == 0

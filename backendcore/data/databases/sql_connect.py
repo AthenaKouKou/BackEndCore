@@ -299,7 +299,7 @@ class SqlDB():
             res = conn.execute(stmt)
             return res
 
-    def delete_by_id(self, db, clct_nm, id: str):
+    def delete_by_id(self, db, clct_nm, id):
         """
         Delete one record identified by id.
         We convert the passed in string to an ID for our user.
