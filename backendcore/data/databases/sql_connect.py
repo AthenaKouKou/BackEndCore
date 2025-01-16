@@ -76,17 +76,25 @@ class SqlDB():
         with engine.begin() as conn:
             conn.execute(collect.delete())
 
-    def create_table(self, table_name, columns=None):
+    def create_table(self, table_name, columns=None,
+                     key_fld=None):
         # Sets up a new table schema and creates it in the DB
         new_table = sqla.Table(
             table_name,
             self.mdata,
-            sqla.Column(OBJ_ID_NM, sqla.Integer, primary_key=True),
             extend_existing=True,
         )
-        for column in columns:
+        if key_fld is None:
             new_table.append_column(
-                sqla.Column(column[0], column[1]),
+                sqla.Column(OBJ_ID_NM, sqla.Integer, primary_key=True),
+                replace_existing=True,
+            )
+        for column in columns:
+            pkey = False
+            if column[0] == key_fld:
+                pkey = True
+            new_table.append_column(
+                sqla.Column(column[0], column[1], primary_key=pkey),
                 replace_existing=True,
             )
         self.mdata.create_all(engine)
