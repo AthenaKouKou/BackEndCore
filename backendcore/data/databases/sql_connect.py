@@ -23,6 +23,11 @@ NO_PROJ = []
 DOC_LIMIT = 100000
 INNER_DB_ID = '$oid'
 
+# SQL doesn't have the db/collection that Mongo has,
+# so functions here will take the db to match
+# and then do nothing with it.
+DB_NAME = 'db'
+
 
 _type_py2sql_dict = {
  int: sqla.sql.sqltypes.BigInteger,
@@ -111,15 +116,21 @@ class SqlDB():
             ic('Created table:', clct)
         return clct
 
-    def get_field(self, collect, col_nm: str):
+    def get_field(self, collect, col_nm: str, create_if_missing=False):
         """
         Need to create column if it doesn't exist
         But that requires a migration.
         """
         field = collect.c.get(col_nm)
-        if field is None:
-            raise ValueError(f'No such field: {col_nm}')
-        return field
+        if field is not None:
+            return field
+        if create_if_missing:
+            self.add_fld(DB_NAME, collect.name, col_nm)
+            field = collect.c.get(col_nm)
+            if field is None:
+                raise ValueError('Field creation failed.')
+            return field
+        raise ValueError(f'No such field: {col_nm}')
 
     def _create_clct_from_doc(self, clct_nm: str, doc: dict):
         """
@@ -172,16 +183,18 @@ class SqlDB():
 
     def _asmbl_sort_slct(self, collect, sort=ASC, sort_fld=OBJ_ID_NM):
         stmt = sqla.select(collect)
+        field = self.get_field(collect, sort_fld, create_if_missing=True)
         if sort == ASC:
-            return stmt.order_by(self.get_field(collect, sort_fld).asc())
+            return stmt.order_by(field.asc())
         if sort == DESC:
-            return stmt.order_by(self.get_field(collect, sort_fld).desc())
+            return stmt.order_by(field.desc())
         return stmt
 
     def _update_dict_to_vals(self, clct, update_dict):
         vals = {}
         for key in update_dict:
-            vals[self.get_field(clct, key)] = update_dict[key]
+            field = self.get_field(clct, key, create_if_missing=True)
+            vals[field] = update_dict[key]
         return vals
 
     def _filter_to_where(self, clct, stmt, filter={}, vals=None):
@@ -191,9 +204,9 @@ class SqlDB():
         """
         if not len(filter.keys()):
             return stmt
-        for field in list(filter.keys()):
-            stmt = stmt.where(self.get_field(clct, field) ==
-                              filter[field])
+        for fld_nm in list(filter.keys()):
+            field = self.get_field(clct, fld_nm, create_if_missing=True)
+            stmt = stmt.where(field == filter[fld_nm])
         if vals is not None:
             stmt = stmt.values(self._update_dict_to_vals(clct, vals))
         return stmt
