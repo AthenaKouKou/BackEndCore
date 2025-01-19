@@ -39,6 +39,11 @@ _type_py2sql_dict = {
  dict: sqla.sql.sqltypes.JSON
 }
 
+_type_py2sqltext_dict = {
+    int: 'BIGINT',
+    str: 'VARCHAR',
+    float: 'FLOAT',
+}
 
 def _type_py2sql(pytype):
     '''Return the closest sqla type for a given python type'''
@@ -49,6 +54,17 @@ def _type_py2sql(pytype):
             f"You may add custom `sqltype` to ` \
             {str(pytype)} \
             ` assignment in `_type_py2sql_dict`.")
+
+
+def _type_py2sqltext(pytype):
+    '''Return the closest textual sql type for a given python type'''
+    if pytype in _type_py2sqltext_dict:
+        return _type_py2sqltext_dict[pytype]
+    else:
+        raise NotImplementedError(
+            f"You may add custom `sqltype` to ` \
+            {str(pytype)} \
+            ` assignment in `_type_py2sqltext_dict`.")
 
 
 class SqlDB():
@@ -343,8 +359,8 @@ class SqlDB():
         ic(f'Unused db_nm (add_fld()): {db_nm}')
         with engine.begin() as conn:
             conn.execute(
-                sqla.text(f'alter table {clct_nm} add column \
-                            {fld_nm} {_type_py2sql(type(fld_data))}')
+                sqla.text(f'alter table {clct_nm} add column ' +
+                          f'{fld_nm} {_type_py2sqltext(type(fld_data))}')
             )
 
     def add_fld_to_all(self, db_nm, clct_nm, new_fld, value):
