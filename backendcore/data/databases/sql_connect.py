@@ -141,8 +141,7 @@ class SqlDB():
         if field is not None:
             return field
         if create_if_missing:
-            self.add_fld(DB_NAME, collect.name, col_nm)
-            field = collect.c.get(col_nm)
+            field = self.add_fld(DB_NAME, collect.name, col_nm)
             if field is None:
                 raise ValueError('Field creation failed.')
             return field
@@ -227,7 +226,7 @@ class SqlDB():
             stmt = stmt.values(self._update_dict_to_vals(clct, vals))
         return stmt
 
-    def _id_handler(rec, no_id):
+    def _id_handler(self, rec, no_id):
         if rec:
             if no_id:
                 del rec[OBJ_ID_NM]
@@ -357,11 +356,17 @@ class SqlDB():
         but for now this is ok. -Boaz 1/10/25
         """
         ic(f'Unused db_nm (add_fld()): {db_nm}')
+        tp = type(fld_data)
         with engine.begin() as conn:
             conn.execute(
                 sqla.text(f'alter table {clct_nm} add column ' +
-                          f'{fld_nm} {_type_py2sqltext(type(fld_data))}')
+                          f'{fld_nm} {_type_py2sqltext(tp)}')
             )
+        collect = self.get_collect(clct_nm)
+        column = sqla.Column(fld_nm, _type_py2sql(tp))
+        collect.append_column(column, replace_existing=True)
+        self.mdata.create_all(engine)
+        return column
 
     def add_fld_to_all(self, db_nm, clct_nm, new_fld, value):
         self.add_fld(db_nm, clct_nm, new_fld, value)
