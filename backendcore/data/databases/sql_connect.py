@@ -45,6 +45,7 @@ _type_py2sqltext_dict = {
     float: 'FLOAT',
 }
 
+
 def _type_py2sql(pytype):
     '''Return the closest sqla type for a given python type'''
     if pytype in _type_py2sql_dict:
