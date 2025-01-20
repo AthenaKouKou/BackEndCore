@@ -1,5 +1,5 @@
 import sqlalchemy as sqla
-from sqlalchemy import Integer
+from sqlalchemy import Integer, desc, asc
 from icecream import ic
 
 from backendcore.common.constants import OBJ_ID_NM
@@ -123,25 +123,27 @@ class SqlDB():
         return new_table
 
     # def get_collect(self, db_nm: str, clct_nm: str):
-    def get_collect(self, clct_nm: str, doc={}):
+    def get_collect(self, clct_nm: str, doc={}, create_if_none=False):
         clct = self.mdata.tables.get(clct_nm)
-        # If collection doesn't exist, create it based on doc
-        if clct is None:
+        if clct is not None:
+            clct = self._add_extra_flds_from_doc(clct, doc)
+            return clct
+        if create_if_none:
             if doc is None:
-                raise ValueError(f'No such table: {clct_nm}')
+                raise ValueError(f'Table creation failed: {clct_nm}')
             clct = self._create_clct_from_doc(clct_nm, doc)
-            ic('Created table:', clct)
-        return clct
+            return clct
+        return None
 
-    def get_field(self, collect, col_nm: str, create_if_missing=False):
+    def get_field(self, collect, col_nm: str, create_if_none=False):
         """
-        Need to create column if it doesn't exist
-        But that requires a migration.
+        Returns a field if it exists, with option to 
+        create it if it doesn't.
         """
         field = collect.c.get(col_nm)
         if field is not None:
             return field
-        if create_if_missing:
+        if create_if_none:
             field = self.add_fld(DB_NAME, collect.name, col_nm)
             if field is None:
                 raise ValueError('Field creation failed.')
@@ -163,53 +165,53 @@ class SqlDB():
             columns.append((column, tp))
         self.create_table(clct_nm, columns)
         return self.get_collect(clct_nm)
+    
+    def _add_extra_flds_from_doc(self, collect, doc: dict):
+        for fld in doc:
+            self.get_field(collect, fld, create_if_none=True)
+        return collect
 
     def create(self, db_nm: str, clct_nm: str, doc, with_date=False):
         """
         Enter a document or set of documents into a table.
         """
         print('Unused db_nm (create()):', db_nm)
-        ic(doc)
         if with_date:
             raise NotImplementedError(
                 'with_date format is not supported at present time')
-        collect = self.get_collect(clct_nm, doc=doc)
+        collect = self.get_collect(clct_nm, doc=doc, create_if_none=True)
         with engine.begin() as conn:
             res = conn.execute(sqla.insert(collect), doc)
-            return res
+        # ic(self.read(db_nm, clct_nm))
+        return res
 
     def _read_recs_to_objs(self, res):
         """
         Transforms results from a SELECT
-        into objects with fields.
+        into an object with fields.
         """
         all_docs = []
-        fields = []
-        for field in res._metadata.keys:
-            fields.append(field)
-        for rec in res:
-            doc = {}
-            for i in range(len(fields)):
-                doc[fields[i]] = rec[i]
-            all_docs.append(doc)
+        for doc in res.mappings().all():
+            all_docs.append(dict(doc))
         return all_docs
 
     def _text_wrap(self, name):
         return sqla.text(f"\'{name}\'")
 
-    def _asmbl_sort_slct(self, collect, sort=ASC, sort_fld=OBJ_ID_NM):
+    def _asmbl_sort_slct(self, collect, sort=NO_SORT, sort_fld=OBJ_ID_NM):
         stmt = sqla.select(collect)
-        field = self.get_field(collect, sort_fld, create_if_missing=True)
+        # ic(stmt.__str__())
+        field = self.get_field(collect, sort_fld, create_if_none=True)
         if sort == ASC:
-            return stmt.order_by(field.asc())
+            return stmt.order_by(asc(field))
         if sort == DESC:
-            return stmt.order_by(field.desc())
+            return stmt.order_by(desc(field))
         return stmt
 
     def _update_dict_to_vals(self, clct, update_dict):
         vals = {}
         for key in update_dict:
-            field = self.get_field(clct, key, create_if_missing=True)
+            field = self.get_field(clct, key, create_if_none=True)
             vals[field] = update_dict[key]
         return vals
 
@@ -221,7 +223,7 @@ class SqlDB():
         if not len(filter.keys()):
             return stmt
         for fld_nm in list(filter.keys()):
-            field = self.get_field(clct, fld_nm, create_if_missing=True)
+            field = self.get_field(clct, fld_nm, create_if_none=True)
             stmt = stmt.where(field == filter[fld_nm])
         if vals is not None:
             stmt = stmt.values(self._update_dict_to_vals(clct, vals))
@@ -229,7 +231,8 @@ class SqlDB():
 
     def _id_handler(self, rec, no_id):
         if rec:
-            if no_id:
+            # if no_id:
+            if rec.get(OBJ_ID_NM):
                 del rec[OBJ_ID_NM]
             # else:
             #     # eliminate the ID nesting if it's not already a string:
@@ -237,8 +240,7 @@ class SqlDB():
             #         rec[OBJ_ID_NM] = rec[OBJ_ID_NM][INNER_DB_ID]
         return rec
 
-    def _asmbl_read_stmt(self, clct_nm, filters, sort, sort_fld):
-        collect = self.get_collect(clct_nm)
+    def _asmbl_read_stmt(self, collect, filters, sort, sort_fld):
         stmt = self._asmbl_sort_slct(collect, sort=sort, sort_fld=sort_fld)
         stmt = self._filter_to_where(collect, stmt, filters)
         return stmt
@@ -251,7 +253,10 @@ class SqlDB():
         """
         print(f'Unused db_nm (read()): {db_nm}')
         all_docs = []
-        stmt = self._asmbl_read_stmt(clct_nm, filters, sort, sort_fld)
+        clct = self.get_collect(clct_nm)
+        if clct is None:
+            return all_docs
+        stmt = self._asmbl_read_stmt(clct, filters, sort, sort_fld)
         with engine.connect() as conn:
             res = conn.execute(stmt)
             all_docs = self._read_recs_to_objs(res)
@@ -294,6 +299,8 @@ class SqlDB():
 
     def update(self, db_nm, clct_nm, filters, update_dict):
         collect = self.get_collect(clct_nm)
+        if collect is None:
+            raise ValueError(f'Cannot update; {clct_nm} does not exist.')
         stmt = sqla.update(collect)
         stmt = self._filter_to_where(collect, stmt,
                                      filters, update_dict)
@@ -330,6 +337,8 @@ class SqlDB():
         """
         print('Unused db_nm (delete()):', db_nm)
         collect = self.get_collect(clct_nm)
+        if collect is None:
+            raise ValueError(f'Cannot delete; {clct_nm} does not exist.')
         stmt = sqla.delete(collect)
         stmt = self._filter_to_where(collect, stmt, filters)
         with engine.begin() as conn:
@@ -356,7 +365,7 @@ class SqlDB():
         SQLA also offers Alembic for industrial-strength migration
         but for now this is ok. -Boaz 1/10/25
         """
-        ic(f'Unused db_nm (add_fld()): {db_nm}')
+        print(f'Unused db_nm (add_fld()): {db_nm}')
         tp = type(fld_data)
         with engine.begin() as conn:
             conn.execute(
