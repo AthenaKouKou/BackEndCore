@@ -126,7 +126,7 @@ class SqlDB():
     def get_collect(self, clct_nm: str, doc={}, create_if_none=False):
         clct = self.mdata.tables.get(clct_nm)
         if clct is not None:
-            clct = self._add_extra_flds_from_doc(clct, doc)
+            # clct = self._add_extra_flds_from_doc(clct, doc)
             return clct
         if create_if_none:
             if doc is None:
@@ -137,7 +137,7 @@ class SqlDB():
 
     def get_field(self, collect, col_nm: str, create_if_none=False):
         """
-        Returns a field if it exists, with option to 
+        Returns a field if it exists, with option to
         create it if it doesn't.
         """
         field = collect.c.get(col_nm)
@@ -165,7 +165,7 @@ class SqlDB():
             columns.append((column, tp))
         self.create_table(clct_nm, columns)
         return self.get_collect(clct_nm)
-    
+
     def _add_extra_flds_from_doc(self, collect, doc: dict):
         for fld in doc:
             self.get_field(collect, fld, create_if_none=True)
