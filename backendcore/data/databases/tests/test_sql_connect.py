@@ -24,8 +24,8 @@ BAD_VAL = "Scooby-dooby-doo!"
 BIG_INT = 10**32
 
 TABLE_COLS = [
-            ('x', sql.Integer),
-            ('y', sql.Integer),
+            ('x', sql.sqla.BigInteger),
+            ('y', sql.sqla.BigInteger),
         ]
 TEST_DOCS = [
         {"_id": 0, "x": 1, "y": 1},

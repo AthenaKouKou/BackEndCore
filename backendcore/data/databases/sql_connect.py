@@ -1,6 +1,8 @@
 import sqlalchemy as sqla
-from sqlalchemy import Integer, desc, asc
+from sqlalchemy import desc, asc
 from icecream import ic
+import time
+import os
 
 import backendcore.data.databases.common as cmn
 
@@ -30,6 +32,7 @@ INNER_DB_ID = '$oid'
 # and then do nothing with it.
 DB_NAME = 'db'
 
+DATE_KEY = '$date'
 
 _type_py2sql_dict = {
  int: sqla.sql.sqltypes.BigInteger,
@@ -38,10 +41,12 @@ _type_py2sql_dict = {
  bytes: sqla.sql.sqltypes.LargeBinary,
  bool: sqla.sql.sqltypes.Boolean,
  dict: sqla.sql.sqltypes.JSON,
- list: sqla.sql.sqltypes.JSON,
+ # Gene confirmed trying to use lists
+ # should raise an exception. - Boaz 1/21/25
+ #  list: sqla.sql.sqltypes.JSON,
  #  list: sqla.types.ARRAY(sqla.String),
  #  "<class 'str'>list": sqla.types.ARRAY(sqla.String),
- #  "<class 'int'>list": sqla.types.ARRAY(sqla.Integer),
+ #  "<class 'int'>list": sqla.types.ARRAY(sqla.BigInteger),
 }
 
 _type_py2sqltext_dict = {
@@ -92,6 +97,7 @@ class SqlDB():
         self.mdata = sqla.MetaData()
         if engine is None:
             engine = self._connectDB()
+        self.id_counter = os.urandom(3)
 
     def _connectDB(self):
         connect_str = DB_TABLE[self.variant]
@@ -112,6 +118,17 @@ class SqlDB():
         with engine.begin() as conn:
             conn.execute(collect.delete())
 
+    def _obj_id(self):
+        timestr = int(time.time()).to_bytes(4, 'big')
+        randbytes = os.urandom(1)
+        ctrstr = self.id_counter
+        self.id_counter = int.from_bytes(ctrstr, 'big') + 1
+        self.id_counter = self.id_counter.to_bytes(3, 'big')
+        id = timestr + randbytes + ctrstr
+        id = int.from_bytes(id, 'big')
+        ic(id)
+        return id
+
     def create_table(self, table_name, columns=None,
                      key_fld=None):
         # Sets up a new table schema and creates it in the DB
@@ -120,16 +137,14 @@ class SqlDB():
             self.mdata,
             extend_existing=True,
         )
-        if key_fld is None:
-            new_table.append_column(
-                sqla.Column(OBJ_ID_NM, sqla.Integer, primary_key=True),
-                replace_existing=True,
-            )
+        new_table.append_column(
+            sqla.Column(OBJ_ID_NM, sqla.BigInteger, primary_key=True),
+            replace_existing=True,
+        )
         for column in columns:
             pkey = False
             if column[0] == key_fld:
                 pkey = True
-            ic(column)
             new_table.append_column(
                 sqla.Column(column[0], column[1], primary_key=pkey),
                 replace_existing=True,
@@ -172,7 +187,6 @@ class SqlDB():
         """
         if isinstance(doc, list):
             doc = doc.pop()
-        ic(doc)
         columns = self._doc_to_cols(doc)
         self.create_table(clct_nm, columns)
         return self.get_collect(clct_nm)
@@ -203,11 +217,24 @@ class SqlDB():
         if with_date:
             raise NotImplementedError(
                 'with_date format is not supported at present time')
-        collect = self.get_collect(clct_nm, doc=doc, create_if_none=True)
+        doc_with_ids = self.add_ids(doc)
+        collect = self.get_collect(clct_nm, doc=doc_with_ids,
+                                   create_if_none=True)
         with engine.begin() as conn:
-            res = conn.execute(sqla.insert(collect), doc)
-        # ic(self.read(db_nm, clct_nm))
-        return res
+            conn.execute(sqla.insert(collect), doc)
+        if isinstance(doc, dict):
+            return doc[OBJ_ID_NM]
+        return doc[0][OBJ_ID_NM]
+
+    def add_ids(self, doc):
+        if isinstance(doc, dict):
+            if doc.get(OBJ_ID_NM) is None:
+                doc[OBJ_ID_NM] = self._obj_id()
+            return doc
+        for row in doc:
+            if row.get(OBJ_ID_NM) is None:
+                row[OBJ_ID_NM] = self._obj_id()
+        return doc
 
     def _read_recs_to_objs(self, res):
         """
@@ -278,7 +305,6 @@ class SqlDB():
         print(f'Unused db_nm (read()): {db_nm}')
         all_docs = []
         clct = self.get_collect(clct_nm)
-        ic(clct)
         if clct is None:
             return all_docs
         stmt = self._asmbl_read_stmt(clct, filters, sort, sort_fld)
@@ -366,6 +392,7 @@ class SqlDB():
             raise ValueError(f'Cannot delete; {clct_nm} does not exist.')
         stmt = sqla.delete(collect)
         stmt = self._filter_to_where(collect, stmt, filters)
+        ic(str(stmt))
         with engine.begin() as conn:
             res = conn.execute(stmt)
         return create_del_ret(res)
@@ -375,6 +402,7 @@ class SqlDB():
         Delete one record identified by id.
         We convert the passed in string to an ID for our user.
         """
+        ic(db, clct_nm, id)
         return self.delete(db, clct_nm, filters={OBJ_ID_NM: id})
 
     def delete_many(self, db_nm, clct_nm, filters={}):
@@ -442,13 +470,18 @@ class SqlDB():
                                 {key} {nm_map[key]}')
                 )
 
+    def time_str_from_rec(self, date_rec: dict):
+        # Not quite sure how this translation works,
+        # but tests pass!
+        return date_rec
+
 
 def main():
     sqlDB = SqlDB()
 
     table_cols = [
-            ('x', Integer),
-            ('y', Integer),
+            ('x', sqla.BigInteger),
+            ('y', sqla.BigInteger),
         ]
     db = 'some_db'
     collect = 'some_collection'
@@ -456,8 +489,8 @@ def main():
     ic(new_table)
 
     doc = [
-        {"_id": 0, "x": 1, "y": 1},
-        {"_id": 1, "x": 2, "y": 4},
+        {"x": 1, "y": 1},
+        {"x": 2, "y": 4},
         ]
     ic(sqlDB.create(db, collect, doc))
     ic(sqlDB.read(db, collect, sort=DESC))
