@@ -37,8 +37,11 @@ _type_py2sql_dict = {
  float: sqla.sql.sqltypes.Float,
  bytes: sqla.sql.sqltypes.LargeBinary,
  bool: sqla.sql.sqltypes.Boolean,
- list: sqla.sql.sqltypes.ARRAY,
- dict: sqla.sql.sqltypes.JSON
+ dict: sqla.sql.sqltypes.JSON,
+ list: sqla.sql.sqltypes.JSON,
+ #  list: sqla.types.ARRAY(sqla.String),
+ #  "<class 'str'>list": sqla.types.ARRAY(sqla.String),
+ #  "<class 'int'>list": sqla.types.ARRAY(sqla.Integer),
 }
 
 _type_py2sqltext_dict = {
@@ -54,9 +57,9 @@ def _type_py2sql(pytype):
         return _type_py2sql_dict[pytype]
     else:
         raise NotImplementedError(
-            f"You may add custom `sqltype` to ` \
-            {str(pytype)} \
-            ` assignment in `_type_py2sql_dict`.")
+            f"You may add custom `sqltype` to \
+            `{pytype}` \
+            assignment in `_type_py2sql_dict`.")
 
 
 def _type_py2sqltext(pytype):
@@ -75,8 +78,8 @@ def create_del_ret(sql_ret):
 
 
 def create_update_ret(sql_ret):
-    return cmn.UpdateReturn(sql_ret.modified_count,
-                            sql_ret.matched_count)
+    return cmn.UpdateReturn(sql_ret.rowcount,
+                            sql_ret.rowcount)
 
 
 class SqlDB():
@@ -126,6 +129,7 @@ class SqlDB():
             pkey = False
             if column[0] == key_fld:
                 pkey = True
+            ic(column)
             new_table.append_column(
                 sqla.Column(column[0], column[1], primary_key=pkey),
                 replace_existing=True,
@@ -168,14 +172,23 @@ class SqlDB():
         """
         if isinstance(doc, list):
             doc = doc.pop()
-        columns = []
-        for column in doc:
-            if column == OBJ_ID_NM:
-                continue
-            tp = _type_py2sql(type(doc[column]))
-            columns.append((column, tp))
+        ic(doc)
+        columns = self._doc_to_cols(doc)
         self.create_table(clct_nm, columns)
         return self.get_collect(clct_nm)
+
+    def _doc_to_cols(self, doc: dict):
+        columns = []
+        for column in doc:
+            if column == OBJ_ID_NM or doc[column] is None:
+                continue
+            pytp = type(doc[column])
+            # Detecting lists; only postgresql allows arrays
+            # if pytp == list and len(doc[column]) > 0:
+            #     pytp = str(type(doc[column][0])) + 'list'
+            tp = _type_py2sql(pytp)
+            columns.append((column, tp))
+        return columns
 
     def _add_extra_flds_from_doc(self, collect, doc: dict):
         for fld in doc:
@@ -265,6 +278,7 @@ class SqlDB():
         print(f'Unused db_nm (read()): {db_nm}')
         all_docs = []
         clct = self.get_collect(clct_nm)
+        ic(clct)
         if clct is None:
             return all_docs
         stmt = self._asmbl_read_stmt(clct, filters, sort, sort_fld)
@@ -317,7 +331,7 @@ class SqlDB():
                                      filters, update_dict)
         with engine.begin() as conn:
             res = conn.execute(stmt)
-            return res
+        return create_update_ret(res)
 
     def update_fld(self, db_nm, clct_nm, filters, fld_nm, fld_val):
         """
