@@ -2,6 +2,8 @@ import sqlalchemy as sqla
 from sqlalchemy import Integer, desc, asc
 from icecream import ic
 
+import backendcore.data.databases.common as cmn
+
 from backendcore.common.constants import OBJ_ID_NM
 
 con = None
@@ -66,6 +68,15 @@ def _type_py2sqltext(pytype):
             f"You may add custom `sqltype` to ` \
             {str(pytype)} \
             ` assignment in `_type_py2sqltext_dict`.")
+
+
+def create_del_ret(sql_ret):
+    return cmn.DeleteReturn(sql_ret.rowcount)
+
+
+def create_update_ret(sql_ret):
+    return cmn.UpdateReturn(sql_ret.modified_count,
+                            sql_ret.matched_count)
 
 
 class SqlDB():
@@ -343,7 +354,7 @@ class SqlDB():
         stmt = self._filter_to_where(collect, stmt, filters)
         with engine.begin() as conn:
             res = conn.execute(stmt)
-            return res
+        return create_del_ret(res)
 
     def delete_by_id(self, db, clct_nm, id):
         """

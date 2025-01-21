@@ -138,18 +138,24 @@ def test_delete_one(sqltobj, table_with_docs):
     res = sqltobj.delete(TEST_DB, table_with_docs.name,
                          {sql.OBJ_ID_NM: 0})
     afterdel = len(sqltobj.read(TEST_DB, table_with_docs.name))
+    assert res.succeeded()
+    assert res.del_count() == 1
     assert afterdel < beforedel
 
 
 def test_delete_many(sqltobj, table_with_docs):
-    sqltobj.delete_many(TEST_DB, table_with_docs.name)
+    res = sqltobj.delete_many(TEST_DB, table_with_docs.name)
     afterdel = len(sqltobj.read(TEST_DB, table_with_docs.name))
+    assert res.succeeded()
+    assert res.del_count() > 0
     assert afterdel == 0
 
 
 def test_delete_by_id(sqltobj, table_with_docs):
     id = 1
-    sqltobj.delete_by_id(TEST_DB, table_with_docs.name, id)
-    res = sqltobj.read(TEST_DB, table_with_docs.name,
+    res = sqltobj.delete_by_id(TEST_DB, table_with_docs.name, id)
+    afterdel = sqltobj.read(TEST_DB, table_with_docs.name,
                        filters={sql.OBJ_ID_NM: id})
-    assert len(res) == 0
+    assert res.succeeded()
+    assert res.del_count() == 1
+    assert len(afterdel) == 0
