@@ -198,8 +198,8 @@ class SqlDB():
                 continue
             pytp = type(doc[column])
             # Detecting lists; only postgresql allows arrays
-            # if pytp == list and len(doc[column]) > 0:
-            #     pytp = str(type(doc[column][0])) + 'list'
+            if pytp == list:
+                raise ValueError("SQL columns can't be arrays.")
             tp = _type_py2sql(pytp)
             columns.append((column, tp))
         return columns
