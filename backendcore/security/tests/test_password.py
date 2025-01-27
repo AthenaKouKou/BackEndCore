@@ -4,6 +4,7 @@ Tests password.py
 """
 from datetime import datetime, timedelta
 from unittest import mock
+import os
 
 import pytest
 
@@ -11,6 +12,8 @@ import backendcore.users.query as uqry
 from backendcore.security.settings import PW_RESET_TOK_TTL
 
 import backendcore.security.password as pwd
+
+LISTS_IN_DB = os.environ.get('LISTS_IN_DB', '1') == '1'
 
 
 @pytest.fixture(scope='function')

@@ -42,6 +42,15 @@ SQL = 'SQL'
 MY_SQL = 'MySQL'
 SQLITE = 'SQLite'
 
+# Testing flags:
+LISTS_IN_DB = 'LISTS_IN_DB'
+LISTS_IN_DB_DICT = {
+    MONGO: '1',
+    SQL: '0',
+    MY_SQL: '0',
+    SQLITE: '0',
+    SQLITE_MEM: '0',
+}
 
 # DB messages:
 DUP = "Can't add duplicate"
@@ -71,6 +80,7 @@ def get_db():
         db = sdb.SqlDB(variant=SQLITE_MEM)
     if db_type == MY_SQL or db_type == SQLITE:
         db = sdb.SqlDB(variant=db_type)
+    os.environ[LISTS_IN_DB] = LISTS_IN_DB_DICT[db_type]
     return db
 
 
