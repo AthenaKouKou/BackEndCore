@@ -31,8 +31,6 @@ def temp_user():
     NO_LISTS_REASON = "DB does not support lists as values"
     if LISTS_IN_DB == '0' or not LISTS_IN_DB:
         pytest.skip(NO_LISTS_REASON)
-    print(f'{LISTS_IN_DB=}')
-    print(f'{os.environ.get('LISTS_IN_DB')=}')
 
     try:
         uqry.delete(uqry.TEST_EMAIL)
