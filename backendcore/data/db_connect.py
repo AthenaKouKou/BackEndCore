@@ -78,8 +78,10 @@ def get_db():
         print(f'{db=}')
     if db_type == SQL or db_type == SQLITE_MEM:
         db = sdb.SqlDB(variant=SQLITE_MEM)
+        print(f'{db=}')
     if db_type == MY_SQL or db_type == SQLITE:
         db = sdb.SqlDB(variant=db_type)
+        print(f'{db=}')
     os.environ[LISTS_IN_DB] = LISTS_IN_DB_DICT[db_type]
     return db
 

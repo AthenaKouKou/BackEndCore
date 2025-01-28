@@ -13,11 +13,16 @@ from backendcore.security.settings import PW_RESET_TOK_TTL
 
 import backendcore.security.password as pwd
 
-LISTS_IN_DB = os.environ.get('LISTS_IN_DB', '1') == '1'
-
 
 @pytest.fixture(scope='function')
 def temp_user():
+    LISTS_IN_DB = os.environ.get('LISTS_IN_DB')
+    NO_LISTS_REASON = "DB does not support lists as values"
+    if LISTS_IN_DB == '0' or not LISTS_IN_DB:
+        pytest.skip(NO_LISTS_REASON)
+    print(f'{LISTS_IN_DB=}')
+    print(f'{os.environ.get('LISTS_IN_DB')=}')
+
     try:
         uqry.delete(uqry.TEST_EMAIL)
     except Exception:
