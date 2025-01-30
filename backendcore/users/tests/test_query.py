@@ -23,7 +23,7 @@ VALID_PASSWD = 'Fl000by!'
 SOME_PAST_DATE = '2020-01-01'
 LAST_LOGIN_DATE = '2022-01-01'
 
-NO_LISTS_REASON = "DB does not support lists as values"
+NO_LISTS_REASON = os.environ.get('NO_LISTS_REASON')
 
 
 def gen_new_user_email():

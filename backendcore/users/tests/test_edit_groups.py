@@ -7,7 +7,7 @@ import backendcore.users.edit_groups as egrp
 @pytest.fixture(scope='function')
 def edit_grp():
     LISTS_IN_DB = os.environ.get('LISTS_IN_DB')
-    NO_LISTS_REASON = "DB does not support lists as values"
+    NO_LISTS_REASON = os.environ.get('NO_LISTS_REASON')
     if LISTS_IN_DB == '0' or not LISTS_IN_DB:
         pytest.skip(NO_LISTS_REASON)
     egrp.add_edit_grp(egrp.TEST_EDIT_GROUP)

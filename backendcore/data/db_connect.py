@@ -44,6 +44,7 @@ SQLITE = 'SQLite'
 
 # Testing flags:
 LISTS_IN_DB = 'LISTS_IN_DB'
+NO_LISTS_REASON = 'NO_LISTS_REASON'
 LISTS_IN_DB_DICT = {
     MONGO: '1',
     SQL: '0',
@@ -83,6 +84,7 @@ def get_db():
         db = sdb.SqlDB(variant=db_type)
         print(f'{db=}')
     os.environ[LISTS_IN_DB] = LISTS_IN_DB_DICT[db_type]
+    os.environ[NO_LISTS_REASON] = "DB does not support lists as values"
     return db
 
 

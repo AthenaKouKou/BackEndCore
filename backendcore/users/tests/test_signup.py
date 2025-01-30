@@ -8,7 +8,7 @@ import backendcore.users.query as uqry
 
 from backendcore.users.signup import signup
 
-NO_LISTS_REASON = "DB does not support lists as values"
+NO_LISTS_REASON = os.environ.get('NO_LISTS_REASON')
 
 def test_signup():
     """
