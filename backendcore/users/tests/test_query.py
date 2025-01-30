@@ -10,6 +10,8 @@ import os
 import backendcore.data.db_connect as dbc
 import backendcore.users.query as usr
 
+from backendcore.data.db_connect import LISTS_IN_DB_DICT
+
 # email for the a_user fixture:
 A_USERS_EMAIL = 'test1729@koukoudata.com'
 GARBAGE_TEST_USER = 'suhdfhjgfh'  # not even valid email addr!
@@ -23,7 +25,7 @@ VALID_PASSWD = 'Fl000by!'
 SOME_PAST_DATE = '2020-01-01'
 LAST_LOGIN_DATE = '2022-01-01'
 
-LISTS_IN_DB = os.environ.get('LISTS_IN_DB')
+LISTS_IN_DB = LISTS_IN_DB_DICT[os.environ.get('DATABASE')]
 NO_LISTS_REASON = os.environ.get('NO_LISTS_REASON')
 
 
