@@ -8,9 +8,9 @@ import backendcore.users.query as uqry
 
 from backendcore.users.signup import signup
 
-from backendcore.data.db_connect import LISTS_IN_DB_DICT
+from backendcore.data.db_connect import LISTS_IN_DB_DICT, MONGO
 
-LISTS_IN_DB = LISTS_IN_DB_DICT[os.environ.get('DATABASE')]
+LISTS_IN_DB = LISTS_IN_DB_DICT[os.environ.get('DATABASE', MONGO)]
 NO_LISTS_REASON = os.environ.get('NO_LISTS_REASON')
 
 def test_signup():
