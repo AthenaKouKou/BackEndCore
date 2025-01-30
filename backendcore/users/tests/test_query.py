@@ -23,6 +23,7 @@ VALID_PASSWD = 'Fl000by!'
 SOME_PAST_DATE = '2020-01-01'
 LAST_LOGIN_DATE = '2022-01-01'
 
+LISTS_IN_DB = os.environ.get('LISTS_IN_DB')
 NO_LISTS_REASON = os.environ.get('NO_LISTS_REASON')
 
 
@@ -36,7 +37,6 @@ def gen_new_user_email():
 
 @pytest.fixture(scope='function')
 def a_user():
-    LISTS_IN_DB = os.environ.get('LISTS_IN_DB')
     if LISTS_IN_DB == '0' or not LISTS_IN_DB:
         pytest.skip(NO_LISTS_REASON)
     # let's try deleting the user first, in case some earlier test failure
@@ -117,9 +117,12 @@ def test_create_user():
     """
     Can we create a new user?
     """
-    LISTS_IN_DB = os.environ.get('LISTS_IN_DB')
     if LISTS_IN_DB == '0' or not LISTS_IN_DB:
-        pytest.skip(NO_LISTS_REASON)
+        with pytest.raises(ValueError):
+            usr.create_user(A_USERS_EMAIL, TEST_FN,
+                            TEST_LN, VALID_PASSWD, TEST_SALT, TEST_ORG)
+        return
+
     ret = usr.create_user(A_USERS_EMAIL, TEST_FN,
                           TEST_LN, VALID_PASSWD, TEST_SALT, TEST_ORG)
     assert ret is not None
@@ -191,9 +194,10 @@ TEST_PAY_PROV_USER_ID = 'test pay prov user id'
 
 
 def test_update_pay_prov_sid():
-    LISTS_IN_DB = os.environ.get('LISTS_IN_DB')
     if LISTS_IN_DB == '0' or not LISTS_IN_DB:
-        pytest.skip(NO_LISTS_REASON)
+        with pytest.raises(ValueError):
+            usr.create_test_user()
+        return
     usr.create_test_user()
     usr.update_pay_prov_sid(usr.TEST_EMAIL, usr.TEST_PAY_PROV_SID)
     user = usr.fetch_user(usr.TEST_EMAIL)
@@ -202,9 +206,10 @@ def test_update_pay_prov_sid():
 
 
 def test_clear_pay_prov_sid():
-    LISTS_IN_DB = os.environ.get('LISTS_IN_DB')
     if LISTS_IN_DB == '0' or not LISTS_IN_DB:
-        pytest.skip(NO_LISTS_REASON)
+        with pytest.raises(ValueError):
+            usr.create_test_user()
+        return
     usr.create_test_user()
     usr.update_pay_prov_sid(usr.TEST_EMAIL, usr.TEST_PAY_PROV_SID)
     usr.clear_pay_prov_sid(usr.TEST_PAY_PROV_SID)
@@ -214,9 +219,10 @@ def test_clear_pay_prov_sid():
 
 
 def test_update_user_pay_prov_id():
-    LISTS_IN_DB = os.environ.get('LISTS_IN_DB')
     if LISTS_IN_DB == '0' or not LISTS_IN_DB:
-        pytest.skip(NO_LISTS_REASON)
+        with pytest.raises(ValueError):
+            usr.create_test_user()
+        return
     usr.create_test_user_with_pay_prov_sid()
     usr.update_pay_prov_user_id(usr.TEST_PAY_PROV_SID, TEST_PAY_PROV_USER_ID)
     user = usr.fetch_user(usr.TEST_EMAIL)

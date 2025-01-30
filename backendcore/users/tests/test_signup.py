@@ -8,6 +8,7 @@ import backendcore.users.query as uqry
 
 from backendcore.users.signup import signup
 
+LISTS_IN_DB = os.environ.get('LISTS_IN_DB')
 NO_LISTS_REASON = os.environ.get('NO_LISTS_REASON')
 
 def test_signup():
@@ -15,7 +16,6 @@ def test_signup():
     Tests that we can successfully signup a user if valid information is
     given.
     """
-    LISTS_IN_DB = os.environ.get('LISTS_IN_DB')
     if LISTS_IN_DB == '0' or not LISTS_IN_DB:
         pytest.skip(NO_LISTS_REASON)
     email = 'jkhjkshfjkhsdjf@foo.com'
@@ -38,14 +38,21 @@ def test_signup_already_exists():
     Tests that we raise an error if the client tries to signup a user
     who already exists.
     """
-    LISTS_IN_DB = os.environ.get('LISTS_IN_DB')
-    if LISTS_IN_DB == '0' or not LISTS_IN_DB:
-        pytest.skip(NO_LISTS_REASON)
     email = 'kahdshgjksdhg@bar.com'
     try:
         uqry.delete(email)
     except Exception:
         print('User was not in DB')
+
+    if LISTS_IN_DB == '0' or not LISTS_IN_DB:
+        with pytest.raises(ValueError):
+            signup(
+                email=email,
+                pw='someotherpw',
+                fname='s',
+                lname='c',
+            )
+        return
     signup(
         email=email,
         pw='someotherpw',
