@@ -282,6 +282,7 @@ if JOURNAL_CODE == COSMOS_JOURNAL_CODE:
         'samuelmebersole@gmail.com',
         'bk1nyc@gmail.com',
         'lesliemarsh@gmail.com',
+        'ma6700@nyu.edu',
     ]
     ct_journal_checks = ActionChecks(valid_users=valid_ct_journal_users,
                                      auth_key=True,
