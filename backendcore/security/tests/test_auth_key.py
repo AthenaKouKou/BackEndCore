@@ -29,6 +29,11 @@ def get_issue_time(user):
 
 @pytest.fixture(scope='function')
 def temp_user():
+    LISTS_IN_DB = os.environ.get('LISTS_IN_DB')
+    NO_LISTS_REASON = os.environ.get('NO_LISTS_REASON')
+    if LISTS_IN_DB == '0' or not LISTS_IN_DB:
+        pytest.skip(NO_LISTS_REASON)
+
     try:
         uqry.delete(uqry.TEST_EMAIL)
     except Exception:

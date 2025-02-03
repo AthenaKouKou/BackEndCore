@@ -42,6 +42,16 @@ SQL = 'SQL'
 MY_SQL = 'MySQL'
 SQLITE = 'SQLite'
 
+# Testing flags:
+LISTS_IN_DB = 'LISTS_IN_DB'
+NO_LISTS_REASON = 'NO_LISTS_REASON'
+LISTS_IN_DB_DICT = {
+    MONGO: '1',
+    SQL: '0',
+    MY_SQL: '0',
+    SQLITE: '0',
+    SQLITE_MEM: '0',
+}
 
 # DB messages:
 DUP = "Can't add duplicate"
@@ -67,9 +77,14 @@ def get_db():
         local = os.environ.get("LOCAL_MONGO", REMOTE) == LOCAL
         db = mdb.MongoDB(local_db=local)
         print(f'{db=}')
-    if db_type == SQL:
-        sql_variant = os.environ.get('SQL_VARIANT', SQLITE_MEM)
-        db = sdb.SqlDB(variant=sql_variant)
+    elif db_type == SQL or db_type == SQLITE_MEM:
+        db = sdb.SqlDB(variant=SQLITE_MEM)
+        print(f'{db=}')
+    elif db_type == MY_SQL or db_type == SQLITE:
+        db = sdb.SqlDB(variant=db_type)
+        print(f'{db=}')
+    os.environ[LISTS_IN_DB] = LISTS_IN_DB_DICT[db_type]
+    os.environ[NO_LISTS_REASON] = "DB does not support lists as values"
     return db
 
 

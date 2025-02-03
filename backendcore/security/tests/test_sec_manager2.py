@@ -6,6 +6,7 @@ from copy import deepcopy
 import json
 import pytest
 from unittest.mock import patch
+import os
 
 import backendcore.security.auth_key as akey
 import backendcore.users.query as uqry
@@ -26,6 +27,11 @@ NOT_A_STR = 17  # could be any non-str value!
 
 @pytest.fixture(scope='function')
 def temp_user():
+    LISTS_IN_DB = os.environ.get('LISTS_IN_DB')
+    NO_LISTS_REASON = os.environ.get('NO_LISTS_REASON')
+    if LISTS_IN_DB == '0' or not LISTS_IN_DB:
+        pytest.skip(NO_LISTS_REASON)
+
     try:
         uqry.delete(uqry.TEST_EMAIL)
     except Exception:

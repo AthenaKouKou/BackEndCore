@@ -2,6 +2,7 @@
 Tests login.py
 """
 import pytest
+import os
 
 import backendcore.common.time_fmts as tfmt
 import backendcore.users.query as uqry
@@ -11,6 +12,10 @@ from backendcore.users.login import login
 
 @pytest.fixture(scope='function')
 def temp_user():
+    LISTS_IN_DB = os.environ.get('LISTS_IN_DB')
+    NO_LISTS_REASON = os.environ.get('NO_LISTS_REASON')
+    if LISTS_IN_DB == '0' or not LISTS_IN_DB:
+        pytest.skip(NO_LISTS_REASON)
     try:
         uqry.delete(uqry.TEST_EMAIL)
     except Exception:
