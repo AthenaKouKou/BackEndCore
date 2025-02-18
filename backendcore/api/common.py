@@ -65,11 +65,13 @@ def get_auth_key_from_request(request) -> str:
 
 
 def get_auth_key_and_user(request):
-    jdata = request.json
-    auth_key = get_auth_key_from_request(request)
-    user_id = jdata.get(USER_ID, None)
-    if not user_id:
-        user_id = jdata.get(EMAIL, None)
+    user_id = None
+    if hasattr(request, 'json'):
+        jdata = request.json
+        auth_key = get_auth_key_from_request(request)
+        user_id = jdata.get(USER_ID, None)
+        if not user_id:
+            user_id = jdata.get(EMAIL, None)
     if not user_id:
         user_id = uqry.fetch_id_by_auth_key(auth_key)
     return (auth_key, user_id)
