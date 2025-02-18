@@ -5,6 +5,7 @@ We should not assume that is true forever!
 Thus, we should cut over from calling the ID
 field `email` to calling it `user_id`.
 """
+from backendcore.common.common import get_client_code
 from backendcore.common.hashing import hash_str_and_salt
 import backendcore.common.valid as vld
 from backendcore.common.constants import (
@@ -39,6 +40,11 @@ PAY_PROV_USER_ID = 'pay_prov_user_id'
 # some users may record email addresses they wish to send reports to:
 RPT_RECIPS = 'rpt_recipients'
 
+db_name = dbc.USER_DB
+client = get_client_code()
+if client == 'MFC':
+    db_name = 'mfcDB'
+
 
 def list_users():
     return dbc.read(dbc.USER_DB, USER_COLLECT)
@@ -49,7 +55,7 @@ def fetch_by_key(user_id: str):
     User IDs must be unique in our db, so we can fetch a unique
     record based on just user_id.
     """
-    return dbc.fetch_one(dbc.USER_DB, USER_COLLECT,
+    return dbc.fetch_one(db_name, USER_COLLECT,
                          filters={EMAIL: user_id})
 
 
@@ -73,7 +79,7 @@ def create_user(email: str, firstname: str, lastname: str,
         raise ValueError(f'{email=} already exists in userDB')
     else:
         hashed_pw = hash_str_and_salt(passwd, salt)
-        return dbc.insert_doc(dbc.USER_DB, USER_COLLECT,
+        return dbc.insert_doc(db_name, USER_COLLECT,
                               {EMAIL: email,
                                FIRST_NAME: firstname,
                                LAST_NAME: lastname,
@@ -98,7 +104,7 @@ def delete(user_id: str):
     if not exists(user_id):
         raise ValueError(f'{user_id=} is not in the database.')
     else:
-        dbc.delete(dbc.USER_DB, USER_COLLECT, {EMAIL: user_id})
+        dbc.delete(db_name, USER_COLLECT, {EMAIL: user_id})
         return SUCCESS
 
 
@@ -142,7 +148,7 @@ def add_login(user_id: str, date=None):
         print(f'adding login for {user_id=}')
         if date is None:
             date = tfmt.get_today()
-        dbc.append_to_list(dbc.USER_DB, LOGIN_COLLECT, EMAIL,
+        dbc.append_to_list(db_name, LOGIN_COLLECT, EMAIL,
                            user_id, LOGINS, date)
 
 
@@ -152,7 +158,7 @@ def fetch_logins(user_id: str):
     """
     print('Calling fetch_logins')
     if exists(user_id):
-        return dbc.read_one(dbc.USER_DB, LOGIN_COLLECT,
+        return dbc.read_one(db_name, LOGIN_COLLECT,
                             filters={EMAIL: user_id})
 
 
@@ -181,7 +187,7 @@ def add_rpt_recip(user_id: str, rec_email: str):
         if RPT_RECIPS not in user:
             user[RPT_RECIPS] = []
         user[RPT_RECIPS].append(rec_email)
-        dbc.update_fld(dbc.USER_DB, USER_COLLECT, {EMAIL: user_id},
+        dbc.update_fld(db_name, USER_COLLECT, {EMAIL: user_id},
                        RPT_RECIPS, user[RPT_RECIPS])
         return user[RPT_RECIPS]
     else:
@@ -199,7 +205,7 @@ def replace_rpt_recips(user_id: str, recips: list):
     if not isinstance(recips, list):
         raise TypeError(f'Recipients must be a list: {recips=}')
     if exists(user_id):
-        ret = dbc.update_fld(dbc.USER_DB, USER_COLLECT,
+        ret = dbc.update_fld(db_name, USER_COLLECT,
                              {EMAIL: user_id},
                              RPT_RECIPS, recips)
         return ret
@@ -224,7 +230,7 @@ def update_pw_reset_token(user_id: str, salt: str, hashed_token: str):
     """
     Updates password resets for a user_id.
     """
-    return dbc.update(dbc.USER_DB, USER_COLLECT,
+    return dbc.update(db_name, USER_COLLECT,
                       {EMAIL: user_id},
                       {PW_RES_SALT: salt,
                        PW_RES_TOK: hashed_token,
@@ -237,7 +243,7 @@ def update_pw(user_id, salt, hashed_pw):
     and then blanks out the reset salt/token/issue_time,
     so that if they need to reset again, they must get a new token.
     """
-    return dbc.update(dbc.USER_DB,
+    return dbc.update(db_name,
                       USER_COLLECT,
                       {EMAIL: user_id},
                       {SALT: salt,
@@ -259,7 +265,7 @@ def fetch_by_auth_key(key: str) -> dict:
     """
     Fetch a user by their authorization key.
     """
-    return dbc.fetch_one(dbc.USER_DB, USER_COLLECT,
+    return dbc.fetch_one(db_name, USER_COLLECT,
                          filters={KEY: key})
 
 
@@ -272,7 +278,7 @@ def fetch_id_by_auth_key(key: str) -> str:
 
 
 def update_auth_key(user_id, auth_key):
-    return dbc.update(dbc.USER_DB,
+    return dbc.update(db_name,
                       USER_COLLECT,
                       {EMAIL: user_id},
                       {KEY: auth_key, ISSUE_TIME: tfmt.now()})
@@ -280,7 +286,7 @@ def update_auth_key(user_id, auth_key):
 
 def update_pay_prov_sid(user_id, session_id):
     return dbc.update_fld(
-        dbc.USER_DB,
+        db_name,
         USER_COLLECT,
         {EMAIL: user_id},
         PAY_PROV_SID,
@@ -291,7 +297,7 @@ def update_pay_prov_sid(user_id, session_id):
 def clear_pay_prov_sid(sid):
     assert isinstance(sid, str)
     return dbc.update_fld(
-        dbc.USER_DB,
+        db_name,
         USER_COLLECT,
         {PAY_PROV_SID: sid},
         PAY_PROV_SID,
@@ -304,7 +310,7 @@ def update_pay_prov_user_id(sid: str, pay_prov_user_id: str):
     Identifies a user by his session id and sets his payment provider id.
     """
     return dbc.update_fld(
-        dbc.USER_DB,
+        db_name,
         USER_COLLECT,
         {PAY_PROV_SID: sid},
         PAY_PROV_USER_ID,
@@ -346,7 +352,7 @@ def create_test_user_with_pay_prov_sid(sid=TEST_PAY_PROV_SID):
         'an org'
     )
     dbc.update_fld(
-        dbc.USER_DB,
+        db_name,
         USER_COLLECT,
         {EMAIL: TEST_EMAIL},
         PAY_PROV_SID,
