@@ -14,7 +14,9 @@ from backendcore.common.constants import (  # noqa F401
     READ,
     UPDATE,
 )
+from backendcore.common.common import get_client_db
 import backendcore.data.db_connect as dbc
+from backendcore.data.caching import needs_cache
 import backendcore.security.auth_key as ak
 import backendcore.users.query as uqry
 from backendcore.security.constants import (
@@ -32,13 +34,14 @@ VALIDATE_USER = 'validateUser'
 
 BAD_TYPE = 'Bad type for: '
 
-
 VALIDATOR = 'validator'
 IN_EFFECT = 'in_effect'
 
 SEC_COLLECT = 'security_protocols'
 USERS = 'users'
+PASSWORD = 'password'
 PROT_NM = 'protocol_name'
+
 
 INFRA_PASS_PHRASE = 'Come on, Beanie!'
 
@@ -50,6 +53,16 @@ VALID_ACTIONS = [
     UPDATE,
     DELETE,
 ]
+
+
+def needs_security_cache(fn):
+    """
+    Should be used to decorate any function that uses datacollection methods.
+    """
+    return needs_cache(fn, SEC_COLLECT, get_client_db(),
+                       SEC_COLLECT,
+                       key_fld=uqry.USER_ID,
+                       no_id=False)
 
 
 def is_valid_action(action: str):
@@ -105,6 +118,10 @@ class ActionChecks(object):
         for check in json_checks.values():
             if VALIDATOR in check:
                 del check[VALIDATOR]
+        if self.valid_users:
+            json_checks[USERS] = self.valid_users
+        if self.phrase:
+            json_checks[PASSWORD] = self.phrase
         return json_checks
 
     def is_valid_auth_key(self, user_id: str, auth_key: str) -> bool:
