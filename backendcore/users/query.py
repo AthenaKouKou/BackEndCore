@@ -5,7 +5,7 @@ We should not assume that is true forever!
 Thus, we should cut over from calling the ID
 field `email` to calling it `user_id`.
 """
-from backendcore.common.common import get_client_code
+from backendcore.common.common import get_client_db
 from backendcore.common.hashing import hash_str_and_salt
 import backendcore.common.valid as vld
 from backendcore.common.constants import (
@@ -40,10 +40,7 @@ PAY_PROV_USER_ID = 'pay_prov_user_id'
 # some users may record email addresses they wish to send reports to:
 RPT_RECIPS = 'rpt_recipients'
 
-db_name = dbc.USER_DB
-client = get_client_code()
-if client == 'MFC':
-    db_name = 'mfcDB'
+db_name = get_client_db()
 
 
 def list_users():
