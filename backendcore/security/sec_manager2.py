@@ -16,7 +16,6 @@ from backendcore.common.constants import (  # noqa F401
 )
 from backendcore.common.common import get_client_db
 import backendcore.data.db_connect as dbc
-from backendcore.data.caching import needs_cache
 import backendcore.security.auth_key as ak
 import backendcore.users.query as uqry
 from backendcore.security.constants import (
@@ -54,15 +53,7 @@ VALID_ACTIONS = [
     DELETE,
 ]
 
-
-def needs_security_cache(fn):
-    """
-    Should be used to decorate any function that uses datacollection methods.
-    """
-    return needs_cache(fn, SEC_COLLECT, get_client_db(),
-                       SEC_COLLECT,
-                       key_fld=uqry.USER_ID,
-                       no_id=False)
+SEC_DB = get_client_db()
 
 
 def is_valid_action(action: str):
@@ -79,6 +70,7 @@ class ActionChecks(object):
                  valid_users=None,
                  ip_address=None,
                  this_phrase=''):
+        self.phrase = None
         if not isinstance(auth_key, bool):
             raise TypeError(f'{BAD_TYPE}{type(auth_key)=}')
         if not isinstance(pass_phrase, bool):
@@ -115,9 +107,8 @@ class ActionChecks(object):
 
     def to_json(self):
         json_checks = deepcopy(self.checks)
-        for check in json_checks.values():
-            if VALIDATOR in check:
-                del check[VALIDATOR]
+        for check in json_checks:
+            json_checks[check] = json_checks[check][IN_EFFECT]
         if self.valid_users:
             json_checks[USERS] = self.valid_users
         if self.phrase:
@@ -188,14 +179,12 @@ class SecProtocol(object):
 
     def to_json(self):
         prot = {
-            self.name: {
-                CREATE: self.create.to_json(),
-                READ: self.read.to_json(),
-                UPDATE: self.update.to_json(),
-                DELETE: self.delete.to_json(),
-            }
+            PROT_NM: self.name,
+            CREATE: self.create.to_json(),
+            READ: self.read.to_json(),
+            UPDATE: self.update.to_json(),
+            DELETE: self.delete.to_json(),
         }
-        print(f'{prot=}')
         return prot
 
     def get_name(self):
@@ -266,16 +255,53 @@ def delete(name):
         raise ValueError(f'Attempt to delete non-existent protocol: {name=}')
 
 
-def create_sec_doc(name, users):
+def checks_from_json(check_json):
     """
-    Used to add new sec protocol docs to the database
+    Takes the output from the db for the check and turns it into a check
+    object.
     """
-    return dbc.insert_doc(dbc.USER_DB, SEC_COLLECT,
-                          {PROT_NM: name, USERS: users})
+    return ActionChecks(auth_key=check_json.get(AUTH_KEY, False),
+                        pass_phrase=check_json.get(PASS_PHRASE, False),
+                        valid_users=check_json.get(USERS, None),
+                        ip_address=check_json.get(IP_ADDRESS, None),
+                        this_phrase=check_json.get(PASSWORD, None))
 
 
-def fetch_sec_users(name):
-    return dbc.fetch_one(dbc.USER_DB, SEC_COLLECT, {PROT_NM: name})[USERS]
+def protocol_from_json(protocol_json):
+    """
+    Takes the output from the db and turns it into a protocol object.
+    There is only one key in the main json: it is the name of the protocol.
+    """
+    protocol_name = protocol_json[PROT_NM]
+    create_checks = checks_from_json(protocol_json[CREATE])
+    read_checks = checks_from_json(protocol_json[READ])
+    update_checks = checks_from_json(protocol_json[UPDATE])
+    delete_checks = checks_from_json(protocol_json[DELETE])
+    return SecProtocol(protocol_name,
+                       create=create_checks,
+                       read=read_checks,
+                       update=update_checks,
+                       delete=delete_checks)
+
+
+def fetch_all():
+    """
+    Gets all the security protocols from the db and puts them in sec_manager
+    """
+    data_list = dbc.fetch_all(SEC_DB,
+                              SEC_COLLECT,
+                              no_id=True)
+    for protocol_json in data_list:
+        add(protocol_from_json(protocol_json))
+
+
+def add_to_db(protocol):
+    ret = None
+    try:
+        ret = dbc.insert_doc(SEC_DB, SEC_COLLECT, protocol.to_json())
+    except Exception as e:
+        print(e)
+    return ret
 
 
 JOURNAL_CODE = os.environ.get('JOURNAL_CODE', '')
@@ -308,7 +334,8 @@ if JOURNAL_CODE == COSMOS_JOURNAL_CODE:
                                       create=ct_journal_checks,
                                       delete=ct_journal_checks,
                                       update=ct_journal_checks)
-    add(ct_journal_protocol)
+    # add(ct_journal_protocol)
+    add_to_db(ct_journal_protocol)
 else:
     # Currently leaving in old in-file data format.
     # New instantiation as follows:
@@ -329,12 +356,14 @@ else:
                                     create=library_checks,
                                     delete=library_checks,
                                     update=library_checks)
-    add(glossary_protocol)
+    # add(glossary_protocol)
+    add_to_db(glossary_protocol)
     bibliography_protocol = SecProtocol(BIBLIO,
                                         create=library_checks,
                                         delete=library_checks,
                                         update=library_checks)
-    add(bibliography_protocol)
+    # add(bibliography_protocol)
+    add_to_db(bibliography_protocol)
 
     # valid_adddsrc_users = fetch_sec_users(ADD_DSRC)
     valid_adddsrc_users = [
@@ -359,7 +388,8 @@ else:
         delete=adddsrc_checks,
         update=adddsrc_checks
     )
-    add(adddsrc_protocol)
+    # add(adddsrc_protocol)
+    add_to_db(adddsrc_protocol)
 
     # valid_infra_users = fetch_sec_users(INFRA)
     valid_infra_users = [
@@ -381,7 +411,8 @@ else:
                                  delete=infra_checks,
                                  read=infra_checks,
                                  update=infra_checks)
-    add(infra_protocol)
+    # add(infra_protocol)
+    add_to_db(infra_protocol)
 
     valid_journal_users = [
         'gcallah@mac.com',
@@ -398,7 +429,8 @@ else:
                                    create=journal_checks,
                                    delete=journal_checks,
                                    update=journal_checks)
-    add(journal_protocol)
+    # add(journal_protocol)
+    add_to_db(journal_protocol)
 
 
 # for API testing:
@@ -424,6 +456,8 @@ GOOD_PROTOCOL = SecProtocol(TEST_NAME,
                             read=GOOD_SEC_CHECKS,
                             update=GOOD_SEC_CHECKS,
                             delete=GOOD_SEC_CHECKS)
+
+fetch_all()
 
 
 def main():
