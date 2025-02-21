@@ -5,7 +5,7 @@ We should not assume that is true forever!
 Thus, we should cut over from calling the ID
 field `email` to calling it `user_id`.
 """
-from backendcore.common.common import get_client_db
+from backendcore.common.clients import get_client_db
 from backendcore.common.hashing import hash_str_and_salt
 import backendcore.common.valid as vld
 from backendcore.common.constants import (
