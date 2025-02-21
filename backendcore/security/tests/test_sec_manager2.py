@@ -284,3 +284,20 @@ def test_fetch_journal_protocol_name():
     different environment variables
     """
     assert isinstance(sm.fetch_journal_protocol_name(), str,)
+
+
+def test_checks_from_json():
+    test_json = GOOD_SEC_CHECKS.to_json()
+    checks = sm.checks_from_json(test_json)
+    assert checks.is_valid_user(sm.TEST_EMAIL, sm.TEST_EMAIL)
+
+
+@patch(f'{FETCH_BY_AUTH_KEY}', autospec=True, return_value=sm.TEST_EMAIL)
+def test_protocol_from_json(mock_fetch_by_auth):
+    test_json = GOOD_PROTOCOL.to_json()
+    protocol = sm.protocol_from_json(test_json)
+    assert protocol.is_permitted(sm.CREATE, sm.TEST_EMAIL,
+                                  {sm.VALIDATE_USER:
+                                   sm.TEST_EMAIL,
+                                   sm.AUTH_KEY: 'some auth key',
+                                   sm.PASS_PHRASE: sm.TEST_PHRASE})

@@ -15,6 +15,7 @@ def get_client_code():
 
 
 def get_client_db():
+    get_client_code()
     if client_code == 'MFC':
         return 'mfcDB'
     else:

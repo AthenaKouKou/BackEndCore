@@ -335,7 +335,7 @@ if JOURNAL_CODE == COSMOS_JOURNAL_CODE:
                                       delete=ct_journal_checks,
                                       update=ct_journal_checks)
     # add(ct_journal_protocol)
-    add_to_db(ct_journal_protocol)
+    # add_to_db(ct_journal_protocol)
 else:
     # Currently leaving in old in-file data format.
     # New instantiation as follows:
@@ -357,13 +357,13 @@ else:
                                     delete=library_checks,
                                     update=library_checks)
     # add(glossary_protocol)
-    add_to_db(glossary_protocol)
+    # add_to_db(glossary_protocol)
     bibliography_protocol = SecProtocol(BIBLIO,
                                         create=library_checks,
                                         delete=library_checks,
                                         update=library_checks)
     # add(bibliography_protocol)
-    add_to_db(bibliography_protocol)
+    # add_to_db(bibliography_protocol)
 
     # valid_adddsrc_users = fetch_sec_users(ADD_DSRC)
     valid_adddsrc_users = [
@@ -389,7 +389,7 @@ else:
         update=adddsrc_checks
     )
     # add(adddsrc_protocol)
-    add_to_db(adddsrc_protocol)
+    # add_to_db(adddsrc_protocol)
 
     # valid_infra_users = fetch_sec_users(INFRA)
     valid_infra_users = [
@@ -412,7 +412,7 @@ else:
                                  read=infra_checks,
                                  update=infra_checks)
     # add(infra_protocol)
-    add_to_db(infra_protocol)
+    # add_to_db(infra_protocol)
 
     valid_journal_users = [
         'gcallah@mac.com',
@@ -430,7 +430,7 @@ else:
                                    delete=journal_checks,
                                    update=journal_checks)
     # add(journal_protocol)
-    add_to_db(journal_protocol)
+    # add_to_db(journal_protocol)
 
 
 # for API testing:
