@@ -260,6 +260,8 @@ def checks_from_json(check_json):
     Takes the output from the db for the check and turns it into a check
     object.
     """
+    if not check_json:
+        return ActionChecks()
     return ActionChecks(auth_key=check_json.get(AUTH_KEY, False),
                         pass_phrase=check_json.get(PASS_PHRASE, False),
                         valid_users=check_json.get(USERS, None),
@@ -273,10 +275,10 @@ def protocol_from_json(protocol_json):
     There is only one key in the main json: it is the name of the protocol.
     """
     protocol_name = protocol_json[PROT_NM]
-    create_checks = checks_from_json(protocol_json.get(CREATE, ActionChecks()))
-    read_checks = checks_from_json(protocol_json.get(READ, ActionChecks()))
-    update_checks = checks_from_json(protocol_json.get(UPDATE, ActionChecks()))
-    delete_checks = checks_from_json(protocol_json.get(DELETE, ActionChecks()))
+    create_checks = checks_from_json(protocol_json.get(CREATE))
+    read_checks = checks_from_json(protocol_json.get(READ))
+    update_checks = checks_from_json(protocol_json.get(UPDATE))
+    delete_checks = checks_from_json(protocol_json.get(DELETE))
     return SecProtocol(protocol_name,
                        create=create_checks,
                        read=read_checks,
