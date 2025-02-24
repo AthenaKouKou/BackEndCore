@@ -210,11 +210,11 @@ class SecProtocol(object):
         return valid
 
 
-def is_permitted(name, action, user_id: str = '', auth_key: str = '',
+def is_permitted(prot_name, action, user_id: str = '', auth_key: str = '',
                  phrase: str = ''):
-    prot = fetch_by_key(name)
+    prot = fetch_by_key(prot_name)
     if not prot:
-        raise ValueError(f'Unknown protocol: {name=}')
+        raise ValueError(f'Unknown protocol: {prot_name=}')
     check_vals = {}
     if not user_id:
         user_id = ak.fetch_user_id_by_key(auth_key)
@@ -224,9 +224,9 @@ def is_permitted(name, action, user_id: str = '', auth_key: str = '',
     return prot.is_permitted(action, user_id, check_vals)
 
 
-def fetch_by_key(name: str):
-    print(f'fetch_by_key: {name=}')
-    ret = sec_manager.get(name, None)
+def fetch_by_key(prot_name: str):
+    print(f'fetch_by_key: {prot_name=}')
+    ret = sec_manager.get(prot_name, None)
     print(f'{ret=}')
     return ret
 
@@ -273,10 +273,10 @@ def protocol_from_json(protocol_json):
     There is only one key in the main json: it is the name of the protocol.
     """
     protocol_name = protocol_json[PROT_NM]
-    create_checks = checks_from_json(protocol_json[CREATE])
-    read_checks = checks_from_json(protocol_json[READ])
-    update_checks = checks_from_json(protocol_json[UPDATE])
-    delete_checks = checks_from_json(protocol_json[DELETE])
+    create_checks = checks_from_json(protocol_json.get(CREATE, ActionChecks()))
+    read_checks = checks_from_json(protocol_json.get(READ, ActionChecks()))
+    update_checks = checks_from_json(protocol_json.get(UPDATE, ActionChecks()))
+    delete_checks = checks_from_json(protocol_json.get(DELETE, ActionChecks()))
     return SecProtocol(protocol_name,
                        create=create_checks,
                        read=read_checks,
