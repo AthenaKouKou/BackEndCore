@@ -126,7 +126,8 @@ def test_sec_checks_is_permitted(mock_auth_key):
                                                         'some auth key',
                                                         sm.PASS_PHRASE:
                                                         sm.TEST_PHRASE,
-                                                        sm.CODES: sm.TEST_CODE})
+                                                        sm.CODES:
+                                                        sm.TEST_CODE})
 
 
 def test_sec_checks_is_not_permitted():
