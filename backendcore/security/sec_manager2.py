@@ -19,17 +19,13 @@ import backendcore.data.db_connect as dbc
 import backendcore.security.auth_key as ak
 import backendcore.users.query as uqry
 from backendcore.security.constants import (
-    ADD_DSRC,
-    BIBLIO,
-    COSMOS_JOURNAL,
-    GLOSSARY,
-    INFRA,
     JOURNAL,
 )
 
 
 IP_ADDRESS = 'ipAddress'
 VALIDATE_USER = 'validateUser'
+CODES = 'codes'
 
 BAD_TYPE = 'Bad type for: '
 
@@ -69,6 +65,7 @@ class ActionChecks(object):
                  pass_phrase=False,
                  valid_users=None,
                  ip_address=None,
+                 codes=None,
                  this_phrase=''):
         self.phrase = None
         if not isinstance(auth_key, bool):
@@ -85,6 +82,7 @@ class ActionChecks(object):
                     raise TypeError(f'{BAD_TYPE}{type(user)=}')
         if ip_address and not isinstance(ip_address, str):
             raise TypeError(f'{BAD_TYPE}{type(ip_address)=}')
+        print(codes)
         self.checks = {
             VALIDATE_USER: {
                 IN_EFFECT: valid_users is not None,
@@ -98,9 +96,14 @@ class ActionChecks(object):
                 IN_EFFECT: pass_phrase,
                 VALIDATOR: self.is_valid_pass_phrase,
             },
+            CODES: {
+                IN_EFFECT: codes is not None,
+                VALIDATOR: self.is_valid_code,
+            },
             # IP_ADDRESS: to be developed!
         }
         self.valid_users = valid_users
+        self.codes = codes
 
     def __str__(self):
         return str(self.checks)
@@ -113,6 +116,13 @@ class ActionChecks(object):
             json_checks[USERS] = self.valid_users
         if self.phrase:
             json_checks[PASSWORD] = self.phrase
+        # Kludge because we have two types of checks: those that store their
+        # value only if they are active, and those that have a seperate value
+        # to signifiy that they are active
+        if self.codes:
+            json_checks[CODES] = self.codes
+        else:
+            del json_checks[CODES]
         return json_checks
 
     def is_valid_auth_key(self, user_id: str, auth_key: str) -> bool:
@@ -124,7 +134,6 @@ class ActionChecks(object):
         """
         This is a temporary expedient!
         """
-        print(f'comparing {pass_phrase=} with {self.phrase=}')
         return pass_phrase == self.phrase
 
     def is_valid_user(self, user_id, user):
@@ -134,6 +143,17 @@ class ActionChecks(object):
         valid = True  # by default all users are valid
         if self.valid_users:
             valid = user in self.valid_users
+        return valid
+
+    def is_valid_code(self, user_id, code):
+        """
+        This method compares the code passed to the dictionary of valid codes.
+        Note that the dictionary is of the format: {code_name: code}.
+        Also, we don't actually use the user_id
+        """
+        valid = True
+        if self.codes:
+            valid = code in self.codes.values()
         return valid
 
     def is_permitted(self, user_id: str, check_vals: dict) -> bool:
@@ -211,7 +231,7 @@ class SecProtocol(object):
 
 
 def is_permitted(prot_name, action, user_id: str = '', auth_key: str = '',
-                 phrase: str = ''):
+                 phrase: str = '', code: str = None):
     prot = fetch_by_key(prot_name)
     if not prot:
         raise ValueError(f'Unknown protocol: {prot_name=}')
@@ -221,6 +241,7 @@ def is_permitted(prot_name, action, user_id: str = '', auth_key: str = '',
     check_vals[VALIDATE_USER] = user_id
     check_vals[AUTH_KEY] = auth_key
     check_vals[PASS_PHRASE] = phrase
+    check_vals[CODES] = code
     return prot.is_permitted(action, user_id, check_vals)
 
 
@@ -266,7 +287,8 @@ def checks_from_json(check_json):
                         pass_phrase=check_json.get(PASS_PHRASE, False),
                         valid_users=check_json.get(USERS, None),
                         ip_address=check_json.get(IP_ADDRESS, None),
-                        this_phrase=check_json.get(PASSWORD, None))
+                        this_phrase=check_json.get(PASSWORD, None),
+                        codes=check_json.get(CODES, None))
 
 
 def protocol_from_json(protocol_json):
@@ -320,133 +342,21 @@ def fetch_journal_protocol_name():
     return JOURNAL
 
 
-if JOURNAL_CODE == COSMOS_JOURNAL_CODE:
-    valid_ct_journal_users = [
-        'gcallah@mac.com',
-        'kristian.d.nikolov@gmail.com',
-        'samuelmebersole@gmail.com',
-        'bk1nyc@gmail.com',
-        'lesliemarsh@gmail.com',
-        'ma6700@nyu.edu',
-    ]
-    ct_journal_checks = ActionChecks(valid_users=valid_ct_journal_users,
-                                     auth_key=True,
-                                     pass_phrase=False)
-    ct_journal_protocol = SecProtocol(COSMOS_JOURNAL,
-                                      create=ct_journal_checks,
-                                      delete=ct_journal_checks,
-                                      update=ct_journal_checks)
-    # add(ct_journal_protocol)
-    # add_to_db(ct_journal_protocol)
-else:
-    # Currently leaving in old in-file data format.
-    # New instantiation as follows:
-    # valid_lib_users = fetch_sec_users(LIB)
-    valid_lib_users = [
-        'gcallah@mac.com',
-        'vincentlaran@gmail.com',
-        'abalohubert25@gmail.com',
-        'abalo.hubert87@yahoo.com',
-        'elen.callahan@structuredfinance.org',
-        'Elen.Callahan@StructuredFinance.org',
-    ]
-
-    library_checks = ActionChecks(valid_users=valid_lib_users,
-                                  auth_key=True,
-                                  pass_phrase=False)
-    glossary_protocol = SecProtocol(GLOSSARY,
-                                    create=library_checks,
-                                    delete=library_checks,
-                                    update=library_checks)
-    # add(glossary_protocol)
-    # add_to_db(glossary_protocol)
-    bibliography_protocol = SecProtocol(BIBLIO,
-                                        create=library_checks,
-                                        delete=library_checks,
-                                        update=library_checks)
-    # add(bibliography_protocol)
-    # add_to_db(bibliography_protocol)
-
-    # valid_adddsrc_users = fetch_sec_users(ADD_DSRC)
-    valid_adddsrc_users = [
-        'gcallah@mac.com',
-        'eugene@gmail.com',
-        'vincentlaran@gmail.com',
-        'abalohubert25@gmail.com',
-        'abalo.hubert87@yahoo.com',
-        'kristian.d.nikolov@gmail.com',
-        'Elen.Callahan@StructuredFinance.org',
-        'test@test.com'
-    ]
-
-    adddsrc_checks = ActionChecks(
-        valid_users=valid_adddsrc_users,
-        auth_key=True,
-        pass_phrase=True
-    )
-    adddsrc_protocol = SecProtocol(
-        ADD_DSRC,
-        create=adddsrc_checks,
-        delete=adddsrc_checks,
-        update=adddsrc_checks
-    )
-    # add(adddsrc_protocol)
-    # add_to_db(adddsrc_protocol)
-
-    # valid_infra_users = fetch_sec_users(INFRA)
-    valid_infra_users = [
-        'gcallah@mac.com',
-        'vincentlaran@gmail.com',
-        'abalohubert25@gmail.com',
-        'abalo.hubert87@yahoo.com',
-        'kristian.d.nikolov@gmail.com',
-        'samuelmebersole@gmail.com',
-        'bk1nyc@gmail.com',
-    ]
-
-    infra_checks = ActionChecks(valid_users=valid_infra_users,
-                                auth_key=False,
-                                pass_phrase=True,
-                                this_phrase=INFRA_PASS_PHRASE)
-    infra_protocol = SecProtocol(INFRA,
-                                 create=infra_checks,
-                                 delete=infra_checks,
-                                 read=infra_checks,
-                                 update=infra_checks)
-    # add(infra_protocol)
-    # add_to_db(infra_protocol)
-
-    valid_journal_users = [
-        'gcallah@mac.com',
-        'kristian.d.nikolov@gmail.com',
-        'samuelmebersole@gmail.com',
-        'bk1nyc@gmail.com',
-        'Elen.Callahan@StructuredFinance.org',
-        'elen.callahan@structuredfinance.org',
-    ]
-    journal_checks = ActionChecks(valid_users=valid_journal_users,
-                                  auth_key=True,
-                                  pass_phrase=False)
-    journal_protocol = SecProtocol(JOURNAL,
-                                   create=journal_checks,
-                                   delete=journal_checks,
-                                   update=journal_checks)
-    # add(journal_protocol)
-    # add_to_db(journal_protocol)
-
-
 # for API testing:
 GOOD_IP_ADDRESS = '127.0.0.1'
 TEST_EMAIL = 'test@mac.com'
 GOOD_VALID_USERS = [TEST_EMAIL, 'kris@smack.com']
 TEST_NAME = 'test name'
 TEST_PHRASE = 'test phrase'
+TEST_CODE = 'test code'
+TEST_CODES = {'some event name': TEST_CODE}
 
 GOOD_SEC_CHECKS = ActionChecks(auth_key=True,
                                pass_phrase=True,
                                this_phrase=TEST_PHRASE,
                                ip_address=False,
-                               valid_users=GOOD_VALID_USERS,)
+                               valid_users=GOOD_VALID_USERS,
+                               codes=TEST_CODES)
 
 NO_USERS_SEC_CHECKS = ActionChecks(auth_key=True,
                                    pass_phrase=True,
