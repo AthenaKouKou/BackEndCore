@@ -13,6 +13,7 @@ from backendcore.common.constants import (  # noqa F401
     PASS_PHRASE,
     READ,
     UPDATE,
+    CODES,
 )
 from backendcore.common.clients import get_client_db
 import backendcore.data.db_connect as dbc
@@ -25,7 +26,6 @@ from backendcore.security.constants import (
 
 IP_ADDRESS = 'ipAddress'
 VALIDATE_USER = 'validateUser'
-CODES = 'codes'
 
 BAD_TYPE = 'Bad type for: '
 
