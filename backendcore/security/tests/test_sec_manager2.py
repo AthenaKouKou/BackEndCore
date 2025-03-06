@@ -8,7 +8,6 @@ import pytest
 from unittest.mock import patch
 import os
 
-import backendcore.security.auth_key as akey
 import backendcore.users.query as uqry
 
 import backendcore.security.sec_manager2 as sm
@@ -36,10 +35,10 @@ def temp_user():
         uqry.delete(uqry.TEST_EMAIL)
     except Exception:
         print('User was not already in DB')
-    mongo_id = uqry.create_test_user()
+    uqry.create_test_user()
     user = uqry.fetch_by_key(uqry.TEST_EMAIL)
     print(f'{user=}')
-    yield  user
+    yield user
     uqry.delete(uqry.TEST_EMAIL)
 
 
@@ -86,11 +85,11 @@ def test_sec_checks_to_json():
     json_obj = GOOD_SEC_CHECKS.to_json()
     assert json_obj is not None
     json_str = json.dumps(json_obj)
-    assert(isinstance(json_str, str))
+    assert (isinstance(json_str, str))
 
 
 def test_sec_checks_str():
-    assert(isinstance(str(GOOD_SEC_CHECKS), str))
+    assert (isinstance(str(GOOD_SEC_CHECKS), str))
 
 
 def test_is_sec_checks_valid_user():
@@ -102,7 +101,7 @@ def test_is_sec_checks_not_valid_user():
 
 
 def test_is_sec_checks_valid_user_by_default():
-    assert sm.NO_USERS_SEC_CHECKS.is_valid_user('Any user should be valid!', '')
+    assert sm.NO_USERS_SEC_CHECKS.is_valid_user('Any user should be valid', '')
 
 
 UQRY = 'backendcore.users.query'
@@ -116,7 +115,7 @@ def test_is_sec_checks_valid_auth_key(mock_auth_key):
 
 @patch(f'{FETCH_BY_AUTH_KEY}', autospec=True, return_value='bademail.com')
 def test_is_sec_checks_not_valid_auth_key(mock_auth_key):
-   assert not GOOD_SEC_CHECKS.is_valid_auth_key(sm.TEST_EMAIL, 'some auth key')
+    assert not GOOD_SEC_CHECKS.is_valid_auth_key(sm.TEST_EMAIL, 'some authkey')
 
 
 @patch(f'{FETCH_BY_AUTH_KEY}', autospec=True, return_value=sm.TEST_EMAIL)
@@ -126,7 +125,9 @@ def test_sec_checks_is_permitted(mock_auth_key):
                                                         sm.AUTH_KEY:
                                                         'some auth key',
                                                         sm.PASS_PHRASE:
-                                                        sm.TEST_PHRASE})
+                                                        sm.TEST_PHRASE,
+                                                        sm.CODES:
+                                                        sm.TEST_CODE})
 
 
 def test_sec_checks_is_not_permitted():
@@ -180,11 +181,11 @@ def test_protocol_to_json():
     json_obj = GOOD_PROTOCOL.to_json()
     assert json_obj is not None
     json_str = json.dumps(json_obj)
-    assert(isinstance(json_str, str))
+    assert (isinstance(json_str, str))
 
 
 def test_protocol_str():
-    assert(isinstance(str(GOOD_PROTOCOL), str))
+    assert (isinstance(str(GOOD_PROTOCOL), str))
 
 
 @patch(f'{FETCH_BY_AUTH_KEY}', autospec=True, return_value=sm.TEST_EMAIL)
@@ -193,7 +194,8 @@ def test_protocol_is_permitted(mock_auth_key):
                                       {sm.VALIDATE_USER:
                                        sm.TEST_EMAIL,
                                        sm.AUTH_KEY: 'some auth key',
-                                       sm.PASS_PHRASE: sm.TEST_PHRASE})
+                                       sm.PASS_PHRASE: sm.TEST_PHRASE,
+                                       sm.CODES: sm.TEST_CODE})
 
 
 def test_protocol_is_not_permitted():
@@ -224,11 +226,11 @@ def new_protocol():
 
 
 def test_fetch_by_key_missing_protocol():
-   assert sm.fetch_by_key('Not a security protocol!') is None
+    assert sm.fetch_by_key('Not a security protocol!') is None
 
 
 def test_fetch_by_key_protocol(temp_protocol):
-   assert sm.fetch_by_key(TEST_NAME) is not None
+    assert sm.fetch_by_key(TEST_NAME) is not None
 
 
 # Test is_valid_user
@@ -265,7 +267,8 @@ def test_delete_missing():
 @patch(f'{FETCH_BY_AUTH_KEY}', autospec=True, return_value=sm.TEST_EMAIL)
 def test_is_permitted(mock_auth_key, temp_protocol):
     assert sm.is_permitted(TEST_NAME, sm.CREATE, user_id=sm.TEST_EMAIL,
-                           auth_key='some auth_key', phrase=sm.TEST_PHRASE)
+                           auth_key='some auth_key', phrase=sm.TEST_PHRASE,
+                           code=sm.TEST_CODE)
 
 
 def test_is_not_permitted_bad_email(temp_protocol):
@@ -284,3 +287,21 @@ def test_fetch_journal_protocol_name():
     different environment variables
     """
     assert isinstance(sm.fetch_journal_protocol_name(), str,)
+
+
+def test_checks_from_json():
+    test_json = GOOD_SEC_CHECKS.to_json()
+    checks = sm.checks_from_json(test_json)
+    assert checks.is_valid_user(sm.TEST_EMAIL, sm.TEST_EMAIL)
+
+
+@patch(f'{FETCH_BY_AUTH_KEY}', autospec=True, return_value=sm.TEST_EMAIL)
+def test_protocol_from_json(mock_fetch_by_auth):
+    test_json = GOOD_PROTOCOL.to_json()
+    protocol = sm.protocol_from_json(test_json)
+    assert protocol.is_permitted(sm.CREATE, sm.TEST_EMAIL,
+                                 {sm.VALIDATE_USER:
+                                  sm.TEST_EMAIL,
+                                  sm.AUTH_KEY: 'some auth key',
+                                  sm.PASS_PHRASE: sm.TEST_PHRASE,
+                                  sm.CODES: sm.TEST_CODE})
