@@ -231,7 +231,7 @@ class DataCollection(object):
                               {self.key_fld: key_val})
         self.clear_cache()
         return ret
-    
+
     def delete_many(self, filters={}):
         """
         Deletes many records based on filters.
