@@ -15,12 +15,12 @@ BAD_METHOD = 'Bad method!'
 NEW_BASE_URL = 'https://some.server.com'
 
 
-def test_set_base_url_none():
-    assert pwr.BASE_URL in pwr.set_base_url(None)
+def test_test_env_false():
+    assert pwr.BASE_URL in pwr.set_base_url(False)
 
 
-def test_set_base_url_not_none():
-    assert NEW_BASE_URL in pwr.set_base_url(NEW_BASE_URL)
+def test_test_env_true():
+    assert pwr.BASE_URL not in pwr.set_base_url(True)
 
 
 @patch('backendcore.emailer.api_send.send_mail',

@@ -22,6 +22,7 @@ SMTP_USER_NAME = os.getenv('SMTP_USER_NAME')
 
 RESET = 'reset_password'
 BASE_URL = f'{urls.FRONTEND_BASE_URL}'
+TEST_URL = f'{urls.TEST_FRONTEND_URL}'
 PW_RES_SUBJ = f'Reset Your {cnm.OUR_NAME} password'
 
 
@@ -29,8 +30,10 @@ def is_valid_mail_method(method):
     return method in VALID_MAIL_METHODS
 
 
-def set_base_url(base_url):
-    if not base_url:
+def set_base_url(testing_env):
+    if testing_env:
+        base_url = TEST_URL
+    else:
         base_url = BASE_URL
     if not base_url.endswith('/'):
         base_url += '/'
@@ -43,9 +46,9 @@ def send_pw_reset(
         user_email: str,
         tok_ttl_seconds: int,
         method=MAIL_METHOD,
-        base_url=None
+        testing_env=False,
 ):
-    base_url = set_base_url(base_url)
+    base_url = set_base_url(testing_env)
     if not reset_tok:
         raise ValueError(f'In send_pw_reset, no reset token: {reset_tok=}')
     if not is_valid_mail_method(method):
