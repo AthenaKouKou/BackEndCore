@@ -82,7 +82,6 @@ class ActionChecks(object):
                     raise TypeError(f'{BAD_TYPE}{type(user)=}')
         if ip_address and not isinstance(ip_address, str):
             raise TypeError(f'{BAD_TYPE}{type(ip_address)=}')
-        print(codes)
         self.checks = {
             VALIDATE_USER: {
                 IN_EFFECT: valid_users is not None,
@@ -127,7 +126,6 @@ class ActionChecks(object):
 
     def is_valid_auth_key(self, user_id: str, auth_key: str) -> bool:
         auth_user = uqry.fetch_id_by_auth_key(auth_key)
-        print(f'{auth_user=}')
         return user_id == auth_user
 
     def is_valid_pass_phrase(self, user_id: str, pass_phrase: str) -> bool:
@@ -211,10 +209,8 @@ class SecProtocol(object):
         return self.name
 
     def is_permitted(self, action, user_id, check_vals):
-        print(f'{check_vals=}')
         valid = True
         if action in self.__dict__:
-            print(f'{action=}')
             valid = self.__dict__[action].is_permitted(user_id,
                                                        check_vals)
         return valid
@@ -246,9 +242,7 @@ def is_permitted(prot_name, action, user_id: str = '', auth_key: str = '',
 
 
 def fetch_by_key(prot_name: str):
-    print(f'fetch_by_key: {prot_name=}')
     ret = sec_manager.get(prot_name, None)
-    print(f'{ret=}')
     return ret
 
 
@@ -349,14 +343,13 @@ GOOD_VALID_USERS = [TEST_EMAIL, 'kris@smack.com']
 TEST_NAME = 'test name'
 TEST_PHRASE = 'test phrase'
 TEST_CODE = 'test code'
-TEST_CODES = {'some event name': TEST_CODE}
+TEST_CODES = {TEST_CODE: 'some event name'}
 
 GOOD_SEC_CHECKS = ActionChecks(auth_key=True,
                                pass_phrase=True,
                                this_phrase=TEST_PHRASE,
                                ip_address=False,
-                               valid_users=GOOD_VALID_USERS,
-                               codes=TEST_CODES)
+                               valid_users=GOOD_VALID_USERS)
 
 NO_USERS_SEC_CHECKS = ActionChecks(auth_key=True,
                                    pass_phrase=True,
