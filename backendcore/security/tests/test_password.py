@@ -2,7 +2,7 @@
 """
 Tests password.py
 """
-from datetime import datetime, timedelta
+from datetime import timedelta
 from unittest import mock
 import os
 
@@ -25,9 +25,9 @@ def temp_user():
         uqry.delete(uqry.TEST_EMAIL)
     except Exception:
         print('User was not already in DB')
-    mongo_id = uqry.create_test_user()
+    uqry.create_test_user()
     user = uqry.fetch_by_key(uqry.TEST_EMAIL)
-    yield  user
+    yield user
     uqry.delete(uqry.TEST_EMAIL)
 
 
@@ -70,7 +70,7 @@ def test_reset_wrong_token(temp_user):
     Tests that we do not change the user's password if the token is
     invalid.
     """
-    orig_pw = temp_user.get(uqry.PASSWORD)
+    temp_user.get(uqry.PASSWORD)
     email = uqry.TEST_EMAIL
     pwd.create_pw_reset_token(email)
     with pytest.raises(ValueError):
@@ -82,13 +82,14 @@ def test_expired_pw_reset_tok(temp_user):
     """
     Test that we raise an error if the user's password reset token has expired.
     """
-    orig_pw = temp_user[uqry.PASSWORD]
+    temp_user[uqry.PASSWORD]
     token = pwd.create_pw_reset_token(uqry.TEST_EMAIL)
     # TODO: The security package should not raise HTTP exceptions.
-    with pytest.raises(wz.Unauthorized), mock.patch('backendcore.security.utils.now') as mock_now:
+    with (pytest.raises(wz.Unauthorized),
+          mock.patch('backendcore.security.utils.now') as mock_now):
         user = uqry.fetch_user(uqry.TEST_EMAIL)
-        mock_now.return_value = user[uqry.PW_RES_TOK_ISS_TIME] + PW_RESET_TOK_TTL + timedelta(
-            minutes=1
-        )
+        mock_now.return_value = (user[uqry.PW_RES_TOK_ISS_TIME]
+                                 + PW_RESET_TOK_TTL
+                                 + timedelta(minutes=1))
         pwd.reset_pw(email=uqry.TEST_EMAIL, token=token, new_pw='new pw')
     assert not pwd.correct_pw(user[uqry.EMAIL], 'new pw')

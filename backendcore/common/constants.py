@@ -1,6 +1,7 @@
 AUTH = 'Authorization'
 AUTH_KEY = 'Auth-Key'
 CODE = 'code'
+CODES = 'codes'
 CREATE = 'create'
 CREATE_DATE = 'create_date'
 DELETE = 'delete'

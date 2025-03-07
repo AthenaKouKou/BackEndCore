@@ -4,14 +4,13 @@ Tests auth_key.py
 """
 import os
 
-from datetime import datetime, timedelta
+from datetime import timedelta
 from unittest import mock
 
 import pytest
 
 from backendcore.env.env_utils import is_cicd_env
 from backendcore.security.utils import now
-from backendcore.security.settings import get_auth_key_ttl
 import backendcore.users.query as uqry
 
 import backendcore.security.auth_key as akey
@@ -38,10 +37,10 @@ def temp_user():
         uqry.delete(uqry.TEST_EMAIL)
     except Exception:
         print('User was not already in DB')
-    mongo_id = uqry.create_test_user()
+    uqry.create_test_user()
     user = uqry.fetch_by_key(uqry.TEST_EMAIL)
     print(f'{user=}')
-    yield  user
+    yield user
     uqry.delete(uqry.TEST_EMAIL)
 
 
@@ -55,7 +54,8 @@ def time_that_should_be_ok(issue_time):
 
 
 def time_that_should_not_be_ok(issue_time):
-    time_now = issue_time + akey.get_auth_key_ttl() + timedelta(minutes=NOT_OK_MINUTES)
+    time_now = (issue_time + akey.get_auth_key_ttl()
+                + timedelta(minutes=NOT_OK_MINUTES))
     print(f'{issue_time=}')
     print(f'{time_now=}')
     return time_now
@@ -108,7 +108,8 @@ def test_is_expired_key(temp_user):
     email = temp_user[uqry.EMAIL]
     akey.set_auth_key(email)
     with mock.patch(NOW) as mock_now:
-        mock_now.return_value = time_that_should_not_be_ok(get_issue_time(temp_user))
+        mock_now.return_value = time_that_should_not_be_ok(
+                                    get_issue_time(temp_user))
         user = uqry.fetch_user(email)
         assert not akey.is_valid_key(email, user[uqry.KEY])
 

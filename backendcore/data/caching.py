@@ -232,6 +232,17 @@ class DataCollection(object):
         self.clear_cache()
         return ret
 
+    def delete_many(self, filters={}):
+        """
+        Deletes many records based on filters.
+        Returns the DB result of the delete.
+        """
+        ret = dbc.delete_many(self.db_nm,
+                              self.collect_nm,
+                              filters)
+        self.clear_cache()
+        return ret
+
     def aggregate(self, pipeline):
         return dbc.aggregate(self.db_nm, self.collect_nm, pipeline)
 
