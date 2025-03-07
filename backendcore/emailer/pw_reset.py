@@ -31,6 +31,7 @@ def is_valid_mail_method(method):
 
 
 def set_base_url(testing_env):
+    print(f'{testing_env=}')
     if testing_env:
         base_url = TEST_URL
     else:
@@ -38,6 +39,7 @@ def set_base_url(testing_env):
     if not base_url.endswith('/'):
         base_url += '/'
     base_url += RESET
+    print(f'{base_url=}')
     return base_url
 
 
