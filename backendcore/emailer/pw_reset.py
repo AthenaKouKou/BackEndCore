@@ -38,6 +38,8 @@ def set_base_url(testing_env):
         base_url = BASE_URL
     if not base_url.endswith('/'):
         base_url += '/'
+    if not base_url:
+        raise ValueError(f'Bad URL: {base_url=}')
     base_url += RESET
     print(f'{base_url=}')
     return base_url
