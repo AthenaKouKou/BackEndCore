@@ -43,6 +43,13 @@ def test_base_url_test_true(mock_get_test_url):
     assert pwr.set_base_url(True).startswith(FAKE_TEST_URL)
 
 
+@patch(f'{BACKENDCORE_EMAILER}.pw_reset.get_base_url',
+       autospec=True, return_value='')
+def test_empty_url(mock_get_base_url):
+    with pytest.raises(ValueError):
+        pwr.set_base_url(True)
+
+
 @patch(f'{BACKENDCORE_EMAILER}.api_send.send_mail',
        autospec=True, return_value='Not none')
 def test_send_pw_reset(mock_send_mail):
