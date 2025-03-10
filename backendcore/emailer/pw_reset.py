@@ -26,6 +26,20 @@ TEST_URL = f'{urls.TEST_FRONTEND_URL}'
 PW_RES_SUBJ = f'Reset Your {cnm.OUR_NAME} password'
 
 
+def get_base_url():
+    """
+    A patch location!
+    """
+    return BASE_URL
+
+
+def get_test_url():
+    """
+    A patch location
+    """
+    return TEST_URL
+
+
 def is_valid_mail_method(method):
     return method in VALID_MAIL_METHODS
 
@@ -33,15 +47,15 @@ def is_valid_mail_method(method):
 def set_base_url(testing_env):
     print(f'{testing_env=}')
     if testing_env:
-        base_url = TEST_URL
+        base_url = get_test_url()
     else:
-        base_url = BASE_URL
+        base_url = get_base_url()
+        print(f'{base_url=}')
+    if not base_url:
+        raise ValueError(f'Bad URL for password reset: {base_url=}')
     if not base_url.endswith('/'):
         base_url += '/'
-    if not base_url:
-        raise ValueError(f'Bad URL: {base_url=}')
     base_url += RESET
-    print(f'{base_url=}')
     return base_url
 
 
@@ -58,6 +72,7 @@ def send_pw_reset(
     if not is_valid_mail_method(method):
         raise ValueError(f'Bad mail method: {method}')
     tok_ttl_minutes = tok_ttl_seconds // 60
+    params = f'id={user_email}&pw_reset_token={reset_tok}'
     MESSAGE = f"""
 <p>
   Hello,
@@ -70,7 +85,7 @@ def send_pw_reset(
 </p>
 
 <p>
-  <a href="{base_url}?id={user_email}&pw_reset_token={reset_tok}">
+  <a href="{base_url}?{params}">
   Click here to reset your password.
   </a>
 </p>
