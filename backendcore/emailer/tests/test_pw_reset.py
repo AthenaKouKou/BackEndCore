@@ -27,6 +27,10 @@ def test_is_not_valid_mail_method():
     assert not pwr.is_valid_mail_method(BAD_METHOD)
 
 
+def test_check_for_slash():
+    assert pwr.check_for_slash(FAKE_BASE_URL).endswith('/')
+
+
 @patch(f'{BACKENDCORE_EMAILER}.pw_reset.get_base_url',
        autospec=True, return_value=FAKE_BASE_URL)
 def test_base_url_test_false(mock_get_base_url):

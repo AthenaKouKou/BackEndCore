@@ -44,6 +44,12 @@ def is_valid_mail_method(method):
     return method in VALID_MAIL_METHODS
 
 
+def check_for_slash(base_url):
+    if not base_url.endswith('/'):
+        base_url += '/'
+    return base_url
+
+
 def set_base_url(testing_env):
     print(f'{testing_env=}')
     if testing_env:
@@ -53,8 +59,7 @@ def set_base_url(testing_env):
         print(f'{base_url=}')
     if not base_url:
         raise ValueError(f'Bad URL for password reset: {base_url=}')
-    if not base_url.endswith('/'):
-        base_url += '/'
+    base_url = check_for_slash(base_url)
     base_url += RESET
     return base_url
 
