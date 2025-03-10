@@ -25,6 +25,9 @@ BASE_URL = f'{urls.FRONTEND_BASE_URL}'
 TEST_URL = f'{urls.TEST_FRONTEND_URL}'
 PW_RES_SUBJ = f'Reset Your {cnm.OUR_NAME} password'
 
+ID_PARAM_NAME = 'id'
+TOKEN_PARAM_NAME = 'pwResetToken'
+
 
 def get_base_url():
     """
@@ -77,7 +80,7 @@ def send_pw_reset(
     if not is_valid_mail_method(method):
         raise ValueError(f'Bad mail method: {method}')
     tok_ttl_minutes = tok_ttl_seconds // 60
-    params = f'id={user_email}&pw_reset_token={reset_tok}'
+    params = f'{ID_PARAM_NAME}={user_email}&{TOKEN_PARAM_NAME}={reset_tok}'
     MESSAGE = f"""
 <p>
   Hello,
