@@ -193,6 +193,13 @@ class DataCollection(object):
         if clear_cache:
             self.clear_cache()
         return ret
+    
+    def add_many(self, recs: list, clear_cache=True):
+        """
+        Creates many new records based on a list of record dicts.
+        Returns DB result of the insert.
+        """
+        ret = dbc.insert_many
 
     def update(self, key_val: str, update_dict: dict, by_id: bool = False):
         if not self.exists(key_val):
