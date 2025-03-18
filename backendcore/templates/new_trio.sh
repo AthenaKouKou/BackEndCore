@@ -9,8 +9,8 @@ TEMPL_ENT=template
 TEMPL_CLASS_PRE=Template
 TEMPL_CONST=TEMPLATE
 
-API_DIR=api_server
-API_MOD_DIR="$API_DIR/apis"
+API_DIR=api
+API_MOD_DIR="$API_DIR"
 API_TEST_DIR="$API_DIR/tests"
 
 if [ -z $1 ]; then

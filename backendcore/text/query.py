@@ -1,7 +1,5 @@
 """
-This is our interface to text data around our different sites.
-We never expect our users to add or delete texts,
-so we make no provisions for that.
+This is our interface to some texts data.
 """
 from backendcore.data.caching import needs_cache, get_cache
 
