@@ -59,7 +59,6 @@ def _get_user_info(request):
     return user_id, auth_key
 
 
-
 JOURNAL_TEXT_FIELDS = 'Journal text fields'
 
 
