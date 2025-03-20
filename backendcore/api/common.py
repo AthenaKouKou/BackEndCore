@@ -90,3 +90,7 @@ def signup_requires_phone():
     """
     req_phone = getenv(REQ_EMAIL, None)
     return req_phone is not None
+
+
+def get_req_headers(request):
+    return dict(request.headers)

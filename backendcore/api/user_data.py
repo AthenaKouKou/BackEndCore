@@ -38,8 +38,6 @@ from backendcore.users.query import (
     ORG,
 )
 
-from server.utils import get_req_headers
-
 api = Namespace(USER_DATA, 'Data about our users.')
 parser = api.parser()
 parser.add_argument(ak.AUTH, location='headers')
@@ -59,7 +57,7 @@ signup_fields_dict = {
 }
 
 
-if acmn.requires_phone():
+if acmn.signup_requires_phone():
     signup_fields_dict[PHONE] = fields.String
 
 signup_fields = api.model('SignUp', signup_fields_dict)
@@ -214,7 +212,7 @@ class IsValidKey(Resource):
         If the headers contain a valid key, responds with 200-OK;
         401-unauthorized otherwise.
         """
-        hdrs = get_req_headers(request)
+        hdrs = acmn.get_req_headers(request)
         if AUTH_KEY not in hdrs:
             raise wz.Unauthorized('Auth key missing from headers.')
         else:
@@ -247,7 +245,7 @@ class DeleteUser(Resource):
         If the headers contain a valid key, responds with 200-OK;
         401-unauthorized otherwise.
         """
-        hdrs = get_req_headers(request)
+        hdrs = acmn.get_req_headers(request)
         if ak.AUTH not in hdrs:
             raise wz.Unauthorized('Login key missing from headers.')
         else:
