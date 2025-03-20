@@ -206,6 +206,7 @@ class IsValidKey(Resource):
         If the headers contain a valid key, responds with 200-OK;
         401-unauthorized otherwise.
         """
+        print(request.headers)
         auth_key = acmn.get_auth_key_from_request(request)
         if auth_key is not None:
             raise wz.Unauthorized('Auth key missing from headers.')
