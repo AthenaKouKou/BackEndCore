@@ -193,11 +193,6 @@ class ResetPassword(Resource):
             raise wz.NotAcceptable(f'Password reset error: {str(err)}')
 
 
-is_valid_key_fields = api.model('IsValidKey', {
-    USER_ID: fields.String,
-})
-
-
 @api.route(f'/{VALID_KEY}')
 @api.expect(parser)
 class IsValidKey(Resource):
@@ -205,7 +200,6 @@ class IsValidKey(Resource):
     Indicates whether the provided auth key is valid.
     """
     @api.doc(security=AUTH_KEY)
-    @api.expect(is_valid_key_fields)
     @api.response(HTTPStatus.UNAUTHORIZED.value, 'Unauthorized')
     def get(self):
         """
