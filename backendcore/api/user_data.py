@@ -207,21 +207,14 @@ class IsValidKey(Resource):
     @api.doc(security=AUTH_KEY)
     @api.expect(is_valid_key_fields)
     @api.response(HTTPStatus.UNAUTHORIZED.value, 'Unauthorized')
-    def post(self):
+    def get(self):
         """
         If the headers contain a valid key, responds with 200-OK;
         401-unauthorized otherwise.
         """
         auth_key = acmn.get_auth_key_from_request(request)
-        if auth_key is None:
+        if auth_key is not None:
             raise wz.Unauthorized('Auth key missing from headers.')
-        """
-        Temporarily commented out until the issue w/ frontend login is resolved
-        args = request.json
-        if args is None or USER_ID not in args:
-            raise wz.Unauthorized('User_id missing from headers.')
-        valid = ak.is_valid_key(args[USER_ID], hdrs[AUTH_KEY])
-        """
         valid = ak.is_valid_key_only(auth_key)
         if not valid:
             raise wz.Unauthorized(f'Invalid login key: {auth_key=}')
