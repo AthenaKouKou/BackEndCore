@@ -69,10 +69,9 @@ def get_auth_key_from_request(request) -> str:
     """
     Gets the auth key from the request's header.
     """
-    auth_key = request.headers.get(AUTH, None)
-    print(auth_key)
+    auth_key = request.headers.get(AUTH_KEY, None)
     if auth_key is None:
-        auth_key = request.headers.get(AUTH_KEY, None)
+        auth_key = request.headers.get(AUTH, None)
     return auth_key
 
 
