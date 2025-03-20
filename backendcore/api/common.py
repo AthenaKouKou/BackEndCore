@@ -1,13 +1,17 @@
 """
 Common functions for API handling.
 """
-from backendcore.api.constants import AUTH
+from os import getenv
+
+from backendcore.api.constants import (
+    AUTH,
+    USER_ID,
+)
 
 import backendcore.users.query as uqry
 
 GET_FROM_JSON = ['POST', 'PUT', 'PATCH']
 
-USER_ID = 'user_id'
 EMAIL = 'email'
 PARAM_SEP = '&'
 KEY_VAL_SEP = '='
@@ -75,3 +79,14 @@ def get_auth_key_and_user(request):
     if not user_id:
         user_id = uqry.fetch_id_by_auth_key(auth_key)
     return (auth_key, user_id)
+
+
+REQ_EMAIL = 'REQ_EMAIL'
+
+
+def signup_requires_phone():
+    """
+    Checks if the current server requires a phone number for signup
+    """
+    req_phone = getenv(REQ_EMAIL, None)
+    return req_phone is not None

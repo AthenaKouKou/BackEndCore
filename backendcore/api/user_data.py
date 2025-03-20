@@ -16,7 +16,12 @@ from backendcore.api.constants import (
     SIGNUP,
     USER_DATA,
 )
-from backendcore.common.constants import EMAIL, PHONE, AUTH_KEY
+from backendcore.common.constants import (
+    EMAIL,
+    PHONE,
+    AUTH_KEY,
+    USER_ID,
+)
 from backendcore.emailer.user_email import normalize_email
 import backendcore.emailer.pw_reset as pwr
 import backendcore.security.auth_key as ak
@@ -39,25 +44,25 @@ api = Namespace(USER_DATA, 'Data about our users.')
 parser = api.parser()
 parser.add_argument(ak.AUTH, location='headers')
 
-FIRST_TEMP = 'first_id'
-LAST_TEMP = 'last_id'
 NEW_RECIPS_KEY = 'New recipients'
 PW_RESET_TOK = 'pw_reset_token'
-RECIP_EMAIL = 'recip_email'
 RESET_PW = 'reset_pw'
-USER_ID = 'user_id'
 VALID_KEY = 'valid_key'
-EDIT_GRP_USERS = 'edit_grp_users'
 
 
-signup_fields = api.model('SignUp', {
+signup_fields_dict = {
     EMAIL: fields.String,
     PASSWORD: fields.String,
     FIRST_NAME: fields.String,
     LAST_NAME: fields.String,
     ORG: fields.String,
-    PHONE: fields.String,
-})
+}
+
+
+if acmn.requires_phone():
+    signup_fields_dict[PHONE] = fields.String
+
+signup_fields = api.model('SignUp', signup_fields_dict)
 
 SAMPLE_PASSWORD = 'valid_password'
 
