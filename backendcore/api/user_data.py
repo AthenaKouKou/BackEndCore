@@ -15,12 +15,12 @@ from backendcore.api.constants import (
     MESSAGE,
     SIGNUP,
     USER_DATA,
+    USER_ID,
 )
 from backendcore.common.constants import (
     EMAIL,
     PHONE,
     AUTH_KEY,
-    USER_ID,
 )
 from backendcore.emailer.user_email import normalize_email
 import backendcore.emailer.pw_reset as pwr
