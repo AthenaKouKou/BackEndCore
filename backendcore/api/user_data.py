@@ -212,11 +212,9 @@ class IsValidKey(Resource):
         If the headers contain a valid key, responds with 200-OK;
         401-unauthorized otherwise.
         """
-        hdrs = acmn.get_req_headers(request)
-        if AUTH_KEY not in hdrs:
+        auth_key = acmn.get_auth_key_from_request(request)
+        if auth_key is None:
             raise wz.Unauthorized('Auth key missing from headers.')
-        else:
-            auth_key = hdrs[AUTH_KEY]
         """
         Temporarily commented out until the issue w/ frontend login is resolved
         args = request.json

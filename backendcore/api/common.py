@@ -4,8 +4,12 @@ Common functions for API handling.
 from os import getenv
 
 from backendcore.api.constants import (
-    AUTH,
     USER_ID,
+)
+
+from backendcore.common.constants import (
+    AUTH_KEY,
+    AUTH,
 )
 
 import backendcore.users.query as uqry
@@ -65,7 +69,10 @@ def get_auth_key_from_request(request) -> str:
     """
     Gets the auth key from the request's header.
     """
-    return request.headers.get(AUTH, None)
+    auth_key = request.headers.get(AUTH, None)
+    if auth_key is None:
+        auth_key = request.headers.get(AUTH_KEY, None)
+    return auth_key
 
 
 def get_auth_key_and_user(request):
