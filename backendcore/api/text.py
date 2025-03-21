@@ -18,7 +18,6 @@ from backendcore.api.constants import (
     DELETE,
     FIELDS,
     FORM,
-    JOURNAL,
     MESSAGE,
     READ,
     UPDATE,
@@ -28,23 +27,19 @@ import backendcore.security.sec_manager2 as sm
 
 from backendcore.users.query import fetch_id_by_auth_key
 
-import text.fields as tflds
-from text.fields import (
+import backendcore.text.fields as tflds
+from backendcore.text.fields import (
     EDITOR,
     TEXT,
+    TEXT_DISP_NAME,
 )
-import text.form as tform
-import text.query as tqry
+import backendcore.text.form as tform
+import backendcore.text.query as tqry
 
 
-api = Namespace(JOURNAL, 'Web-based journal manager.')
+api = Namespace(TEXT_DISP_NAME, 'Editing text data for our sites.')
 parser = api.parser()
 parser.add_argument(AUTH, location='headers')
-MANU = 'manuscripts'
-MANU_ID = 'manuscript id'
-STATE = 'state'
-ACTION = 'action'
-DASHCOLUMNS = 'dashcolumns'
 
 PROTOCOL_NM = sm.fetch_journal_protocol_name()
 

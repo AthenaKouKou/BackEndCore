@@ -1,22 +1,35 @@
 from backendcore.data.form_filler import (
-    DESCR, DISP_NAME
+    # DESCR,
+    DISP_NAME,
 )
 import backendcore.data.fields as cflds
 
-NAME = cflds.NAME
-CODE = cflds.CODE
+EDITOR = 'Editor'
+EDITOR_DISP_NAME = EDITOR
+LAST_EDIT = 'last_edit'
+LAST_EDIT_DISP_NAME = 'Last Edit Date'
+TITLE = 'title'
+TITLE_DISP_NAME = 'Title'
+TEXT = 'text'
+TEXT_DISP_NAME = 'Text'
 
-TEST_FLD_NM = CODE
-TEST_FLD_DISP_NM = 'Sample Code'
+TEST_FLD_NM = TITLE
+TEST_FLD_DISP_NM = TITLE_DISP_NAME
 
 
 FIELDS = {
-    CODE: {
-        DISP_NAME: TEST_FLD_DISP_NM,
+    TITLE: {
+        DISP_NAME: TITLE_DISP_NAME,
     },
-    NAME: {
-        DISP_NAME: 'Sample Name',
-        DESCR: 'This is the field description.'
+    TEXT: {
+        DISP_NAME: TEXT_DISP_NAME,
+        cflds.MARKDOWN: 1,
+    },
+    EDITOR: {
+        DISP_NAME: EDITOR_DISP_NAME,
+    },
+    LAST_EDIT: {
+        DISP_NAME: LAST_EDIT_DISP_NAME,
     },
 }
 

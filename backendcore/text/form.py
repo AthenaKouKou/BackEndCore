@@ -4,12 +4,22 @@ This module provides a sample query form.
 
 import backendcore.data.form_filler as ff
 
-from backendcore.templates.fields import CODE
+from backendcore.text.fields import (
+    TITLE,
+    TITLE_DISP_NAME,
+    TEXT,
+    TEXT_DISP_NAME,
+)
 
 FORM_FLDS = [
     {
-        ff.FLD_NM: CODE,
-        ff.QSTN: 'Sample:',
+        ff.FLD_NM: TITLE,
+        ff.QSTN: TITLE_DISP_NAME,
+        ff.PARAM_TYPE: ff.QUERY_STR,
+    },
+    {
+        ff.FLD_NM: TEXT,
+        ff.QSTN: TEXT_DISP_NAME,
         ff.PARAM_TYPE: ff.QUERY_STR,
     },
 ]
