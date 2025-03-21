@@ -39,6 +39,7 @@ PAY_PROV_SID = 'pay_prov_session_id'
 PAY_PROV_USER_ID = 'pay_prov_user_id'
 # some users may record email addresses they wish to send reports to:
 RPT_RECIPS = 'rpt_recipients'
+RECIP_EMAIL = 'recip_email'
 
 db_name = get_client_db()
 
