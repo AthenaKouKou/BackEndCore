@@ -13,14 +13,18 @@ FILE = 'file'
 FILETYPE = 'filetype'
 FORM = 'form'
 JOURNAL = 'Journal'
-LOGIN = 'login'
 MESSAGE = 'message'
-RETRIEVE = 'retrieve'
 SEC_MANAGER = 'SecurityManager'
 SEC_MANAGER_KEY = 'Security Manager'
-SIGNUP = 'signup'
 TEXT = 'text'
 USER_ID = 'user_id'
+
+# URL values
+IS_PERMITTED = 'isPermitted'
+RETRIEVE = 'retrieve'
+SIGNUP = 'signup'
+LOGIN = 'login'
+RESET_PW = 'reset_pw'
 
 # Endpoint Categories Categories
 USER_DATA = 'UserData'
