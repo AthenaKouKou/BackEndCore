@@ -16,6 +16,7 @@ from backendcore.api.constants import (
     SIGNUP,
     USER_DATA,
     USER_ID,
+    RESET_PW,
 )
 from backendcore.common.constants import (
     EMAIL,
@@ -44,7 +45,6 @@ parser.add_argument(ak.AUTH, location='headers')
 
 NEW_RECIPS_KEY = 'New recipients'
 PW_RESET_TOK = 'pw_reset_token'
-RESET_PW = 'reset_pw'
 VALID_KEY = 'valid_key'
 
 

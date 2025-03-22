@@ -24,6 +24,7 @@ IS_PERMITTED = 'isPermitted'
 RETRIEVE = 'retrieve'
 SIGNUP = 'signup'
 LOGIN = 'login'
+RESET_PW = 'reset_pw'
 
 # Endpoint Categories Categories
 USER_DATA = 'UserData'
