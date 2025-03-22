@@ -57,7 +57,7 @@ def _get_user_info(request):
 JOURNAL_TEXT_FIELDS = 'Journal text fields'
 
 
-@api.route(f'/{TEXT}/{FIELDS}')
+@api.route(f'/{FIELDS}')
 class TextFields(Resource):
     """
     Get the journal text fields.
@@ -72,7 +72,7 @@ class TextFields(Resource):
 JOURNAL_TEXT_FORM = 'Journal text add/query/update form'
 
 
-@api.route(f'/{TEXT}/{FORM}')
+@api.route(f'/{FORM}')
 class TextForm(Resource):
     """
     Get the form for querying the journal text data.
@@ -87,7 +87,7 @@ class TextForm(Resource):
 JOURNAL_TEXT_READ = 'Journal text map'
 
 
-@api.route(f'/{TEXT}/{READ}')
+@api.route(f'/{READ}')
 class TextRead(Resource):
     """
     This endpoint serves journal text data as a dict.
@@ -108,7 +108,7 @@ UPDATE_TEXT_FLDS = api.model('UpdateText', {
 })
 
 
-@api.route(f'/{TEXT}/{UPDATE}/<title>')
+@api.route(f'/{UPDATE}/<title>')
 @api.expect(parser)
 class TextUpdate(Resource):
     @api.response(HTTPStatus.OK, 'Success')
@@ -130,7 +130,7 @@ class TextUpdate(Resource):
         return {MESSAGE: 'Text updated.'}
 
 
-@api.route(f'/{TEXT}/{DELETE}/<title>')
+@api.route(f'/{DELETE}/<title>')
 @api.expect(parser)
 class TextDelete(Resource):
     @api.response(HTTPStatus.OK, 'Success')
