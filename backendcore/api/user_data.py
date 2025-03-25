@@ -216,7 +216,7 @@ class IsValidKey(Resource):
             return {AUTH_KEY: 'valid'}
 
 
-@api.route('/<user_id>')
+@api.route(f'/<{USER_ID}>')
 @api.expect(parser)
 class DeleteUser(Resource):
     """
@@ -244,3 +244,17 @@ class DeleteUser(Resource):
             except ValueError as e:
                 raise wz.NotFound(e)
             return {MESSAGE: f'User {user_id} deleted'}
+
+
+@api.route(f'/<{USER_ID}>')
+class UserExists(Resource):
+    """
+    Delete a user if credentials are OK.
+    """
+    @api.response(HTTPStatus.OK.value, 'OK')
+    @api.response(HTTPStatus.NOT_FOUND.value, 'User not found')
+    def get(self, user_id):
+        if uqry.exists(user_id):
+            return HTTPStatus.OK
+        else:
+            raise HTTPStatus.NOT_FOUND
