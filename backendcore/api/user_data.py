@@ -217,7 +217,6 @@ class IsValidKey(Resource):
 
 
 @api.route(f'/<{USER_ID}>')
-@api.expect(parser)
 class User(Resource):
     """
     Delete a user if credentials are OK.
@@ -225,6 +224,7 @@ class User(Resource):
     @api.doc(security=ak.AUTH)
     @api.response(HTTPStatus.OK.value, 'OK')
     @api.response(HTTPStatus.UNAUTHORIZED.value, 'Unauthorized')
+    @api.expect(parser)
     def delete(self, user_id):
         """
         If the headers contain a valid key, responds with 200-OK;
@@ -245,13 +245,13 @@ class User(Resource):
                 raise wz.NotFound(e)
             return {MESSAGE: f'User {user_id} deleted'}
 
-    """
-    Returns 200 if a user exists, 404 otherwise
-    """
     @api.response(HTTPStatus.OK.value, 'OK')
     @api.response(HTTPStatus.NOT_FOUND.value, 'User not found')
     def get(self, user_id):
+        """
+        Returns 200 if a user exists, 404 otherwise
+        """
         if uqry.exists(user_id):
-            return HTTPStatus.OK
+            return {MESSAGE: f'User {user_id} exists'}
         else:
-            raise HTTPStatus.NOT_FOUND
+            raise wz.NotFound(f'User {user_id} not found')
