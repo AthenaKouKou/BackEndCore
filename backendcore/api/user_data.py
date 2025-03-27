@@ -230,6 +230,8 @@ class User(Resource):
         If the headers contain a valid key, responds with 200-OK;
         401-unauthorized otherwise.
         """
+        """
+        Temporarily commenting this out until MFC stuff is settled
         hdrs = acmn.get_req_headers(request)
         if ak.AUTH not in hdrs:
             raise wz.Unauthorized('Login key missing from headers.')
@@ -244,6 +246,12 @@ class User(Resource):
             except ValueError as e:
                 raise wz.NotFound(e)
             return {MESSAGE: f'User {user_id} deleted'}
+        """
+        try:
+            uqry.delete(user_id)
+        except ValueError as e:
+            raise wz.NotFound(e)
+        return {MESSAGE: f'User {user_id} deleted'}
 
     @api.response(HTTPStatus.OK.value, 'OK')
     @api.response(HTTPStatus.NOT_FOUND.value, 'User not found')
