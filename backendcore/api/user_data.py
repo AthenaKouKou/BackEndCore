@@ -250,7 +250,7 @@ class User(Resource):
         try:
             uqry.delete(user_id)
         except ValueError as e:
-            raise wz.NotFound(e)
+            raise wz.NotFound(f'Error deleting user {user_id}: {e}')
         return {MESSAGE: f'User {user_id} deleted'}
 
     @api.response(HTTPStatus.OK.value, 'OK')
