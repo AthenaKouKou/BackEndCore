@@ -20,7 +20,7 @@ from backendcore.api.user_data import ( # noqa F401
 )
 
 api = Api(
-    title='Mark Fontanilla & Company API Server',
+    title='BackEndCore Test Server',
     version='1.0',
     description='An index server.',
     contact={
