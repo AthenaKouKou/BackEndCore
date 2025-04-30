@@ -24,8 +24,11 @@ passwd = os.environ.get("MONGO_PASSWD", '')
 cloud_mdb = "mongodb+srv"
 db_params = "retryWrites=false&w=majority"
 
-LTE = '$lte'
 GTE = '$gte'
+LTE = '$lte'
+PULL = '$pull'
+PUSH = '$push'
+SET = '$set'
 
 DATE_KEY = '$date'
 
@@ -337,7 +340,7 @@ class MongoDB():
 
     def add_fld_to_all(self, db_nm, clct_nm, new_fld, value):
         collect = get_collect(db_nm, clct_nm)
-        return collect.update_many({}, {'$set': {new_fld: value}},
+        return collect.update_many({}, {SET: {new_fld: value}},
                                    upsert=False)
 
     def update_fld(self, db_nm, clct_nm, filters, fld_nm, fld_val):
@@ -348,7 +351,7 @@ class MongoDB():
         """
         collect = get_collect(db_nm, clct_nm)
         mongo_update_obj = collect.update_one(filters,
-                                              {'$set': {fld_nm: fld_val}})
+                                              {SET: {fld_nm: fld_val}})
         return create_update_ret(mongo_update_obj)
 
     def update_fld_for_many(self, db_nm, clct_nm, filters, fld_nm, fld_val):
@@ -359,17 +362,17 @@ class MongoDB():
         """
         collect = get_collect(db_nm, clct_nm)
         mongo_update_obj = collect.update_many(filters,
-                                               {'$set': {fld_nm: fld_val}})
+                                               {SET: {fld_nm: fld_val}})
         return create_update_ret(mongo_update_obj)
 
     def update(self, db_nm, clct_nm, filters, update_dict):
         collect = get_collect(db_nm, clct_nm)
-        mongo_update_obj = collect.update_one(filters, {'$set': update_dict})
+        mongo_update_obj = collect.update_one(filters, {SET: update_dict})
         return create_update_ret(mongo_update_obj)
 
     def upsert(self, db_nm, clct_nm, filters, update_dict):
         collect = get_collect(db_nm, clct_nm)
-        ret = collect.update_one(filters, {'$set': update_dict}, upsert=True)
+        ret = collect.update_one(filters, {SET: update_dict}, upsert=True)
         rec_id = ret.upserted_id
         if not rec_id:  # we updated, not inserted
             rec = collect.find_one(update_dict)
@@ -392,10 +395,27 @@ class MongoDB():
 
     def append_to_list(self, db_nm, clct_nm, filter_fld_nm, filter_fld_val,
                        list_nm, new_list_item):
+        """
+        Appends a value to an existing list in a single document, or creates
+        the list with the value if it does not yet exist.
+        """
         collect = get_collect(db_nm, clct_nm)
-        collect.update_one({filter_fld_nm: filter_fld_val},
-                           {'$push': {list_nm: new_list_item}},
-                           upsert=True)
+        mongo_update_obj = collect.update_one({filter_fld_nm: filter_fld_val},
+                                              {PUSH: {list_nm:
+                                                      new_list_item}},
+                                              upsert=True)
+        return create_update_ret(mongo_update_obj)
+
+    def delete_from_list(self, db_nm, clct_nm, filter_fld_nm, filter_fld_val,
+                         list_nm, new_list_item):
+        """
+        Deletes a value from an existing list in a single document.
+        """
+        collect = get_collect(db_nm, clct_nm)
+        mongo_update_obj = collect.update_one({filter_fld_nm: filter_fld_val},
+                                              {PULL: {list_nm: new_list_item}},
+                                              upsert=True)
+        return create_update_ret(mongo_update_obj)
 
     def aggregate(self, db_nm, clct_nm, pipeline):
         return client[db_nm][clct_nm].aggregate(pipeline, allowDiskUse=True)

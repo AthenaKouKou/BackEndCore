@@ -24,3 +24,6 @@ class UpdateReturn():
 
     def succeeded(self) -> bool:
         return self.matched_count > 0
+
+    def updated(self) -> bool:
+        return self.modified_count > 0

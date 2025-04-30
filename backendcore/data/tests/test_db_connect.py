@@ -3,7 +3,6 @@ This module tests our code for database connectivity.
 For the moment, the tests will assume MongoDB.
 """
 import random
-from copy import deepcopy
 
 from unittest.mock import patch
 import pytest
@@ -121,7 +120,7 @@ def test_update_success(a_doc):
     updated.
     """
     result = dbc.update_doc(TEST_DB, TEST_COLLECT, DEF_PAIR, DEF_PAIR)
-    assert dbc.update_success(result) == True
+    assert dbc.update_success(result)
 
 
 @pytest.mark.skip('Update success must be re-written before testing.')
@@ -130,8 +129,9 @@ def test_update_no_success(a_doc):
     Make sure that updated one can properly detect if a record has not been
     updated.
     """
-    result = dbc.update_doc(TEST_DB, TEST_COLLECT, {DEF_FLD: BAD_VAL}, DEF_PAIR)
-    assert dbc.update_success(result) == False
+    result = dbc.update_doc(TEST_DB, TEST_COLLECT,
+                            {DEF_FLD: BAD_VAL}, DEF_PAIR)
+    assert not dbc.update_success(result)
 
 
 @pytest.mark.skip('Update success must be re-written before testing.')
@@ -151,7 +151,8 @@ def test_num_updated_multiple(some_docs):
     Make sure that num_updated can properly detect if several records have been
     updated.
     """
-    result = dbc.update_fld_for_many(TEST_DB, TEST_COLLECT, {}, 'new field', 'new val')
+    result = dbc.update_fld_for_many(TEST_DB, TEST_COLLECT, {},
+                                     'new field', 'new val')
     assert dbc.num_updated(result) > 1
 
 
@@ -161,7 +162,8 @@ def test_num_updated_none(a_doc):
     Make sure that num_updated can properly detect if no records have been
     updated.
     """
-    result = dbc.update_doc(TEST_DB, TEST_COLLECT, {DEF_FLD: BAD_VAL}, DEF_PAIR)
+    result = dbc.update_doc(TEST_DB, TEST_COLLECT, {DEF_FLD: BAD_VAL},
+                            DEF_PAIR)
     assert dbc.num_updated(result) == 0
 
 
@@ -193,7 +195,7 @@ def test_delete_success(a_doc):
     deleted.
     """
     result = dbc.del_one(TEST_DB, TEST_COLLECT, filters=DEF_PAIR)
-    assert dbc.delete_success(result) == True
+    assert dbc.delete_success(result)
 
 
 @pytest.mark.skip('Delete result tests will await rewrite of their functions.')
@@ -203,7 +205,7 @@ def test_delete_no_success(a_doc):
     deleted.
     """
     result = dbc.del_one(TEST_DB, TEST_COLLECT, filters={DEF_FLD: BAD_VAL})
-    assert dbc.delete_success(result) == False
+    assert not dbc.delete_success(result)
 
 
 @pytest.mark.skip('Delete result tests will await rewrite of their functions.')
@@ -252,6 +254,15 @@ def test_append_to_list(mock_append_to_list):
     """
     assert dbc.append_to_list(TEST_DB, TEST_COLLECT, 'any fld', 'any val',
                               'any list', 'any list val') == RET_CONST
+
+
+@patch(f'{DB_OBJ}.delete_from_list', autospec=True, return_value=RET_CONST)
+def test_delete_from_list(mock_delete_from_list):
+    """
+    Test appending to an interior doc list.
+    """
+    assert dbc.delete_from_list(TEST_DB, TEST_COLLECT, 'any fld', 'any val',
+                                'any list', 'any list val') == RET_CONST
 
 
 @patch(f'{DB_OBJ}.rename', autospec=True, return_value=RET_CONST)

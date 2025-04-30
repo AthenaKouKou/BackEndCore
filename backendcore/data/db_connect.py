@@ -373,3 +373,17 @@ def append_to_list(db_nm, clct_nm, filter_fld_nm, filter_fld_val,
                                    filter_fld_val,
                                    list_nm,
                                    new_list_item)
+
+
+@needs_db
+def delete_from_list(db_nm, clct_nm, filter_fld_nm, filter_fld_val,
+                     list_nm, new_list_item):
+    """
+    Note: This has only been implemented for mongoDB for now.
+    """
+    return database.delete_from_list(db_nm,
+                                     clct_nm,
+                                     filter_fld_nm,
+                                     filter_fld_val,
+                                     list_nm,
+                                     new_list_item)
