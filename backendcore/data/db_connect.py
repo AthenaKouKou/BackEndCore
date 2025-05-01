@@ -59,6 +59,7 @@ DUP = "Can't add duplicate"
 # For now database is a global singleton.
 # Maybe one day we will need a... database per thread? I dunno.
 database = None
+db_type = os.environ.get('DATABASE', MONGO)
 
 
 def setup_connection(db_nm: str):
@@ -72,17 +73,14 @@ def get_db():
     Sets up connection to appropriate DB.
     """
     db = None
-    db_type = os.environ.get('DATABASE', MONGO)
     if db_type == MONGO:
         local = os.environ.get("LOCAL_MONGO", REMOTE) == LOCAL
         db = mdb.MongoDB(local_db=local)
-        print(f'{db=}')
     elif db_type == SQL or db_type == SQLITE_MEM:
         db = sdb.SqlDB(variant=SQLITE_MEM)
-        print(f'{db=}')
     elif db_type == MY_SQL or db_type == SQLITE:
         db = sdb.SqlDB(variant=db_type)
-        print(f'{db=}')
+    print(f'{db=}')
     os.environ[LISTS_IN_DB] = LISTS_IN_DB_DICT[db_type]
     os.environ[NO_LISTS_REASON] = "DB does not support lists as values"
     return db
@@ -103,14 +101,15 @@ def needs_db(fn):
     return wrapper
 
 
-@needs_db
 def is_valid_id(rec_id):
     return database.is_valid_id(rec_id)
 
 
-@needs_db
 def get_db_id_len():
-    return database.get_db_id_len()
+    if db_type == MONGO:
+        return mdb.MongoDB.get_db_id_len()
+    else:
+        raise NotImplementedError('db len not implemented for this db type.')
 
 
 @needs_db
