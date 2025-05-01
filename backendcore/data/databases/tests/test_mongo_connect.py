@@ -251,7 +251,7 @@ def test_delete_success(mobj, a_doc):
     deleted.
     """
     result = mobj.delete(TEST_DB, TEST_COLLECT, filters=DEF_PAIR)
-    assert result.succeeded() == True
+    assert result.succeeded()
 
 
 def test_delete_no_success(mobj, a_doc):
@@ -260,7 +260,7 @@ def test_delete_no_success(mobj, a_doc):
     deleted.
     """
     result = mobj.delete(TEST_DB, TEST_COLLECT, filters={DEF_FLD: BAD_VAL})
-    assert result.succeeded() == False
+    assert not result.succeeded()
 
 
 def test_num_deleted_single(mobj, a_doc):
@@ -296,7 +296,7 @@ def test_update_success(mobj, a_doc):
     updated.
     """
     result = mobj.update(TEST_DB, TEST_COLLECT, DEF_PAIR, DEF_PAIR)
-    assert result.succeeded() == True
+    assert result.succeeded()
 
 
 def test_update_no_success(mobj, a_doc):
@@ -305,7 +305,7 @@ def test_update_no_success(mobj, a_doc):
     updated.
     """
     result = mobj.update(TEST_DB, TEST_COLLECT, {DEF_FLD: BAD_VAL}, DEF_PAIR)
-    assert result.succeeded() == False
+    assert not result.succeeded()
 
 
 def test_num_updated_single(mobj, a_doc):
@@ -322,7 +322,8 @@ def test_num_updated_multiple(mobj, some_docs):
     Make sure that num_updated can properly detect if several records have been
     updated.
     """
-    result = mobj.update_fld_for_many(TEST_DB, TEST_COLLECT, {}, 'new field', 'new val')
+    result = mobj.update_fld_for_many(TEST_DB, TEST_COLLECT, {},
+                                      'new field', 'new val')
     assert result.mod_count() > 1
 
 
@@ -351,10 +352,41 @@ def test_append_to_list(mobj, a_doc):
     `a_doc` initiliazes an empty list, so our new val should be
     at `[LIST_FLD][0]`.
     """
-    mobj.append_to_list(TEST_DB, TEST_COLLECT, DEF_FLD, DEF_VAL,
-                       LIST_FLD, 1)  # any old val will do!
+    result = mobj.append_to_list(TEST_DB, TEST_COLLECT, DEF_FLD, DEF_VAL,
+                                 LIST_FLD, 1)  # any old val will do!
+    assert result.succeeded()
     rec = mobj.read_one(TEST_DB, TEST_COLLECT, filters=DEF_PAIR)
     assert rec[LIST_FLD][0] == 1
+
+
+def test_delete_from_list(mobj, a_doc):
+    """
+    Test deleteing from an interior doc list.
+    `a_doc` initiliazes an empty list, so our new val should be
+    at `[LIST_FLD][0]`.
+    """
+    TMP_VAL = 1
+    ret = mobj.append_to_list(TEST_DB, TEST_COLLECT, DEF_FLD, DEF_VAL,
+                              LIST_FLD, TMP_VAL)
+    assert ret.succeeded()
+    rec = mobj.read_one(TEST_DB, TEST_COLLECT, filters=DEF_PAIR)
+    assert rec[LIST_FLD][0] == TMP_VAL
+    ret = mobj.delete_from_list(TEST_DB, TEST_COLLECT, DEF_FLD, DEF_VAL,
+                                LIST_FLD, TMP_VAL)
+    assert ret.succeeded()
+    rec = mobj.read_one(TEST_DB, TEST_COLLECT, filters=DEF_PAIR)
+    assert len(rec[LIST_FLD]) == 0
+
+
+def test_delete_from_list_no_val(mobj, a_doc):
+    """
+    Test deleteing from an interior doc list that doesn't have the value.
+    `a_doc` initiliazes an empty list, so our new val should be
+    at `[LIST_FLD][0]`.
+    """
+    ret = mobj.delete_from_list(TEST_DB, TEST_COLLECT, DEF_FLD, DEF_VAL,
+                                LIST_FLD, 'doesnt matter')
+    assert not ret.updated()
 
 
 def test_rename_fld(mobj, some_docs):
