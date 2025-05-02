@@ -15,3 +15,5 @@ PHONE = 'phone'
 READ = 'read'
 STD_DATE_FORMAT = '%Y-%m-%d'
 UPDATE = 'update'
+
+print('Using newest bcore common constants')
