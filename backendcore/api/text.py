@@ -44,6 +44,7 @@ parser.add_argument(AUTH, location='headers')
 
 PROTOCOL_NM = EDIT_TEXT
 
+
 def _get_user_info(request):
     user_id = None
     if request.is_json:

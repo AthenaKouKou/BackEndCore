@@ -21,7 +21,6 @@ import backendcore.security.auth_key as ak
 import backendcore.users.query as uqry
 from backendcore.security.constants import (
     JOURNAL,
-    EDIT_TEXT,
 )
 
 
