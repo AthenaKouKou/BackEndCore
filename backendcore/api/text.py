@@ -24,6 +24,7 @@ from backendcore.api.constants import (
 )
 
 import backendcore.security.sec_manager2 as sm
+from backendcore.security.constants import EDIT_TEXT
 
 from backendcore.users.query import fetch_id_by_auth_key
 
@@ -41,8 +42,7 @@ api = Namespace(TEXT_DISP_NAME, 'Editing text data for our sites.')
 parser = api.parser()
 parser.add_argument(AUTH, location='headers')
 
-PROTOCOL_NM = sm.fetch_journal_protocol_name()
-
+PROTOCOL_NM = EDIT_TEXT
 
 def _get_user_info(request):
     user_id = None
@@ -54,52 +54,52 @@ def _get_user_info(request):
     return user_id, auth_key
 
 
-JOURNAL_TEXT_FIELDS = 'Journal text fields'
+TEXT_FIELDS = 'Text fields'
 
 
 @api.route(f'/{FIELDS}')
 class TextFields(Resource):
     """
-    Get the journal text fields.
+    Get dictionary of all text fields.
     """
     def get(self):
         """
-        Get the journal text fields.
+        Get the text fields.
         """
-        return {JOURNAL_TEXT_FIELDS: tflds.get_flds()}
+        return {TEXT_FIELDS: tflds.get_flds()}
 
 
-JOURNAL_TEXT_FORM = 'Journal text add/query/update form'
+TEXT_FORM = 'Text add/query/update form'
 
 
 @api.route(f'/{FORM}')
 class TextForm(Resource):
     """
-    Get the form for querying the journal text data.
+    Get the form for querying text data.
     """
     def get(self):
         """
-        Get the form for querying the journal text data.
+        Get the form for querying text data.
         """
-        return {JOURNAL_TEXT_FORM: tform.get_form()}
+        return {TEXT_FORM: tform.get_form()}
 
 
-JOURNAL_TEXT_READ = 'Journal text map'
+TEXT_READ = 'Text map'
 
 
 @api.route(f'/{READ}')
 class TextRead(Resource):
     """
-    This endpoint serves journal text data as a dict.
+    This endpoint serves text data as a dict.
     """
     @api.response(HTTPStatus.OK, 'Success')
     @api.response(HTTPStatus.NOT_FOUND, 'Data not found')
     def get(self):
         """
-        Returns journal text data.
+        Returns text data.
         """
         texts = tqry.fetch_dict()
-        return {JOURNAL_TEXT_READ: texts}
+        return {TEXT_READ: texts}
 
 
 UPDATE_TEXT_FLDS = api.model('UpdateText', {

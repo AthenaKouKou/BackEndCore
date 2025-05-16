@@ -14,8 +14,8 @@ from backendcore.text.fields import (
     TITLE,
 )
 
-DB = 'journalDB'
-COLLECT = 'texts'
+DB = 'textDB'
+COLLECT = 'dmmText'
 CACHE_NM = COLLECT
 
 
