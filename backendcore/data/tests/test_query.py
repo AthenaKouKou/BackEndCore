@@ -56,7 +56,9 @@ TEST_RECS = [
     {'x': 19, 'y': 20},
 ]
 
-@patch('backendcore.data.db_connect.read', autospec=True, return_value=TEST_LIST)
+
+@patch('backendcore.data.db_connect.read', autospec=True,
+       return_value=TEST_LIST)
 def test_fetch_list(mock_read):
     ret = qry.fetch_list('Some DB name', 'Some collection name')
     assert isinstance(ret, list)
@@ -87,15 +89,15 @@ def test_regex_search_no_match():
 
 def test_fetch_by_fld_val():
     res = qry.fetch_by_fld_val(FLD1, VAL1,
-                                TEST_DICT_VALS)
+                               TEST_DICT_VALS)
     assert KEY1 in res
     assert KEY2 not in res
 
 
 def test_fetch_by_fld_val_list():
     res = qry.fetch_by_fld_val(FLD1, VAL1,
-                                TEST_DICT_LISTS,
-                                test_membership=True)
+                               TEST_DICT_LISTS,
+                               test_membership=True)
     assert KEY1 in res
     assert KEY2 not in res
 
@@ -148,8 +150,8 @@ def test_make_combined_key_str():
 def test_list_to_dict_multi_key():
     recs = TEST_RECS
     new_dict = qry.list_to_dict_multi_key('x', 'y', recs)
-    assert new_dict[(17,18)] == {'x': 17, 'y': 18}
-    assert new_dict[(19,20)] == {'x': 19, 'y': 20}
+    assert new_dict[(17, 18)] == {'x': 17, 'y': 18}
+    assert new_dict[(19, 20)] == {'x': 19, 'y': 20}
 
 
 def test_list_to_dict_multi_key_stringify():
@@ -245,5 +247,3 @@ def test_regex_intersect_search_nonexistant_fld():
     assert KEY1 not in res
     assert KEY2 not in res
     assert KEY3 not in res
-
-    

@@ -134,7 +134,7 @@ class ActionChecks(object):
         """
         return pass_phrase == self.phrase
 
-    def is_valid_user(self, user_id, user):
+    def is_valid_user(self, user_id: str, user):
         """
         This method gets the user twice so the others can get it once!
         """
@@ -143,7 +143,7 @@ class ActionChecks(object):
             valid = user in self.valid_users
         return valid
 
-    def is_valid_code(self, user_id, code):
+    def is_valid_code(self, user_id: str, code: str):
         """
         This method compares the code passed to the dictionary of valid codes.
         Note that the dictionary is of the format: {code_name: code}.
@@ -167,6 +167,9 @@ class ActionChecks(object):
                     print(f'is_permitted failing on {check}')
                     return False
         return True
+
+    def has_validate_user(self) -> bool:
+        return self.checks[VALIDATE_USER][IN_EFFECT]
 
 
 class SecProtocol(object):
@@ -208,14 +211,18 @@ class SecProtocol(object):
     def get_name(self):
         return self.name
 
-    def is_permitted(self, action, user_id, check_vals):
+    def is_permitted(self,
+                     action: str,
+                     user_id: str,
+                     check_vals: dict,
+                     ) -> bool:
         valid = True
         if action in self.__dict__:
             valid = self.__dict__[action].is_permitted(user_id,
                                                        check_vals)
         return valid
 
-    def is_valid_user(self, action, user_id):
+    def is_valid_user(self, action: str, user_id: str) -> bool:
         """
         Must pass user_id to the action twice!
         """
@@ -224,6 +231,36 @@ class SecProtocol(object):
             valid = valid = self.__dict__[action].is_valid_user(user_id,
                                                                 user_id)
         return valid
+
+    def add_user(self, user_id: str, actions: list):
+        if actions is None:
+            actions = VALID_ACTIONS
+        for action in actions:
+            if is_valid_action(action):
+                if self.__dict__[action].has_validate_user():
+                    action_list = f'{action}.{USERS}'
+                    dbc.append_to_list(SEC_DB, SEC_COLLECT,
+                                       filter_fld_nm=PROT_NM,
+                                       filter_fld_val=self.name,
+                                       list_nm=action_list,
+                                       new_list_item=user_id)
+            else:
+                raise ValueError(f'{action} is not a valid action')
+
+    def delete_user(self, user_id: str, actions: list):
+        if actions is None:
+            actions = VALID_ACTIONS
+        for action in actions:
+            if is_valid_action(action):
+                if self.__dict__[action].has_validate_user():
+                    action_list = f'{action}.{USERS}'
+                    dbc.delete_from_list(SEC_DB, SEC_COLLECT,
+                                         filter_fld_nm=PROT_NM,
+                                         filter_fld_val=self.name,
+                                         list_nm=action_list,
+                                         new_list_item=user_id)
+            else:
+                raise ValueError(f'{action} is not a valid action')
 
 
 def is_permitted(prot_name, action, user_id: str = '', auth_key: str = '',
@@ -302,7 +339,7 @@ def protocol_from_json(protocol_json):
                        delete=delete_checks)
 
 
-def fetch_all():
+def fetch_all() -> bool:
     """
     Gets all the security protocols from the db and puts them in sec_manager
     """
@@ -311,6 +348,15 @@ def fetch_all():
                               no_id=True)
     for protocol_json in data_list:
         add(protocol_from_json(protocol_json))
+    return True
+
+
+def refresh_all() -> bool:
+    """
+    Clears the sec manager dict before calling fetch_all
+    """
+    sec_manager.clear()
+    return fetch_all()
 
 
 def add_to_db(protocol):
@@ -327,13 +373,43 @@ JOURNAL_CODE = os.environ.get('JOURNAL_CODE', '')
 COSMOS_JOURNAL_CODE = 'CAT'
 
 
-def fetch_journal_protocol_name():
+def fetch_journal_protocol_name() -> str:
     """
     We are assuming that SFA is the default journal for now
     This code should move: security should not have to know about
     JOURNAL_CODE.
     """
     return JOURNAL
+
+
+def add_user_to_protocol(
+    protocol_name: str,
+    user_id: str,
+    actions: list = None,
+):
+    """
+    Adds a user to the specified actions of a given protocol.
+    If no actions are provided, they are added to all actions.
+    """
+    prot = fetch_by_key(protocol_name)
+    if prot is None:
+        raise ValueError(f'Could not find {protocol_name} protocol')
+    return prot.add_user(user_id, actions)
+
+
+def delete_user_from_protocol(
+    protocol_name: str,
+    user_id: str,
+    actions: list = None,
+):
+    """
+    Deletes a user from the specified actions of a given protocol.
+    If no actions are provided, they are deleted from all actions.
+    """
+    prot = fetch_by_key(protocol_name)
+    if prot is None:
+        raise ValueError(f'Could not find {protocol_name} protocol')
+    return prot.delete_user(user_id, actions)
 
 
 # for API testing:

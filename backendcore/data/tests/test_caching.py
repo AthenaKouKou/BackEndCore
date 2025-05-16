@@ -41,7 +41,7 @@ TEST_DCOLLECT = cach.DataCollection(TEMP_DB,
                                     TEMP_COLLECT,
                                     key_fld=FLD1,
                                     sort_fld=FLD2,
-                                   )
+                                    )
 
 
 @pytest.fixture(scope='function')
@@ -121,7 +121,7 @@ def test_init():
 
 def test_init_dup_collection(new_dcollect):
     with pytest.raises(ValueError):
-        dcollect = cach.DataCollection(TEMP_DB, TEMP_COLLECT)
+        cach.DataCollection(TEMP_DB, TEMP_COLLECT)
 
 
 @patch('backendcore.data.db_connect.fetch_all', autospec=True,
@@ -195,14 +195,14 @@ def test_fetch_by_key_not_there(mock_fetch, new_dcollect):
 def test_fetch_by_fld_val(mock_fetch, new_dcollect):
     ret = new_dcollect.fetch_by_fld_val(FLD2, VAL2)
     print(f'{ret=}')
-    assert(len(ret) == 1)
+    assert (len(ret) == 1)
 
 
 @patch('backendcore.data.db_connect.fetch_all', autospec=True,
        return_value=TEST_LIST)
 def test_fetch_by_fld_val_not_there(mock_fetch, new_dcollect):
     ret = new_dcollect.fetch_by_fld_val(FLD2, 'fake val')
-    assert(len(ret) == 0)
+    assert (len(ret) == 0)
 
 
 @patch('backendcore.data.db_connect.fetch_all', autospec=True,

@@ -30,7 +30,8 @@ def test_get_choice():
 
 
 def test_get_range_choice():
-    assert isinstance(flds.get_range_choice(TEST_FIELDS, RANGE_EXAMPLE, 40), int)
+    assert isinstance(flds.get_range_choice(TEST_FIELDS, RANGE_EXAMPLE, 40),
+                      int)
 
 
 def test_is_range_fld():
@@ -54,7 +55,8 @@ def test_get_low_val_not_range():
 
 def test_get_high_val():
     for key in flds.get_choices(TEST_FIELDS, RANGE_EXAMPLE):
-        assert isinstance(flds.get_high_val(TEST_FIELDS, RANGE_EXAMPLE, key), (int, float))
+        assert isinstance(flds.get_high_val(TEST_FIELDS, RANGE_EXAMPLE, key),
+                          (int, float))
 
 
 def test_get_high_val_not_range():
@@ -69,7 +71,8 @@ def test_is_valid_choice():
 
 
 def test_is_not_valid_choice():
-    assert not flds.is_valid_choice(TEST_FIELDS, RANGE_EXAMPLE, 'Not a valid choice!')
+    assert not flds.is_valid_choice(TEST_FIELDS, RANGE_EXAMPLE,
+                                    'Not a valid choice!')
 
 
 def test_get_choices():

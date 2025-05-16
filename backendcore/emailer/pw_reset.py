@@ -67,21 +67,26 @@ def set_base_url(testing_env):
     return base_url
 
 
-def send_pw_reset(
-        reset_tok: str,
-        user_email: str,
-        tok_ttl_seconds: int,
-        method=MAIL_METHOD,
-        testing_env=False,
-):
-    base_url = set_base_url(testing_env)
-    if not reset_tok:
-        raise ValueError(f'In send_pw_reset, no reset token: {reset_tok=}')
-    if not is_valid_mail_method(method):
-        raise ValueError(f'Bad mail method: {method}')
-    tok_ttl_minutes = tok_ttl_seconds // 60
-    params = f'{ID_PARAM_NAME}={user_email}&{TOKEN_PARAM_NAME}={reset_tok}'
-    MESSAGE = f"""
+def send_email(user_email: str, message: str, method=MAIL_METHOD):
+    print('Sending password reset email.')
+    if method == SMTP:
+        print('Using SMTP to send password reset email')
+        if not PW_RESET_SENDER_PW:
+            raise ValueError('In send_pw_reset, no sender pw: '
+                             + f'{PW_RESET_SENDER_PW=}')
+        return sm.send_mail(smtp_serv_host=SMTP_SERV_HOST,
+                            sender=PW_RESET_SENDER,
+                            sender_pw=PW_RESET_SENDER_PW, subject=PW_RES_SUBJ,
+                            recipients=[user_email],
+                            html_body=message)
+    else:
+        print('Using API to send password reset email')
+        return am.send_mail(to_emails=user_email, subject=PW_RES_SUBJ,
+                            content=message)
+
+
+def get_message(base_url: str, params: str, tok_ttl_minutes: int):
+    return f"""
 <p>
   Hello,
 </p>
@@ -102,18 +107,21 @@ def send_pw_reset(
 - The DataMixMaster Team
 </p>
 """
-    print('Sending password reset email.')
-    if method == SMTP:
-        print('Using SMTP to send password reset email')
-        if not PW_RESET_SENDER_PW:
-            raise ValueError('In send_pw_reset, no sender pw: '
-                             + f'{PW_RESET_SENDER_PW=}')
-        return sm.send_mail(smtp_serv_host=SMTP_SERV_HOST,
-                            sender=PW_RESET_SENDER,
-                            sender_pw=PW_RESET_SENDER_PW, subject=PW_RES_SUBJ,
-                            recipients=[user_email],
-                            html_body=MESSAGE)
-    else:
-        print('Using API to send password reset email')
-        return am.send_mail(to_emails=user_email, subject=PW_RES_SUBJ,
-                            content=MESSAGE)
+
+
+def send_pw_reset(
+        reset_tok: str,
+        user_email: str,
+        tok_ttl_seconds: int,
+        method=MAIL_METHOD,
+        testing_env=False,
+):
+    base_url = set_base_url(testing_env)
+    if not reset_tok:
+        raise ValueError(f'In send_pw_reset, no reset token: {reset_tok=}')
+    if not is_valid_mail_method(method):
+        raise ValueError(f'Bad mail method: {method}')
+    tok_ttl_minutes = tok_ttl_seconds // 60
+    params = f'{ID_PARAM_NAME}={user_email}&{TOKEN_PARAM_NAME}={reset_tok}'
+    message = get_message(base_url, params, tok_ttl_minutes)
+    return send_email(user_email, message, method)

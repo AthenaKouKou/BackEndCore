@@ -107,7 +107,6 @@ class SqlDB():
         return self.mdata
 
     def _get_engine(self):
-        global engine
         return engine
 
     def _clear_mdata(self):

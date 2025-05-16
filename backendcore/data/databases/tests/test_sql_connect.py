@@ -1,5 +1,4 @@
 import pytest
-import pymongo
 from icecream import ic
 
 import backendcore.data.databases.sql_connect as sql
@@ -56,6 +55,7 @@ def empty_table():
     sqltdb._clear_table(TEST_COLLECT)
     res.drop(sqltdb._get_engine(), checkfirst=False)
     sqltdb._clear_mdata()
+
 
 @pytest.fixture()
 def table_with_docs():
@@ -155,7 +155,7 @@ def test_delete_by_id(sqltobj, table_with_docs):
     id = 1
     res = sqltobj.delete_by_id(TEST_DB, table_with_docs.name, id)
     afterdel = sqltobj.read(TEST_DB, table_with_docs.name,
-                       filters={sql.OBJ_ID_NM: id})
+                            filters={sql.OBJ_ID_NM: id})
     assert res.succeeded()
     assert res.del_count() == 1
     assert len(afterdel) == 0
