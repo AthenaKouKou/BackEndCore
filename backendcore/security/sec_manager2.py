@@ -5,6 +5,7 @@ Attempts to add a name a second time will fail with a ValueError.
 """
 from copy import deepcopy
 import os
+from functools import wraps
 
 from backendcore.common.constants import (  # noqa F401
     AUTH_KEY,
@@ -40,8 +41,6 @@ PROT_NM = 'protocol_name'
 
 INFRA_PASS_PHRASE = 'Come on, Beanie!'
 
-sec_manager = {}
-
 VALID_ACTIONS = [
     CREATE,
     READ,
@@ -50,6 +49,23 @@ VALID_ACTIONS = [
 ]
 
 SEC_DB = get_client_db()
+
+protocols = {}
+
+
+def needs_protocols(fn):
+    """
+    Should be used to decorate any function that directly uses the protocols.
+    Functions that call functions that use the protocols don't need this
+    decorator.
+    """
+    @wraps(fn)
+    def wrapper(*args, **kwargs):
+        global protocols
+        if not protocols:
+            fetch_all()  # this will set the global
+        return fn(*args, **kwargs)
+    return wrapper
 
 
 def is_valid_action(action: str):
@@ -232,6 +248,7 @@ class SecProtocol(object):
                                                                 user_id)
         return valid
 
+    @needs_protocols
     def add_user(self, user_id: str, actions: list):
         if actions is None:
             actions = VALID_ACTIONS
@@ -247,6 +264,7 @@ class SecProtocol(object):
             else:
                 raise ValueError(f'{action} is not a valid action')
 
+    @needs_protocols
     def delete_user(self, user_id: str, actions: list):
         if actions is None:
             actions = VALID_ACTIONS
@@ -278,8 +296,9 @@ def is_permitted(prot_name, action, user_id: str = '', auth_key: str = '',
     return prot.is_permitted(action, user_id, check_vals)
 
 
+@needs_protocols
 def fetch_by_key(prot_name: str):
-    ret = sec_manager.get(prot_name, None)
+    ret = protocols.get(prot_name, None)
     return ret
 
 
@@ -295,14 +314,15 @@ def add(protocol):
     if not isinstance(protocol, SecProtocol):
         raise TypeError(f'Invalid type for protocol: {type=}')
     name = protocol.get_name()
-    if name in sec_manager:
-        raise ValueError(f"Can't add duplicate name to sec_manager: {name=}")
-    sec_manager[name] = protocol
+    if name in protocols:
+        raise ValueError(f"Can't add duplicate name to protocols: {name=}")
+    protocols[name] = protocol
 
 
+@needs_protocols
 def delete(name):
-    if name in sec_manager:
-        del sec_manager[name]
+    if name in protocols:
+        del protocols[name]
     else:
         raise ValueError(f'Attempt to delete non-existent protocol: {name=}')
 
@@ -339,26 +359,30 @@ def protocol_from_json(protocol_json):
                        delete=delete_checks)
 
 
-def fetch_all() -> bool:
+def fetch_all() -> None:
     """
-    Gets all the security protocols from the db and puts them in sec_manager
+    Gets all the security protocols from the db and puts them in protocols
     """
-    data_list = dbc.fetch_all(SEC_DB,
-                              SEC_COLLECT,
-                              no_id=True)
-    for protocol_json in data_list:
-        add(protocol_from_json(protocol_json))
-    return True
+    print('Fetching security protocols')
+    global protocols
+    if len(protocols) < 1:
+        data_list = dbc.fetch_all(SEC_DB,
+                                  SEC_COLLECT,
+                                  no_id=True)
+        for protocol_json in data_list:
+            add(protocol_from_json(protocol_json))
 
 
+@needs_protocols
 def refresh_all() -> bool:
     """
     Clears the sec manager dict before calling fetch_all
     """
-    sec_manager.clear()
+    protocols.clear()
     return fetch_all()
 
 
+@needs_protocols
 def add_to_db(protocol):
     ret = None
     try:
@@ -437,8 +461,6 @@ GOOD_PROTOCOL = SecProtocol(TEST_NAME,
                             read=GOOD_SEC_CHECKS,
                             update=GOOD_SEC_CHECKS,
                             delete=GOOD_SEC_CHECKS)
-
-fetch_all()
 
 
 def main():
