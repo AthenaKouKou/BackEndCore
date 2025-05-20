@@ -8,6 +8,7 @@ import pytest
 from unittest.mock import patch
 import os
 
+import backendcore.data.db_connect as dbc
 import backendcore.users.query as uqry
 
 import backendcore.security.sec_manager2 as sm
@@ -215,6 +216,9 @@ def temp_protocol():
     prot = add_test_protocol()
     yield prot
     sm.delete(TEST_NAME)
+    # Necessary due to add/delete user testing
+    dbc.del_one(sm.SEC_DB, sm.SEC_COLLECT,
+                filters={sm.PROT_NM: sm.TEST_NAME})
 
 
 # This one is not self-deleting.
@@ -301,3 +305,48 @@ def test_protocol_from_json(mock_fetch_by_auth):
                                   sm.TEST_EMAIL,
                                   sm.AUTH_KEY: 'some auth key',
                                   sm.PASS_PHRASE: sm.TEST_PHRASE})
+
+
+def test_add_user_to_protocol(temp_protocol):
+    sm.add_to_db(temp_protocol)
+    NEW_TEST_USER = 'tester@test.com'
+    assert not sm.is_valid_user(TEST_NAME, sm.CREATE, NEW_TEST_USER)
+    sm.add_user_to_protocol(TEST_NAME, NEW_TEST_USER)
+    sm.refresh_all()
+    assert sm.is_valid_user(TEST_NAME, sm.CREATE, NEW_TEST_USER)
+
+
+def test_add_user_to_protocol_invalid_protocol(temp_protocol):
+    with pytest.raises(ValueError):
+        sm.add_to_db(temp_protocol)
+        NEW_TEST_USER = 'tester@test.com'
+        sm.add_user_to_protocol('fake protocol', NEW_TEST_USER)
+
+
+def test_add_user_to_protocol_invalid_action(temp_protocol):
+    with pytest.raises(ValueError):
+        sm.add_to_db(temp_protocol)
+        NEW_TEST_USER = 'tester@test.com'
+        sm.add_user_to_protocol(TEST_NAME, NEW_TEST_USER, ['fake action'])
+
+
+def test_delete_user_from_protocol(temp_protocol):
+    sm.add_to_db(temp_protocol)
+    assert sm.is_valid_user(TEST_NAME, sm.CREATE, sm.TEST_EMAIL)
+    sm.delete_user_from_protocol(TEST_NAME, sm.TEST_EMAIL)
+    sm.refresh_all()
+    assert not sm.is_valid_user(TEST_NAME, sm.CREATE, sm.TEST_EMAIL)
+
+
+def test_delete_user_from_protocol_invalid_protocol(temp_protocol):
+    with pytest.raises(ValueError):
+        sm.add_to_db(temp_protocol)
+        NEW_TEST_USER = 'tester@test.com'
+        sm.delete_user_from_protocol('fake protocol', NEW_TEST_USER)
+
+
+def test_delete_user_from_protocol_invalid_action(temp_protocol):
+    with pytest.raises(ValueError):
+        sm.add_to_db(temp_protocol)
+        NEW_TEST_USER = 'tester@test.com'
+        sm.delete_user_from_protocol(TEST_NAME, NEW_TEST_USER, ['fake action'])
