@@ -122,8 +122,12 @@ class Login(Resource):
         """
         Login and return an auth key.
         """
-        if auth_key := lgn.login(normalize_email(request.json[EMAIL]),
-                                 request.json[PASSWORD]):
+        email = request.json.get(EMAIL, '')
+        password = request.json.get(PASSWORD, '')
+        if not password:
+            raise wz.Unauthorized("Password cannot be blank.")
+        auth_key = lgn.login(normalize_email(email), password)
+        if auth_key:
             return {AUTH_KEY: auth_key}
         else:
             raise wz.Unauthorized("Your email or password is invalid.")
