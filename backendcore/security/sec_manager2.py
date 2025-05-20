@@ -61,7 +61,6 @@ def needs_protocols(fn):
     """
     @wraps(fn)
     def wrapper(*args, **kwargs):
-        global protocols
         if not protocols:
             fetch_all()  # this will set the global
         return fn(*args, **kwargs)
@@ -364,7 +363,6 @@ def fetch_all() -> None:
     Gets all the security protocols from the db and puts them in protocols
     """
     print('Fetching security protocols')
-    global protocols
     if len(protocols) < 1:
         data_list = dbc.fetch_all(SEC_DB,
                                   SEC_COLLECT,
