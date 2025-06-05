@@ -26,6 +26,7 @@ SIGNUP = 'signup'
 LIST = 'list'
 LOGIN = 'login'
 RESET_PW = 'reset_pw'
+CONTACT = 'contact'
 
 # Endpoint Categories
 USER_DATA = 'UserData'

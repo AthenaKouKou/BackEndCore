@@ -19,6 +19,7 @@ import backendcore.users.query as usr
 
 import backendcore.api.endpoints as ep
 
+
 TEST_CLIENT = ep.app.test_client()
 
 # big enough we're never going to get it twice in our lives:
@@ -207,3 +208,48 @@ def test_invalid_key(a_user_email):
                            headers=create_auth_key_hdr('invalid key'),
                            json={ep.USER_ID: a_user_email})
     assert resp.status_code == HTTPStatus.UNAUTHORIZED
+
+
+def test_contact():
+    TEST_FORM = {
+        ep.EMAIL: 'fake email',
+        ep.SUBJECT: 'fake subject',
+        ep.PROJECT: 'fake project',
+        ep.MESSAGE: 'fake message',
+    }
+    resp = TEST_CLIENT.post(ep.CONTACT_W_NS,
+                            json=TEST_FORM)
+    assert resp.status_code == OK
+
+
+def test_contact_no_email():
+    TEST_FORM = {
+        ep.SUBJECT: 'fake subject',
+        ep.PROJECT: 'fake project',
+        ep.MESSAGE: 'fake message',
+    }
+    resp = TEST_CLIENT.post(ep.CONTACT_W_NS,
+                            json=TEST_FORM)
+    assert resp.status_code == NOT_ACCEPTABLE
+
+
+def test_contact_no_subject():
+    TEST_FORM = {
+        ep.EMAIL: 'fake email',
+        ep.PROJECT: 'fake project',
+        ep.MESSAGE: 'fake message',
+    }
+    resp = TEST_CLIENT.post(ep.CONTACT_W_NS,
+                            json=TEST_FORM)
+    assert resp.status_code == NOT_ACCEPTABLE
+
+
+def test_contact_no_message():
+    TEST_FORM = {
+        ep.EMAIL: 'fake email',
+        ep.SUBJECT: 'fake subject',
+        ep.PROJECT: 'fake project',
+    }
+    resp = TEST_CLIENT.post(ep.CONTACT_W_NS,
+                            json=TEST_FORM)
+    assert resp.status_code == NOT_ACCEPTABLE

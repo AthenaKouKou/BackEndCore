@@ -1,4 +1,3 @@
-
 """
 User data endpoints.
 """
@@ -11,17 +10,23 @@ import werkzeug.exceptions as wz
 
 import backendcore.api.common as acmn
 from backendcore.api.constants import (
+    CONTACT,
     LOGIN,
-    MESSAGE,
+    RESET_PW,
     SIGNUP,
     USER_DATA,
     USER_ID,
-    RESET_PW,
 )
 from backendcore.common.constants import (
     EMAIL,
     PHONE,
     AUTH_KEY,
+)
+from backendcore.emailer.contact import process_contact_form
+from backendcore.emailer.contact_form import (
+    MESSAGE,
+    SUBJECT,
+    PROJECT,
 )
 from backendcore.emailer.user_email import normalize_email
 import backendcore.emailer.pw_reset as pwr
@@ -267,3 +272,36 @@ class User(Resource):
             return {MESSAGE: f'User {user_id} exists'}
         else:
             raise wz.NotFound(f'User {user_id} not found')
+
+
+CONTACT_FLDS = api.model('Contact', {
+    EMAIL: fields.String,
+    SUBJECT: fields.String,
+    PROJECT: fields.String,
+    MESSAGE: fields.String,
+})
+
+
+@api.route(f'/{CONTACT}')
+class Contact(Resource):
+    """
+    Sends an email to our contact email
+    """
+    @api.expect(CONTACT_FLDS)
+    @api.response(HTTPStatus.OK.value, 'Success')
+    @api.response(HTTPStatus.NOT_ACCEPTABLE.value, 'Not acceptable')
+    def post(self):
+        """
+        Receives a new contact request.
+        """
+        json = request.json
+        email = json.get(EMAIL, None)
+        subject = json.get(SUBJECT, None)
+        project = json.get(PROJECT, None)
+        message = json.get(MESSAGE, None)
+
+        try:
+            process_contact_form(email, subject, message, project)
+            return {CONTACT: True}
+        except Exception as err:
+            raise wz.NotAcceptable(f'Contact Form error: {str(err)}')

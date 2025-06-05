@@ -12,7 +12,8 @@ FILE_NM = 'test.txt'
 FILE_LOC = f'tests/{FILE_NM}'
 
 
-@patch('backendcore.emailer.api_send.send_mail', autospec=True, return_val='Not none')
+@patch('backendcore.emailer.api_send.send_mail', autospec=True,
+       return_val='Not none')
 def test_send_mail(mock_send_mail):
     ret = asend.send_mail(TEST_TO, TEST_SUBJ, TEST_CONTENT,
                           from_email=asend.DEF_SENDER)

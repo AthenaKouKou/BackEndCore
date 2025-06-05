@@ -9,12 +9,19 @@ from flask_cors import CORS
 from flask_restx import Resource, Namespace
 from werkzeug.routing import Rule
 
+from backendcore.emailer.contact_form import ( # noqa F401
+    MESSAGE,
+    SUBJECT,
+    PROJECT,
+)
+
 from backendcore.common.constants import (  # noqa F401
     MAP,
     PASSWORD,
     AUTH_KEY,
 )
 from backendcore.api.constants import (  # noqa F401
+    CONTACT,
     CREATE,
     DELETE,
     FIELDS,
@@ -74,6 +81,7 @@ PW_RESET_TOK_W_NS = f'/{USER_DATA}/{PW_RESET_TOK}'
 RESET_PW_W_NS = f'/{USER_DATA}/{RESET_PW}'
 SIGNUP_W_NS = f'/{USER_DATA}/{SIGNUP}'
 VALID_KEY_W_NS = f'/{USER_DATA}/{VALID_KEY}'
+CONTACT_W_NS = f'/{USER_DATA}/{CONTACT}'
 
 endpoints = Namespace(ENDPOINTS, 'Getting data about our endpoints.')
 api.add_namespace(endpoints)
