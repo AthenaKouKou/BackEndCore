@@ -82,6 +82,7 @@ RESET_PW_W_NS = f'/{USER_DATA}/{RESET_PW}'
 SIGNUP_W_NS = f'/{USER_DATA}/{SIGNUP}'
 VALID_KEY_W_NS = f'/{USER_DATA}/{VALID_KEY}'
 CONTACT_W_NS = f'/{USER_DATA}/{CONTACT}'
+CONTACT_FORM_W_NS = f'{CONTACT_W_NS}/{FORM}'
 
 endpoints = Namespace(ENDPOINTS, 'Getting data about our endpoints.')
 api.add_namespace(endpoints)

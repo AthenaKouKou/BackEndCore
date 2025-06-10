@@ -253,3 +253,8 @@ def test_contact_no_message():
     resp = TEST_CLIENT.post(ep.CONTACT_W_NS,
                             json=TEST_FORM)
     assert resp.status_code == NOT_ACCEPTABLE
+
+
+def test_contact_form():
+    resp = TEST_CLIENT.get(ep.CONTACT_FORM_W_NS)
+    assert resp.status_code == OK

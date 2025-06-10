@@ -11,6 +11,7 @@ import werkzeug.exceptions as wz
 import backendcore.api.common as acmn
 from backendcore.api.constants import (
     CONTACT,
+    FORM,
     LOGIN,
     RESET_PW,
     SIGNUP,
@@ -23,19 +24,20 @@ from backendcore.common.constants import (
     AUTH_KEY,
 )
 from backendcore.emailer.contact import process_contact_form
+from backendcore.emailer.user_email import normalize_email
+import backendcore.emailer.contact_form as ctf
 from backendcore.emailer.contact_form import (
     MESSAGE,
     SUBJECT,
     PROJECT,
 )
-from backendcore.emailer.user_email import normalize_email
 import backendcore.emailer.pw_reset as pwr
 import backendcore.security.auth_key as ak
-import backendcore.security.settings as secset
 import backendcore.security.password as pw
+import backendcore.security.settings as secset
 import backendcore.users.login as lgn
-import backendcore.users.signup as su
 import backendcore.users.query as uqry
+import backendcore.users.signup as su
 
 from backendcore.users.query import (
     FIRST_NAME,
@@ -305,3 +307,19 @@ class Contact(Resource):
             return {CONTACT: True}
         except Exception as err:
             raise wz.NotAcceptable(f'Contact Form error: {str(err)}')
+
+
+CONTACT_FORM = 'Contact Form'
+
+
+@api.route(f'/{CONTACT}/{FORM}')
+class ContactForm(Resource):
+    """
+    Get the form to make a contact request
+    """
+    @api.response(HTTPStatus.OK.value, 'Success')
+    def get(self):
+        """
+        Get the form to make a contact request
+        """
+        return {CONTACT_FORM: ctf.get_form()}
