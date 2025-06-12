@@ -7,3 +7,7 @@ def test_get_client_code():
 
 def test_get_client_db():
     assert cl.get_client_db() is not None
+
+
+def test_get_sales_email():
+    assert cl.get_sales_email() is not None

@@ -45,10 +45,8 @@ def send_mail(to_emails: str, subject: str, content: str,
         message.attachment = get_attachment(file)
 
     try:
-        print('About to send email using API key.')
         sg = SendGridAPIClient(os.environ.get('SENDGRID_API_KEY'))
         response = sg.send(message)
-        print(response.status_code)
         # for debugging:
         # print(response.body)
         # print(response.headers)
