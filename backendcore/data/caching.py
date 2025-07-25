@@ -210,7 +210,7 @@ class DataCollection(object):
                update_dict: dict,
                by_id: bool = False,
                upsert=False):
-        if not self.exists(key_val):
+        if not upsert and not self.exists(key_val):
             raise ValueError(f'Attempt to update a non-existent {key_val=}')
         if by_id:
             search_dict = dbc.create_id_filter(key_val)
