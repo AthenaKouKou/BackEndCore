@@ -205,7 +205,7 @@ class DataCollection(object):
             self.clear_cache()
         return ret
 
-    def update(self, key_val: str, update_dict: dict, by_id: bool = False):
+    def update(self, key_val: str, update_dict: dict, by_id: bool = False, upsert=False):
         if not self.exists(key_val):
             raise ValueError(f'Attempt to update a non-existent {key_val=}')
         if by_id:
@@ -215,7 +215,9 @@ class DataCollection(object):
         ret = dbc.update_doc(self.db_nm,
                              self.collect_nm,
                              search_dict,
-                             update_dict)
+                             update_dict,
+                             upsert=upsert,
+                             )
         self.clear_cache()
         return dbc.update_success(ret)
 

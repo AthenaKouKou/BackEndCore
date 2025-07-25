@@ -74,12 +74,12 @@ def delete(title):
 
 
 @needs_text_cache
-def update(title, text, editor):
+def update(title, text, editor, upsert=False):
     update_dict = {}
     update_dict[TEXT] = text
     update_dict[LAST_EDIT] = str(tfmt.today())
     update_dict[EDITOR] = editor
-    return get_cache(CACHE_NM).update(title, update_dict)
+    return get_cache(CACHE_NM).update(title, update_dict, upsert=upsert)
 
 
 @needs_text_cache
