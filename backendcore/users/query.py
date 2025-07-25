@@ -269,7 +269,7 @@ def fetch_by_auth_key(key: str) -> dict:
 
 def fetch_id_by_auth_key(key: str) -> str:
     if not key:
-        raise ValueError('Cannot fetch id with no key')
+        raise ValueError('Cannot fetch id without an auth-key')
     user = fetch_by_auth_key(key)
     if user:
         return user.get(EMAIL)
