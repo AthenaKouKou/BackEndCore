@@ -205,7 +205,11 @@ class DataCollection(object):
             self.clear_cache()
         return ret
 
-    def update(self, key_val: str, update_dict: dict, by_id: bool = False, upsert=False):
+    def update(self,
+               key_val: str,
+               update_dict: dict,
+               by_id: bool = False,
+               upsert=False):
         if not self.exists(key_val):
             raise ValueError(f'Attempt to update a non-existent {key_val=}')
         if by_id:
