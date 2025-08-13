@@ -365,9 +365,12 @@ class MongoDB():
                                                {SET: {fld_nm: fld_val}})
         return create_update_ret(mongo_update_obj)
 
-    def update(self, db_nm, clct_nm, filters, update_dict):
+    def update(self, db_nm, clct_nm, filters, update_dict, upsert=False):
         collect = get_collect(db_nm, clct_nm)
-        mongo_update_obj = collect.update_one(filters, {SET: update_dict})
+        mongo_update_obj = collect.update_one(
+            filters,
+            {SET: update_dict},
+            upsert=upsert)
         return create_update_ret(mongo_update_obj)
 
     def upsert(self, db_nm, clct_nm, filters, update_dict):

@@ -317,15 +317,15 @@ def update_fld(db_nm, clct_nm, filters, fld_nm, fld_val):
 
 
 @needs_db
-def update(db_nm, clct_nm, filters, update_dict):
-    return database.update(db_nm, clct_nm, filters, update_dict)
+def update(db_nm, clct_nm, filters, update_dict, upsert=False):
+    return database.update(db_nm, clct_nm, filters, update_dict, upsert=upsert)
 
 
-def update_doc(db_nm, clct_nm, filters, update_dict):
+def update_doc(db_nm, clct_nm, filters, update_dict, upsert=False):
     """
     The old name for update.
     """
-    return update(db_nm, clct_nm, filters, update_dict)
+    return update(db_nm, clct_nm, filters, update_dict, upsert)
 
 
 @needs_db

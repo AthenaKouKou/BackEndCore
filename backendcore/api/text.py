@@ -125,7 +125,7 @@ class TextUpdate(Resource):
                                auth_key=auth_key):
             raise wz.Forbidden('Action not permitted.')
         try:
-            tqry.update(title, text, editor)
+            tqry.update(title, text, editor, upsert=True)
         except ValueError as e:
             raise wz.NotFound(f'{str(e)}')
         return {MESSAGE: 'Text updated.'}
