@@ -36,6 +36,7 @@ TEST_LIST = [
 
 TEMP_DB = 'TempDB'
 TEMP_COLLECT = 'TempCollection'
+TEMP_KEY_COLLECT = 'TempKeyCollection'
 
 TEST_DCOLLECT = cach.DataCollection(TEMP_DB,
                                     TEMP_COLLECT,
@@ -43,10 +44,21 @@ TEST_DCOLLECT = cach.DataCollection(TEMP_DB,
                                     sort_fld=FLD2,
                                     )
 
+TEST_KEYFLD_COLLECT = cach.DataCollection(TEMP_DB,
+                                          TEMP_KEY_COLLECT,
+                                          key_fld=KEY_FLD,
+                                          sort_fld=FLD2,
+                                          )
+
 
 @pytest.fixture(scope='function')
 def new_dcollect():
     return deepcopy(TEST_DCOLLECT)
+
+
+@pytest.fixture(scope='function')
+def new_keyfld_collect():
+    return deepcopy(TEST_KEYFLD_COLLECT)
 
 
 @pytest.fixture(scope='function')
@@ -225,6 +237,17 @@ def test_add(new_dcollect):
     new_dcollect.add(DIFF_REC)
     assert new_dcollect.exists(DIFF_KEY_VAL)
     new_dcollect.delete(DIFF_KEY_VAL)
+
+
+def test_add_keyfld_rec(new_keyfld_collect):
+    """
+    Same as above but checks we can properly add records that use database ids
+    as key field and don't provide a keyfield upon creation
+    """
+    new_keyfld_collect.clear_cache()
+    new_keyfld_collect.add(DIFF_REC)
+    assert new_keyfld_collect.exists(DIFF_KEY_VAL)
+    new_keyfld_collect.delete(DIFF_KEY_VAL)
 
 
 @patch('backendcore.data.db_connect.fetch_all', autospec=True,

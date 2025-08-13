@@ -9,6 +9,7 @@ import backendcore.data.db_connect as dbc
 from backendcore.common.constants import (
     CODE,
     NAME,
+    OBJ_ID_NM,
 )
 
 import backendcore.data.query as qry
@@ -25,6 +26,11 @@ def can_do_math(record, fld):
 
 class DataCollection(object):
     caches: dict = {}
+
+    @staticmethod
+    def is_db_id(fld_nm):
+        if fld_nm in [OBJ_ID_NM]:
+            return True
 
     @classmethod
     def is_registered(cls, cache_name):
@@ -183,7 +189,9 @@ class DataCollection(object):
         want to do that.
         """
         key_val = rec.get(self.key_fld, None)
-        if key_val is None:
+        # A little kludgey: If we are using MONGODB, and we want to use the
+        # object id as the key fld, we can't provide the actual value.
+        if key_val is None and not DataCollection.is_db_id(self.key_fld):
             raise ValueError('Key field value not provided')
         if self.exists(key_val):
             raise ValueError(f'Attempt to add an existing {key_val=}')
