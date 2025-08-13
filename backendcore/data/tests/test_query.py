@@ -1,7 +1,9 @@
 """
 Test module for our caching functions.
 """
+from copy import deepcopy
 from unittest.mock import patch
+import pytest
 
 import backendcore.data.query as qry
 
@@ -51,9 +53,11 @@ TEST_LIST = [
     },
 ]
 
+TEST_RECS_KEY_FLD = 'x'
+
 TEST_RECS = [
-    {'x': 17, 'y': 18},
-    {'x': 19, 'y': 20},
+    {TEST_RECS_KEY_FLD: 17, 'y': 18},
+    {TEST_RECS_KEY_FLD: 19, 'y': 20},
 ]
 
 
@@ -128,6 +132,13 @@ def test_list_to_dict():
     new_dict = qry.list_to_dict('x', recs, del_key=True)
     assert new_dict[17] == {'y': 18}
     assert new_dict[19] == {'y': 20}
+
+
+def test_list_to_dict_no_key_fld():
+    recs = deepcopy(TEST_RECS)
+    recs[0].pop(TEST_RECS_KEY_FLD)
+    with pytest.raises(ValueError):
+        qry.list_to_dict(TEST_RECS_KEY_FLD, recs, del_key=True)
 
 
 def test_list_to_dict_keep_key():

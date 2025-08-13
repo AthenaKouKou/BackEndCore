@@ -6,7 +6,7 @@ import pytest
 
 import backendcore.data.caching as cach
 
-FLD1 = 'fld1'
+KEY_FLD = 'fld1'
 FLD2 = 'fld2'
 VAL1 = 'val1'
 VAL2 = 'val2'
@@ -14,18 +14,18 @@ VAL3 = 'val3'
 VAL4 = 'val4'
 
 REC1 = {
-    FLD1: VAL1,
+    KEY_FLD: VAL1,
     FLD2: VAL2,
 }
 
 REC2 = {
-    FLD1: VAL3,
+    KEY_FLD: VAL3,
     FLD2: VAL4,
 }
 
 DIFF_KEY_VAL = 'A brand new val'
 DIFF_REC = {
-    FLD1: DIFF_KEY_VAL,
+    KEY_FLD: DIFF_KEY_VAL,
     FLD2: VAL2,
 }
 
@@ -39,7 +39,7 @@ TEMP_COLLECT = 'TempCollection'
 
 TEST_DCOLLECT = cach.DataCollection(TEMP_DB,
                                     TEMP_COLLECT,
-                                    key_fld=FLD1,
+                                    key_fld=KEY_FLD,
                                     sort_fld=FLD2,
                                     )
 
@@ -233,6 +233,15 @@ def test_add_duplicate(mock_fetch, new_dcollect):
     with pytest.raises(ValueError):
         # REC1 should be in there already.
         new_dcollect.add(REC1)
+
+
+@patch('backendcore.data.db_connect.fetch_all', autospec=True,
+       return_value=TEST_LIST)
+def test_add_no_key_fld(mock_fetch, new_dcollect):
+    REC_NO_KEY = deepcopy(REC1)
+    REC_NO_KEY.pop(KEY_FLD)
+    with pytest.raises(ValueError):
+        new_dcollect.add(REC_NO_KEY)
 
 
 @patch('backendcore.data.db_connect.fetch_all', autospec=True,

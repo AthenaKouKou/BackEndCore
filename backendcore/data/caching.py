@@ -162,7 +162,6 @@ class DataCollection(object):
         """
         For cases where it is expensive to update the entire cache.
         """
-        print(f'adding {rec=} to cache')
         key_val = rec.get(self.key_fld, None)
         if not key_val:
             raise ValueError('Attempt to add rec with missing key to cache')
@@ -184,12 +183,11 @@ class DataCollection(object):
         want to do that.
         """
         key_val = rec.get(self.key_fld, None)
-        print(f'{key_val=}')
+        if key_val is None:
+            raise ValueError('Key field value not provided')
         if self.exists(key_val):
-            print('key exists')
             raise ValueError(f'Attempt to add an existing {key_val=}')
         ret = dbc.insert_doc(self.db_nm, self.collect_nm, rec)
-        print(f'Inserted record: {ret=}')
         if clear_cache:
             self.clear_cache()
         return ret
@@ -200,7 +198,6 @@ class DataCollection(object):
         Returns DB result of the insert.
         """
         ret = dbc.insert_many(recs)
-        print(f'Inserted record: {ret=}')
         if clear_cache:
             self.clear_cache()
         return ret
@@ -280,8 +277,6 @@ def needs_cache(fn, cache_nm, db_nm, collect_nm,
     """
     @wraps(fn)
     def wrapper(*args, **kwargs):
-        # print(f'{cache_nm=}')
-        # print(f'{glob_dict.get(cache_nm)=}')
         if not DataCollection.is_registered(cache_nm):
             DataCollection(db_nm,
                            collect_nm,

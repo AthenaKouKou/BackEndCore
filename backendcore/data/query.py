@@ -33,9 +33,12 @@ def list_to_dict(key, recs: list, del_key=False) -> dict:
     else:
         new_recs = recs
     for rec in new_recs:
-        new_dict[rec[key]] = rec
+        key_val = rec.get(key)
+        if key_val is None:
+            raise ValueError("A record is missing a key field")
+        new_dict[key_val] = rec
         if del_key:
-            del new_dict[rec[key]][key]
+            del new_dict[key_val][key]
     return new_dict
 
 
