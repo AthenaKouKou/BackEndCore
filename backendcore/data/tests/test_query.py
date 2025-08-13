@@ -134,11 +134,12 @@ def test_list_to_dict():
     assert new_dict[19] == {'y': 20}
 
 
+@pytest.mark.filterwarnings("ignore:A record")
 def test_list_to_dict_no_key_fld():
     recs = deepcopy(TEST_RECS)
     recs[0].pop(TEST_RECS_KEY_FLD)
-    with pytest.raises(ValueError):
-        qry.list_to_dict(TEST_RECS_KEY_FLD, recs, del_key=True)
+    new_dict = qry.list_to_dict(TEST_RECS_KEY_FLD, recs, del_key=False)
+    assert new_dict[19] == {'x': 19, 'y': 20}
 
 
 def test_list_to_dict_keep_key():

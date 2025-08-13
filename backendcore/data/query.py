@@ -3,6 +3,7 @@ Some common functions dealing with our data caches.
 The actual caches appear in the modules dealing with the relevant data entity.
 """
 import re
+import warnings
 from copy import deepcopy
 
 import backendcore.data.db_connect as dbc
@@ -35,10 +36,11 @@ def list_to_dict(key, recs: list, del_key=False) -> dict:
     for rec in new_recs:
         key_val = rec.get(key)
         if key_val is None:
-            raise ValueError("A record is missing a key field")
-        new_dict[key_val] = rec
-        if del_key:
-            del new_dict[key_val][key]
+            warnings.warn(f'A record is missing a key field {rec=}')
+        else:
+            new_dict[key_val] = rec
+            if del_key:
+                del new_dict[key_val][key]
     return new_dict
 
 
