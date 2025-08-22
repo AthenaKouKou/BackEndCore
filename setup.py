@@ -16,5 +16,6 @@ setup(
         'pytz',
         'validators==0.33.0',
         'SQLAlchemy',
+        'sendgrid',
     ],
 )
