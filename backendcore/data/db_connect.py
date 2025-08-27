@@ -23,6 +23,7 @@ from backendcore.data.databases.mongo_connect import (  # noqa F401
 
 from backendcore.data.databases.sql_connect import (
     SQLITE_MEM,
+    SQLITE,
 )
 
 REMOTE = "0"
@@ -40,7 +41,6 @@ FAILURE = -1
 MONGO = 'MongoDB'
 SQL = 'SQL'
 MY_SQL = 'MySQL'
-SQLITE = 'SQLite'
 
 # Testing flags:
 LISTS_IN_DB = 'LISTS_IN_DB'

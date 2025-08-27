@@ -12,10 +12,17 @@ con = None
 SQLITE_DB_NM = 'SQLITE_DB_NM'
 
 SQLITE_MEM = 'sqllite_mem'
-SQLITE_MEM_STR = 'sqlite+pysqlite:///:memory:'
+SQLITE = 'sqlite'
+
+SQL_DB_NM = 'sql.db'
+db_loc = os.environ.get('DATABASE_LOC', '/tmp/')
+SQLITE_BASE = 'sqlite+pysqlite:///'
+SQLITE_MEM_STR = SQLITE_BASE + ':memory:'
+SQLITE_STR = SQLITE_BASE + db_loc + SQL_DB_NM
 
 DB_TABLE = {
     SQLITE_MEM: SQLITE_MEM_STR,
+    SQLITE: SQLITE_STR,
 }
 
 engine = None
