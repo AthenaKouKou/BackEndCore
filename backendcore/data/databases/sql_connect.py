@@ -257,7 +257,7 @@ class SqlDB():
 
     def _asmbl_sort_slct(self, collect, sort=NO_SORT, sort_fld=OBJ_ID_NM):
         stmt = sqla.select(collect)
-        # ic(stmt.__str__())
+        ic(stmt.__str__())
         field = self.get_field(collect, sort_fld, create_if_none=True)
         if sort == ASC:
             return stmt.order_by(asc(field))
@@ -314,8 +314,10 @@ class SqlDB():
         if clct is None:
             return all_docs
         stmt = self._asmbl_read_stmt(clct, filters, sort, sort_fld)
+        print(f'{stmt=}')
         with engine.connect() as conn:
             res = conn.execute(stmt)
+            ic(res)
             all_docs = self._read_recs_to_objs(res)
         if no_id:
             for rec in all_docs:
