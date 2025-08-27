@@ -20,11 +20,10 @@ def temp_user():
         uqry.delete(uqry.TEST_EMAIL)
     except Exception:
         print('User was not already in DB')
-    mongo_id = uqry.create_test_user()
+    uqry.create_test_user()
     user = uqry.fetch_by_key(uqry.TEST_EMAIL)
-    yield  user
+    yield user
     uqry.delete(uqry.TEST_EMAIL)
-
 
 
 def test_login_success(temp_user):

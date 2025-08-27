@@ -13,6 +13,7 @@ from backendcore.data.db_connect import LISTS_IN_DB_DICT, MONGO
 LISTS_IN_DB = LISTS_IN_DB_DICT[os.environ.get('DATABASE', MONGO)]
 NO_LISTS_REASON = os.environ.get('NO_LISTS_REASON')
 
+
 def test_signup():
     """
     Tests that we can successfully signup a user if valid information is
@@ -52,7 +53,7 @@ def test_signup_already_exists():
         uqry.delete(email)
     except Exception:
         print('User was not in DB')
-    
+
     if LISTS_IN_DB == '0' or not LISTS_IN_DB_DICT:
         with pytest.raises(ValueError):
             signup(

@@ -85,7 +85,8 @@ def test_expired_pw_reset_tok(temp_user):
     temp_user[uqry.PASSWORD]
     token = pwd.create_pw_reset_token(uqry.TEST_EMAIL)
     # TODO: The security package should not raise HTTP exceptions.
-    with (pytest.raises(wz.Unauthorized),
+    # with (pytest.raises(wz.Unauthorized),
+    with (pytest.raises(ValueError),
           mock.patch('backendcore.security.utils.now') as mock_now):
         user = uqry.fetch_user(uqry.TEST_EMAIL)
         mock_now.return_value = (user[uqry.PW_RES_TOK_ISS_TIME]

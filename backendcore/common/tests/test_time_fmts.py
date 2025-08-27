@@ -3,9 +3,7 @@ Copyright 2021 API MixMaster LLC. All rights reserved.
 
 Test module for time_fmts.py.
 """
-import unittest.mock as mock
 import datetime as dt
-from random import choice
 
 import pytest
 
@@ -109,7 +107,8 @@ def test_two_dig_yr_to_4():
     xx > current + 1 do '19xx'
     As written, these tests will fail about 80 years from now!
     """
-    assert tfmt.two_dig_yr_to_4('99') == '1999'  # tonight we're gonna party like it's...
+    # tonight we're gonna party like it's...
+    assert tfmt.two_dig_yr_to_4('99') == '1999'
     assert tfmt.two_dig_yr_to_4('01') == '2001'
 
 
@@ -400,7 +399,8 @@ def test_iso_time_from_js_time():
     assert isinstance(iso_time, dt.datetime)
     assert 'Z' not in str(iso_time)
 
+
 def test_datetime_to_iso():
-   test_datetime = tfmt.TEST_OLD_DATETIME
-   iso = tfmt.datetime_to_iso(test_datetime)
-   assert iso == '2000-01-01T01:01:01.000001'
+    test_datetime = tfmt.TEST_OLD_DATETIME
+    iso = tfmt.datetime_to_iso(test_datetime)
+    assert iso == '2000-01-01T01:01:01.000001'
