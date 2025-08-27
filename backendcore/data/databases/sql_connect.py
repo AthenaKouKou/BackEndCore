@@ -226,6 +226,7 @@ class SqlDB():
         doc_with_ids = self.add_ids(doc)
         collect = self.get_collect(clct_nm, doc=doc_with_ids,
                                    create_if_none=True)
+        print(collect)
         with engine.begin() as conn:
             conn.execute(sqla.insert(collect), doc)
         if isinstance(doc, dict):
