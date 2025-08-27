@@ -389,10 +389,13 @@ def delete_from_list(db_nm, clct_nm, filter_fld_nm, filter_fld_val,
 
 
 @needs_db
-def create_table(table_name, columns=None, key_fld=None):
+def create_table(table_nm, columns=None, key_fld=None, from_table=False):
     """
     Note: This has only been implemented for SQL for now.
     """
-    return database.create_table(table_name,
-                                 columns=columns,
-                                 key_fld=key_fld)
+    if from_table:
+        return database._create_clct_from_doc(table_nm, columns)
+    else:
+        return database.create_table(table_nm,
+                                     columns=columns,
+                                     key_fld=key_fld)
