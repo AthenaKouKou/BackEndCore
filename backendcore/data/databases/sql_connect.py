@@ -132,7 +132,6 @@ class SqlDB():
         self.id_counter = self.id_counter.to_bytes(3, 'big')
         id = timestr + randbytes + ctrstr
         id = int.from_bytes(id, 'big')
-        ic(id)
         return id
 
     def create_table(self, table_name, columns=None,
@@ -399,7 +398,6 @@ class SqlDB():
             raise ValueError(f'Cannot delete; {clct_nm} does not exist.')
         stmt = sqla.delete(collect)
         stmt = self._filter_to_where(collect, stmt, filters)
-        ic(str(stmt))
         with engine.begin() as conn:
             res = conn.execute(stmt)
         return create_del_ret(res)
@@ -409,7 +407,6 @@ class SqlDB():
         Delete one record identified by id.
         We convert the passed in string to an ID for our user.
         """
-        ic(db, clct_nm, id)
         return self.delete(db, clct_nm, filters={OBJ_ID_NM: id})
 
     def delete_many(self, db_nm, clct_nm, filters={}):
