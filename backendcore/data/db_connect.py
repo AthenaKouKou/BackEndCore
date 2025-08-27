@@ -386,3 +386,13 @@ def delete_from_list(db_nm, clct_nm, filter_fld_nm, filter_fld_val,
                                      filter_fld_val,
                                      list_nm,
                                      new_list_item)
+
+
+@needs_db
+def create_table(table_name, columns=None, key_fld=None):
+    """
+    Note: This has only been implemented for SQL for now.
+    """
+    return database.create_table(table_name,
+                                 columns=columns,
+                                 key_fld=key_fld)
