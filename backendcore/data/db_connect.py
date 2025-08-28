@@ -4,20 +4,15 @@ This is the interface to our database, whatever our database may be.
 import os
 from functools import wraps
 
+import backendcore.common.time_fmts as tfmt
 import backendcore.data.databases.mongo_connect as mdb
 import backendcore.data.databases.sql_connect as sdb
 
 # For now, get the following from mongo:
 from backendcore.data.databases.mongo_connect import (  # noqa F401
-    API_DB,
-    DB_ID_LEN,
+    DATE,
     DOC_LIMIT,
-    DSRC_DB,
-    GEO_DB,
-    HMDA_DB,
     MAX_DB_INT,
-    SFA_DB,
-    TIME_SERIES_DB,
     USER_DB,
 )
 
@@ -279,7 +274,7 @@ def create(db_nm: str, clct_nm: str, doc: dict, with_date=False):
     `with_date=True` adds the current date to any inserted doc.
     """
     if with_date:
-        print('with_date format is not supported at present time')
+        doc[DATE] = str(tfmt.today())
     return database.create(db_nm, clct_nm, doc)
 
 
