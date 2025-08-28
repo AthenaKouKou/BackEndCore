@@ -76,9 +76,7 @@ def get_db():
     if db_type == MONGO:
         local = os.environ.get("LOCAL_MONGO", REMOTE) == LOCAL
         db = mdb.MongoDB(local_db=local)
-    elif db_type == SQL or db_type == SQLITE_MEM:
-        db = sdb.SqlDB(variant=SQLITE_MEM)
-    elif db_type == MY_SQL or db_type == SQLITE:
+    else:
         db = sdb.SqlDB(variant=db_type)
     print(f'{db=}')
     os.environ[LISTS_IN_DB] = LISTS_IN_DB_DICT[db_type]
