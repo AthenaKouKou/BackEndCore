@@ -10,17 +10,9 @@ import backendcore.data.databases.sql_connect as sdb
 
 # For now, get the following from mongo:
 from backendcore.data.databases.mongo_connect import (  # noqa F401
-    API_DB,
     DATE,
-    DB_ID_LEN,
     DOC_LIMIT,
-    DSRC_DB,
-    GEO_DB,
-    HMDA_DB,
     MAX_DB_INT,
-    SFA_DB,
-    TIME_SERIES_DB,
-    USER_DB,
 )
 
 from backendcore.data.databases.sql_connect import (
