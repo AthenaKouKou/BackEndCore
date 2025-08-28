@@ -106,10 +106,12 @@ class SqlDB():
         if engine is None:
             engine = self._connectDB()
         self.id_counter = os.urandom(3)
+        # Load existing metadata
+        self.mdata.reflect(engine)
 
     def _connectDB(self):
         connect_str = DB_TABLE[self.variant]
-        return sqla.create_engine(connect_str, echo=True)
+        return sqla.create_engine(connect_str, echo=False)
 
     def _get_metadata(self):
         return self.mdata
@@ -158,7 +160,6 @@ class SqlDB():
         self.mdata.create_all(engine)
         return new_table
 
-    # def get_collect(self, db_nm: str, clct_nm: str):
     def get_collect(self, clct_nm: str, doc={}, create_if_none=False):
         clct = self.mdata.tables.get(clct_nm)
         if clct is not None:
@@ -226,7 +227,6 @@ class SqlDB():
         doc_with_ids = self.add_ids(doc)
         collect = self.get_collect(clct_nm, doc=doc_with_ids,
                                    create_if_none=True)
-        print(collect)
         with engine.begin() as conn:
             conn.execute(sqla.insert(collect), doc)
         if isinstance(doc, dict):
@@ -258,11 +258,11 @@ class SqlDB():
 
     def _asmbl_sort_slct(self, collect, sort=NO_SORT, sort_fld=OBJ_ID_NM):
         stmt = sqla.select(collect)
-        ic(stmt.__str__())
-        field = self.get_field(collect, sort_fld, create_if_none=True)
+        if sort_fld is not None:
+            field = self.get_field(collect, sort_fld, create_if_none=True)
         if sort == ASC:
             return stmt.order_by(asc(field))
-        if sort == DESC:
+        elif sort == DESC:
             return stmt.order_by(desc(field))
         return stmt
 
@@ -315,10 +315,8 @@ class SqlDB():
         if clct is None:
             return all_docs
         stmt = self._asmbl_read_stmt(clct, filters, sort, sort_fld)
-        print(f'{stmt=}')
         with engine.connect() as conn:
             res = conn.execute(stmt)
-            ic(res)
             all_docs = self._read_recs_to_objs(res)
         if no_id:
             for rec in all_docs:
