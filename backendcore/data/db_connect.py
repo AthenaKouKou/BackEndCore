@@ -13,6 +13,7 @@ from backendcore.data.databases.mongo_connect import (  # noqa F401
     DATE,
     DOC_LIMIT,
     MAX_DB_INT,
+    USER_DB,
 )
 
 from backendcore.data.databases.sql_connect import (
