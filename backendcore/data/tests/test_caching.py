@@ -6,7 +6,7 @@ import pytest
 
 import backendcore.data.caching as cach
 
-FLD1 = 'fld1'
+KEY_FLD = 'fld1'
 FLD2 = 'fld2'
 VAL1 = 'val1'
 VAL2 = 'val2'
@@ -14,18 +14,18 @@ VAL3 = 'val3'
 VAL4 = 'val4'
 
 REC1 = {
-    FLD1: VAL1,
+    KEY_FLD: VAL1,
     FLD2: VAL2,
 }
 
 REC2 = {
-    FLD1: VAL3,
+    KEY_FLD: VAL3,
     FLD2: VAL4,
 }
 
 DIFF_KEY_VAL = 'A brand new val'
 DIFF_REC = {
-    FLD1: DIFF_KEY_VAL,
+    KEY_FLD: DIFF_KEY_VAL,
     FLD2: VAL2,
 }
 
@@ -36,17 +36,29 @@ TEST_LIST = [
 
 TEMP_DB = 'TempDB'
 TEMP_COLLECT = 'TempCollection'
+TEMP_KEY_COLLECT = 'TempKeyCollection'
 
 TEST_DCOLLECT = cach.DataCollection(TEMP_DB,
                                     TEMP_COLLECT,
-                                    key_fld=FLD1,
+                                    key_fld=KEY_FLD,
                                     sort_fld=FLD2,
                                     )
+
+TEST_KEYFLD_COLLECT = cach.DataCollection(TEMP_DB,
+                                          TEMP_KEY_COLLECT,
+                                          key_fld=KEY_FLD,
+                                          sort_fld=FLD2,
+                                          )
 
 
 @pytest.fixture(scope='function')
 def new_dcollect():
     return deepcopy(TEST_DCOLLECT)
+
+
+@pytest.fixture(scope='function')
+def new_keyfld_collect():
+    return deepcopy(TEST_KEYFLD_COLLECT)
 
 
 @pytest.fixture(scope='function')
@@ -227,12 +239,32 @@ def test_add(new_dcollect):
     new_dcollect.delete(DIFF_KEY_VAL)
 
 
+def test_add_keyfld_rec(new_keyfld_collect):
+    """
+    Same as above but checks we can properly add records that use database ids
+    as key field and don't provide a keyfield upon creation
+    """
+    new_keyfld_collect.clear_cache()
+    new_keyfld_collect.add(DIFF_REC)
+    assert new_keyfld_collect.exists(DIFF_KEY_VAL)
+    new_keyfld_collect.delete(DIFF_KEY_VAL)
+
+
 @patch('backendcore.data.db_connect.fetch_all', autospec=True,
        return_value=TEST_LIST)
 def test_add_duplicate(mock_fetch, new_dcollect):
     with pytest.raises(ValueError):
         # REC1 should be in there already.
         new_dcollect.add(REC1)
+
+
+@patch('backendcore.data.db_connect.fetch_all', autospec=True,
+       return_value=TEST_LIST)
+def test_add_no_key_fld(mock_fetch, new_dcollect):
+    REC_NO_KEY = deepcopy(REC1)
+    REC_NO_KEY.pop(KEY_FLD)
+    with pytest.raises(ValueError):
+        new_dcollect.add(REC_NO_KEY)
 
 
 @patch('backendcore.data.db_connect.fetch_all', autospec=True,

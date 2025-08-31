@@ -114,14 +114,10 @@ def get_input(dflt, opt, qstn):
 
 
 def form(fld_descrips):
-    print('For optional fields just hit Enter if you do not want a value.')
-    print('For fields with a default just hit Enter if you want the default.')
     fld_vals = {}
     for fld in fld_descrips:
         opt = ''
         dflt = ''
-        if CHOICES in fld:
-            print(f'Options: {fld[CHOICES]}')
         if OPT in fld:
             opt = '(OPTIONAL) '
         if DEFAULT in fld:

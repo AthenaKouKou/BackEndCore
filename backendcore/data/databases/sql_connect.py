@@ -12,10 +12,18 @@ con = None
 SQLITE_DB_NM = 'SQLITE_DB_NM'
 
 SQLITE_MEM = 'sqllite_mem'
-SQLITE_MEM_STR = 'sqlite+pysqlite:///:memory:'
+SQLITE = 'sqlite'
+
+SQL_DB_NM = 'sql.db'
+db_nm = os.environ.get('SQL_DB_NM', SQL_DB_NM)
+db_loc = os.environ.get('SQLITE_LOC', './database/')
+SQLITE_BASE = 'sqlite+pysqlite:///'
+SQLITE_MEM_STR = SQLITE_BASE + ':memory:'
+SQLITE_STR = SQLITE_BASE + db_loc + db_nm
 
 DB_TABLE = {
     SQLITE_MEM: SQLITE_MEM_STR,
+    SQLITE: SQLITE_STR,
 }
 
 engine = None
@@ -98,10 +106,12 @@ class SqlDB():
         if engine is None:
             engine = self._connectDB()
         self.id_counter = os.urandom(3)
+        # Load existing metadata
+        self.mdata.reflect(engine)
 
     def _connectDB(self):
         connect_str = DB_TABLE[self.variant]
-        return sqla.create_engine(connect_str, echo=True)
+        return sqla.create_engine(connect_str, echo=False)
 
     def _get_metadata(self):
         return self.mdata
@@ -125,7 +135,6 @@ class SqlDB():
         self.id_counter = self.id_counter.to_bytes(3, 'big')
         id = timestr + randbytes + ctrstr
         id = int.from_bytes(id, 'big')
-        ic(id)
         return id
 
     def create_table(self, table_name, columns=None,
@@ -151,7 +160,6 @@ class SqlDB():
         self.mdata.create_all(engine)
         return new_table
 
-    # def get_collect(self, db_nm: str, clct_nm: str):
     def get_collect(self, clct_nm: str, doc={}, create_if_none=False):
         clct = self.mdata.tables.get(clct_nm)
         if clct is not None:
@@ -250,11 +258,11 @@ class SqlDB():
 
     def _asmbl_sort_slct(self, collect, sort=NO_SORT, sort_fld=OBJ_ID_NM):
         stmt = sqla.select(collect)
-        # ic(stmt.__str__())
-        field = self.get_field(collect, sort_fld, create_if_none=True)
+        if sort_fld is not None:
+            field = self.get_field(collect, sort_fld, create_if_none=True)
         if sort == ASC:
             return stmt.order_by(asc(field))
-        if sort == DESC:
+        elif sort == DESC:
             return stmt.order_by(desc(field))
         return stmt
 
@@ -391,7 +399,6 @@ class SqlDB():
             raise ValueError(f'Cannot delete; {clct_nm} does not exist.')
         stmt = sqla.delete(collect)
         stmt = self._filter_to_where(collect, stmt, filters)
-        ic(str(stmt))
         with engine.begin() as conn:
             res = conn.execute(stmt)
         return create_del_ret(res)
@@ -401,7 +408,6 @@ class SqlDB():
         Delete one record identified by id.
         We convert the passed in string to an ID for our user.
         """
-        ic(db, clct_nm, id)
         return self.delete(db, clct_nm, filters={OBJ_ID_NM: id})
 
     def delete_many(self, db_nm, clct_nm, filters={}):

@@ -9,6 +9,7 @@ import backendcore.data.db_connect as dbc
 from backendcore.common.constants import (
     CODE,
     NAME,
+    OBJ_ID_NM,
 )
 
 import backendcore.data.query as qry
@@ -25,6 +26,11 @@ def can_do_math(record, fld):
 
 class DataCollection(object):
     caches: dict = {}
+
+    @staticmethod
+    def is_db_id(fld_nm):
+        if fld_nm in [OBJ_ID_NM]:
+            return True
 
     @classmethod
     def is_registered(cls, cache_name):
@@ -162,7 +168,6 @@ class DataCollection(object):
         """
         For cases where it is expensive to update the entire cache.
         """
-        print(f'adding {rec=} to cache')
         key_val = rec.get(self.key_fld, None)
         if not key_val:
             raise ValueError('Attempt to add rec with missing key to cache')
@@ -184,12 +189,13 @@ class DataCollection(object):
         want to do that.
         """
         key_val = rec.get(self.key_fld, None)
-        print(f'{key_val=}')
+        # A little kludgey: If we are using MONGODB, and we want to use the
+        # object id as the key fld, we can't provide the actual value.
+        if key_val is None and not DataCollection.is_db_id(self.key_fld):
+            raise ValueError('Key field value not provided')
         if self.exists(key_val):
-            print('key exists')
             raise ValueError(f'Attempt to add an existing {key_val=}')
         ret = dbc.insert_doc(self.db_nm, self.collect_nm, rec)
-        print(f'Inserted record: {ret=}')
         if clear_cache:
             self.clear_cache()
         return ret
@@ -200,7 +206,6 @@ class DataCollection(object):
         Returns DB result of the insert.
         """
         ret = dbc.insert_many(recs)
-        print(f'Inserted record: {ret=}')
         if clear_cache:
             self.clear_cache()
         return ret
@@ -286,8 +291,6 @@ def needs_cache(fn, cache_nm, db_nm, collect_nm,
     """
     @wraps(fn)
     def wrapper(*args, **kwargs):
-        # print(f'{cache_nm=}')
-        # print(f'{glob_dict.get(cache_nm)=}')
         if not DataCollection.is_registered(cache_nm):
             DataCollection(db_nm,
                            collect_nm,

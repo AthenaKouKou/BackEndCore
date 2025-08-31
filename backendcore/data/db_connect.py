@@ -4,25 +4,21 @@ This is the interface to our database, whatever our database may be.
 import os
 from functools import wraps
 
+import backendcore.common.time_fmts as tfmt
 import backendcore.data.databases.mongo_connect as mdb
 import backendcore.data.databases.sql_connect as sdb
 
 # For now, get the following from mongo:
 from backendcore.data.databases.mongo_connect import (  # noqa F401
-    API_DB,
-    DB_ID_LEN,
+    DATE,
     DOC_LIMIT,
-    DSRC_DB,
-    GEO_DB,
-    HMDA_DB,
     MAX_DB_INT,
-    SFA_DB,
-    TIME_SERIES_DB,
     USER_DB,
 )
 
 from backendcore.data.databases.sql_connect import (
     SQLITE_MEM,
+    SQLITE,
 )
 
 REMOTE = "0"
@@ -40,7 +36,6 @@ FAILURE = -1
 MONGO = 'MongoDB'
 SQL = 'SQL'
 MY_SQL = 'MySQL'
-SQLITE = 'SQLite'
 
 # Testing flags:
 LISTS_IN_DB = 'LISTS_IN_DB'
@@ -76,9 +71,7 @@ def get_db():
     if db_type == MONGO:
         local = os.environ.get("LOCAL_MONGO", REMOTE) == LOCAL
         db = mdb.MongoDB(local_db=local)
-    elif db_type == SQL or db_type == SQLITE_MEM:
-        db = sdb.SqlDB(variant=SQLITE_MEM)
-    elif db_type == MY_SQL or db_type == SQLITE:
+    else:
         db = sdb.SqlDB(variant=db_type)
     print(f'{db=}')
     os.environ[LISTS_IN_DB] = LISTS_IN_DB_DICT[db_type]
@@ -281,7 +274,7 @@ def create(db_nm: str, clct_nm: str, doc: dict, with_date=False):
     `with_date=True` adds the current date to any inserted doc.
     """
     if with_date:
-        print('with_date format is not supported at present time')
+        doc[DATE] = str(tfmt.today())
     return database.create(db_nm, clct_nm, doc)
 
 
@@ -386,3 +379,16 @@ def delete_from_list(db_nm, clct_nm, filter_fld_nm, filter_fld_val,
                                      filter_fld_val,
                                      list_nm,
                                      new_list_item)
+
+
+@needs_db
+def create_table(table_nm, columns=None, key_fld=None, from_table=False):
+    """
+    Note: This has only been implemented for SQL for now.
+    """
+    if from_table:
+        return database._create_clct_from_doc(table_nm, columns)
+    else:
+        return database.create_table(table_nm,
+                                     columns=columns,
+                                     key_fld=key_fld)
