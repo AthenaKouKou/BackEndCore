@@ -19,11 +19,12 @@ from backendcore.common.constants import (  # noqa F401
 )
 from backendcore.common.clients import get_client_db
 import backendcore.data.db_connect as dbc
-import backendcore.security.auth_key as ak
 import backendcore.users.query as uqry
 from backendcore.security.constants import (
     JOURNAL,
 )
+import backendcore.security.api_key as apik
+import backendcore.security.auth_key as ak
 
 
 IP_ADDRESS = 'ipAddress'
@@ -78,14 +79,17 @@ class ActionChecks(object):
     """
     def __init__(self,
                  auth_key=False,
+                 api_key=False,
+                 ip_address=None,
                  pass_phrase=False,
                  valid_users=None,
-                 ip_address=None,
                  codes=None,
                  this_phrase=''):
         self.phrase = None
         if not isinstance(auth_key, bool):
             raise TypeError(f'{BAD_TYPE}{type(auth_key)=}')
+        if not isinstance(api_key, bool):
+            raise TypeError(f'{BAD_TYPE}{type(api_key)=}')
         if not isinstance(pass_phrase, bool):
             raise TypeError(f'{BAD_TYPE}{type(pass_phrase)=}')
         elif pass_phrase:
@@ -102,6 +106,10 @@ class ActionChecks(object):
             VALIDATE_USER: {
                 IN_EFFECT: valid_users is not None,
                 VALIDATOR: self.is_valid_user,
+            },
+            API_KEY: {
+                IN_EFFECT: api_key,
+                VALIDATOR: self.is_valid_api_key,
             },
             AUTH_KEY: {
                 IN_EFFECT: auth_key,
@@ -143,6 +151,9 @@ class ActionChecks(object):
     def is_valid_auth_key(self, user_id: str, auth_key: str) -> bool:
         auth_user = uqry.fetch_id_by_auth_key(auth_key)
         return user_id == auth_user
+
+    def is_valid_api_key(self, api_key: str) -> bool:
+        return apik.exists(api_key)
 
     def is_valid_pass_phrase(self, user_id: str, pass_phrase: str) -> bool:
         """
@@ -282,7 +293,7 @@ class SecProtocol(object):
 
 
 def is_permitted(prot_name, action, user_id: str = '', auth_key: str = '',
-                 phrase: str = '', code: str = None):
+                 api_key: str = '', phrase: str = '', code: str = None):
     prot = fetch_by_key(prot_name)
     if not prot:
         raise ValueError(f'Unknown protocol: {prot_name=}')
@@ -445,6 +456,7 @@ TEST_CODE = 'test code'
 TEST_CODES = {TEST_CODE: 'some event name'}
 
 GOOD_SEC_CHECKS = ActionChecks(auth_key=True,
+                               api_key=False,
                                pass_phrase=True,
                                this_phrase=TEST_PHRASE,
                                ip_address=False,

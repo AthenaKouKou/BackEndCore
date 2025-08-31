@@ -6,6 +6,7 @@ We can make it fancier later.
 """
 
 MIN_KEY_LEN = 16
+TEST_KEY = 'test key must be at least MIN_KEY in length!'
 
 keys = []
 

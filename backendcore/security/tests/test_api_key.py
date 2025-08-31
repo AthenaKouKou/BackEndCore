@@ -2,14 +2,13 @@ import pytest
 
 import backendcore.security.api_key as apik
 
-TEST_KEY = 'test key must be at least MIN_KEY in length!'
 KEY_TOO_SHORT = 'will not work'
 
 
 def test_num_keys():
     apik.clear_keys()
     assert apik.num_keys() == 0
-    apik.add(TEST_KEY)
+    apik.add(apik.TEST_KEY)
     assert apik.num_keys() == 1
 
 
@@ -23,8 +22,8 @@ def test_clear_keys():
 
 
 def test_add():
-    apik.add(TEST_KEY)
-    assert apik.exists(TEST_KEY)
+    apik.add(apik.TEST_KEY)
+    assert apik.exists(apik.TEST_KEY)
 
 
 def test_add_bad_key():
@@ -42,8 +41,8 @@ def test_exists():
     This test is a lot like test_add but that will change as module
     becomes more sophiticated.
     """
-    apik.add(TEST_KEY)
-    assert apik.exists(TEST_KEY)
+    apik.add(apik.TEST_KEY)
+    assert apik.exists(apik.TEST_KEY)
 
 
 def test_not_exists():

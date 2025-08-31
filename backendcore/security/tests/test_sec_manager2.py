@@ -12,6 +12,7 @@ import backendcore.data.db_connect as dbc
 import backendcore.users.query as uqry
 
 import backendcore.security.sec_manager2 as sm
+import backendcore.security.api_key as apik
 
 TEST_PROTOCOL_NAME = 'Test-Protocol'
 TEST_PROTOCOL = sm.SecProtocol(TEST_PROTOCOL_NAME)
@@ -23,6 +24,8 @@ GOOD_SEC_CHECKS = sm.GOOD_SEC_CHECKS
 GOOD_PROTOCOL = sm.GOOD_PROTOCOL
 
 NOT_A_STR = 17  # could be any non-str value!
+
+TEST_AUTH_KEY = 'test auth key'
 
 
 @pytest.fixture(scope='function')
@@ -60,6 +63,11 @@ def test_init_sec_checks_w_vals():
 def test_init_sec_checks_bad_auth_key():
     with pytest.raises(TypeError):
         sm.ActionChecks(auth_key='Not a boolean!')
+
+
+def test_init_sec_checks_bad_api_key():
+    with pytest.raises(TypeError):
+        sm.ActionChecks(api_key='Not a boolean!')
 
 
 def test_init_sec_checks_bad_users():
@@ -111,30 +119,36 @@ FETCH_BY_AUTH_KEY = f'{UQRY}.fetch_id_by_auth_key'
 
 @patch(f'{FETCH_BY_AUTH_KEY}', autospec=True, return_value=sm.TEST_EMAIL)
 def test_is_sec_checks_valid_auth_key(mock_auth_key):
-    assert GOOD_SEC_CHECKS.is_valid_auth_key(sm.TEST_EMAIL, 'some auth key')
+    assert GOOD_SEC_CHECKS.is_valid_auth_key(sm.TEST_EMAIL, TEST_AUTH_KEY)
 
 
 @patch(f'{FETCH_BY_AUTH_KEY}', autospec=True, return_value='bademail.com')
 def test_is_sec_checks_not_valid_auth_key(mock_auth_key):
-    assert not GOOD_SEC_CHECKS.is_valid_auth_key(sm.TEST_EMAIL, 'some authkey')
+    assert not GOOD_SEC_CHECKS.is_valid_auth_key(sm.TEST_EMAIL, TEST_AUTH_KEY)
 
 
 @patch(f'{FETCH_BY_AUTH_KEY}', autospec=True, return_value=sm.TEST_EMAIL)
 def test_sec_checks_is_permitted(mock_auth_key):
     assert GOOD_SEC_CHECKS.is_permitted(sm.TEST_EMAIL, {sm.VALIDATE_USER:
                                                         sm.TEST_EMAIL,
-                                                        sm.AUTH_KEY:
-                                                        'some auth key',
+                                                        sm.API_KEY: apik.TEST_KEY,
+                                                        sm.AUTH_KEY: TEST_AUTH_KEY,
                                                         sm.PASS_PHRASE:
                                                         sm.TEST_PHRASE,
                                                         })
 
 
 def test_sec_checks_is_not_permitted():
-    assert not GOOD_SEC_CHECKS.is_permitted(sm.TEST_EMAIL, {sm.VALIDATE_USER:
-                                                            'Bad email',
-                                                            sm.AUTH_KEY:
-                                                            'some auth key'})
+    assert not GOOD_SEC_CHECKS.is_permitted(sm.TEST_EMAIL, {sm.VALIDATE_USER: 'Bad email',
+                                                            sm.AUTH_KEY: TEST_AUTH_KEY})
+
+# def test_is_sec_checks_valid_api_key():
+#     assert GOOD_SEC_CHECKS.is_valid_api_key(apik.TEST_KEY)
+# 
+# 
+# def test_is_sec_checks_not_valid_api_key():
+#     assert not GOOD_SEC_CHECKS.is_valid_api_key('some bad key of sufficient
+#                                                  length')
 
 
 def test_init_protocol_w_defaults():
@@ -193,7 +207,7 @@ def test_protocol_is_permitted(mock_auth_key):
     assert GOOD_PROTOCOL.is_permitted(sm.CREATE, sm.TEST_EMAIL,
                                       {sm.VALIDATE_USER:
                                        sm.TEST_EMAIL,
-                                       sm.AUTH_KEY: 'some auth key',
+                                       sm.AUTH_KEY: TEST_AUTH_KEY,
                                        sm.PASS_PHRASE: sm.TEST_PHRASE})
 
 
@@ -268,8 +282,12 @@ def test_delete_missing():
 
 @patch(f'{FETCH_BY_AUTH_KEY}', autospec=True, return_value=sm.TEST_EMAIL)
 def test_is_permitted(mock_auth_key, temp_protocol):
-    assert sm.is_permitted(TEST_NAME, sm.CREATE, user_id=sm.TEST_EMAIL,
-                           auth_key='some auth_key', phrase=sm.TEST_PHRASE)
+    assert sm.is_permitted(TEST_NAME,
+                           sm.CREATE,
+                           user_id=sm.TEST_EMAIL,
+                           api_key='some auth_key',
+                           auth_key='some auth_key',
+                           phrase=sm.TEST_PHRASE)
 
 
 def test_is_not_permitted_bad_email(temp_protocol):
@@ -303,7 +321,8 @@ def test_protocol_from_json(mock_fetch_by_auth):
     assert protocol.is_permitted(sm.CREATE, sm.TEST_EMAIL,
                                  {sm.VALIDATE_USER:
                                   sm.TEST_EMAIL,
-                                  sm.AUTH_KEY: 'some auth key',
+                                  sm.API_KEY: apik.TEST_KEY,
+                                  sm.AUTH_KEY: TEST_AUTH_KEY,
                                   sm.PASS_PHRASE: sm.TEST_PHRASE})
 
 
