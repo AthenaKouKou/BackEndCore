@@ -8,6 +8,7 @@ import os
 from functools import wraps
 
 from backendcore.common.constants import (  # noqa F401
+    API_KEY,
     AUTH_KEY,
     CREATE,
     DELETE,
