@@ -17,6 +17,7 @@ from backendcore.data.databases.mongo_connect import (  # noqa F401
     API_DB,
     GEO_DB,
     HMDA_DB,
+    SFA_DB,
 )
 
 from backendcore.data.databases.sql_connect import (
