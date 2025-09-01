@@ -15,6 +15,7 @@ from backendcore.data.databases.mongo_connect import (  # noqa F401
     MAX_DB_INT,
     USER_DB,
     API_DB,
+    GEO_DB,
 )
 
 from backendcore.data.databases.sql_connect import (
