@@ -41,8 +41,6 @@ PASSWORD = 'password'
 PROT_NM = 'protocol_name'
 
 
-INFRA_PASS_PHRASE = 'Come on, Beanie!'
-
 VALID_ACTIONS = [
     CREATE,
     READ,
@@ -374,7 +372,6 @@ def fetch_all() -> None:
     """
     Gets all the security protocols from the db and puts them in protocols
     """
-    print('Fetching security protocols')
     if len(protocols) < 1:
         data_list = dbc.fetch_all(SEC_DB,
                                   SEC_COLLECT,
