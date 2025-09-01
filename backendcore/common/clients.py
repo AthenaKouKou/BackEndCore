@@ -4,32 +4,50 @@ import backendcore.data.db_connect as dbc
 CLIENT_CODE = 'CLIENT_CODE'
 SALES_EMAIL = 'sales_email'
 DB_NM = 'db'
-MFC = 'MFC'
-MFC_DB = 'mfcDB'
 CAT = 'CAT'
 CAT_DB = 'catDB'
-DEFAULT = 'default'
+DMM = 'DMM'
+DMM_DB = dbc.USER_DB
+FIN = 'FIN'
+FIN_DB = None
+MFC = 'MFC'
+MFC_DB = 'mfcDB'
+
 client_code = None
 
+# For tests: add codes and dbs as needed!
+VALID_CODES = [CAT, DMM, FIN, MFC]
+CODES_W_DB = [CAT, DMM, MFC]
+VALID_DBS = [CAT_DB, DMM_DB, MFC_DB]
+CLIENT_HAS_NO_DB = FIN
+CLIENT_HAS_EMAIL = DMM
+CLIENT_HAS_NO_EMAIL = FIN
+
 CLIENT_TABLE = {
-    MFC: {DB_NM: MFC_DB},
     CAT: {DB_NM: CAT_DB},
-    # DEFAULT: {DB_NM: dbc.USER_DB, SALES_EMAIL:'seanc@datamixmaster.com'},
-    DEFAULT: {DB_NM: dbc.USER_DB, SALES_EMAIL: 'kristian.d.nikolov@gmail.com'},
+    DMM: {DB_NM: DMM_DB, SALES_EMAIL: 'seanc@datamixmaster.com'},
+    FIN: {DB_NM: FIN_DB},
+    MFC: {DB_NM: MFC_DB},
 }
 
 
 def get_client_code():
     global client_code
-    client_code = os.getenv(CLIENT_CODE, DEFAULT)
+    if not client_code:
+        client_code = os.getenv(CLIENT_CODE, DMM)
     return client_code
 
 
+def get_client():
+    client = CLIENT_TABLE.get(get_client_code())
+    if not client:
+        raise ValueError(f'Bad client code: {get_client_code()}')
+    return client
+
+
 def get_client_db():
-    get_client_code()
-    return CLIENT_TABLE.get(client_code).get(DB_NM)
+    return get_client().get(DB_NM)
 
 
 def get_sales_email():
-    get_client_code()
-    return CLIENT_TABLE.get(client_code).get(SALES_EMAIL)
+    return get_client().get(SALES_EMAIL)

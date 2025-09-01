@@ -470,6 +470,11 @@ GOOD_PROTOCOL = SecProtocol(TEST_NAME,
                             update=GOOD_SEC_CHECKS,
                             delete=GOOD_SEC_CHECKS)
 
+FINSIGHT_NAME = 'FinsightIndex'
+FINSIGHT_SEC_CHECKS = ActionChecks(api_key=True)
+
+FINSIGHT_PROTOCOL = SecProtocol(FINSIGHT_NAME, read=FINSIGHT_SEC_CHECKS)
+
 
 def main():
     create = ActionChecks(valid_users=['gcallah@mac.com'],
