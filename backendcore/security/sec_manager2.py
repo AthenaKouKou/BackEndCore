@@ -17,7 +17,11 @@ from backendcore.common.constants import (  # noqa F401
     UPDATE,
     CODES,
 )
-from backendcore.common.clients import get_client_db
+from backendcore.common.clients import (
+    FIN,
+    get_client_code,
+    get_client_db,
+)
 import backendcore.data.db_connect as dbc
 import backendcore.users.query as uqry
 from backendcore.security.constants import (
@@ -472,8 +476,10 @@ GOOD_PROTOCOL = SecProtocol(TEST_NAME,
 
 FINSIGHT_NAME = 'FinsightIndex'
 FINSIGHT_SEC_CHECKS = ActionChecks(api_key=True)
-
 FINSIGHT_PROTOCOL = SecProtocol(FINSIGHT_NAME, read=FINSIGHT_SEC_CHECKS)
+
+if get_client_code() == FIN:
+    protocols[FINSIGHT_NAME] = FINSIGHT_PROTOCOL
 
 
 def main():
