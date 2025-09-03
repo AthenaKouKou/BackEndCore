@@ -5,6 +5,8 @@ We should not assume that is true forever!
 Thus, we should cut over from calling the ID
 field `email` to calling it `user_id`.
 """
+from functools import wraps
+
 from backendcore.common.clients import get_client_db
 from backendcore.common.hashing import hash_str_and_salt
 import backendcore.common.valid as vld
@@ -41,20 +43,36 @@ PAY_PROV_USER_ID = 'pay_prov_user_id'
 RPT_RECIPS = 'rpt_recipients'
 RECIP_EMAIL = 'recip_email'
 
-db_name = get_client_db()
+db_name = None
 
 
+def needs_db_name(fn):
+    """
+    Should be used to decorate any function that directly uses the db name.
+    Functions that call functions that use the db name don't need this
+    decorator.
+    """
+    @wraps(fn)
+    def wrapper(*args, **kwargs):
+        global db_name
+        if not db_name:
+            db_name = get_client_db()
+        return fn(*args, **kwargs)
+    return wrapper
+
+
+@needs_db_name
 def list_users():
-    return dbc.read(dbc.USER_DB, USER_COLLECT)
+    return dbc.read(db_name, USER_COLLECT)
 
 
+@needs_db_name
 def fetch_by_key(user_id: str):
     """
     User IDs must be unique in our db, so we can fetch a unique
     record based on just user_id.
     """
-    return dbc.fetch_one(db_name, USER_COLLECT,
-                         filters={EMAIL: user_id})
+    return dbc.fetch_one(db_name, USER_COLLECT, filters={EMAIL: user_id})
 
 
 def fetch_user(user_id: str):
@@ -64,6 +82,7 @@ def fetch_user(user_id: str):
     return fetch_by_key(user_id)
 
 
+@needs_db_name
 def create_user(email: str, firstname: str, lastname: str,
                 passwd: str, salt: str, org: str = None,
                 auth_key: str = ''):
@@ -93,6 +112,7 @@ def create_user(email: str, firstname: str, lastname: str,
                                PW_RES_SALT: ''})
 
 
+@needs_db_name
 def delete(user_id: str):
     """
     Deletes a user.
@@ -137,6 +157,7 @@ def get_users_edit_grp(user_id: str):
     return edit_grp
 
 
+@needs_db_name
 def add_login(user_id: str, date=None):
     """
     Records a new login.
@@ -150,6 +171,7 @@ def add_login(user_id: str, date=None):
                            user_id, LOGINS, date)
 
 
+@needs_db_name
 def fetch_logins(user_id: str):
     """
     Fetches all logins for a user as a list.
@@ -168,6 +190,7 @@ def get_last_login(user_id):
         return ''
 
 
+@needs_db_name
 def add_rpt_recip(user_id: str, rec_email: str):
     """
     Adds a report recipient to a user doc.
@@ -192,6 +215,7 @@ def add_rpt_recip(user_id: str, rec_email: str):
         return None
 
 
+@needs_db_name
 def replace_rpt_recips(user_id: str, recips: list):
     """
     Adds a report recipient to a user doc.
@@ -224,6 +248,7 @@ def get_rpt_recips(user_id: str):
         return None
 
 
+@needs_db_name
 def update_pw_reset_token(user_id: str, salt: str, hashed_token: str):
     """
     Updates password resets for a user_id.
@@ -235,6 +260,7 @@ def update_pw_reset_token(user_id: str, salt: str, hashed_token: str):
                        PW_RES_TOK_ISS_TIME: tfmt.now()})
 
 
+@needs_db_name
 def update_pw(user_id, salt, hashed_pw):
     """
     Updates a user's password (given an user_id)
@@ -259,6 +285,7 @@ def get_auth_key(user_id):
         return None
 
 
+@needs_db_name
 def fetch_by_auth_key(key: str) -> dict:
     """
     Fetch a user by their authorization key.
@@ -275,6 +302,7 @@ def fetch_id_by_auth_key(key: str) -> str:
         return user.get(EMAIL)
 
 
+@needs_db_name
 def update_auth_key(user_id, auth_key):
     return dbc.update(db_name,
                       USER_COLLECT,
@@ -282,6 +310,7 @@ def update_auth_key(user_id, auth_key):
                       {KEY: auth_key, ISSUE_TIME: tfmt.now()})
 
 
+@needs_db_name
 def update_pay_prov_sid(user_id, session_id):
     return dbc.update_fld(
         db_name,
@@ -292,6 +321,7 @@ def update_pay_prov_sid(user_id, session_id):
     )
 
 
+@needs_db_name
 def clear_pay_prov_sid(sid):
     assert isinstance(sid, str)
     return dbc.update_fld(
@@ -303,6 +333,7 @@ def clear_pay_prov_sid(sid):
     )
 
 
+@needs_db_name
 def update_pay_prov_user_id(sid: str, pay_prov_user_id: str):
     """
     Identifies a user by his session id and sets his payment provider id.
@@ -338,6 +369,7 @@ def create_test_user():
     )
 
 
+@needs_db_name
 def create_test_user_with_pay_prov_sid(sid=TEST_PAY_PROV_SID):
     create_user(
         TEST_EMAIL,

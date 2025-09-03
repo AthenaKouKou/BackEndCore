@@ -41,7 +41,7 @@ def get_client_code():
 def get_client():
     client = CLIENT_TABLE.get(get_client_code())
     if not client:
-        raise ValueError(f'Bad client code: {get_client_code()}')
+        raise ValueError(f'Bad client code: {client_code}')
     return client
 
 

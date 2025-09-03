@@ -18,6 +18,7 @@ from backendcore.common.constants import (  # noqa F401
     CODES,
 )
 from backendcore.common.clients import (
+    CAT,
     FIN,
     get_client_code,
     get_client_db,
@@ -332,6 +333,10 @@ def add(protocol):
     protocols[name] = protocol
 
 
+def exists(name):
+    return name in protocols
+
+
 @needs_protocols
 def delete(name):
     if name in protocols:
@@ -377,11 +382,15 @@ def fetch_all() -> None:
     Gets all the security protocols from the db and puts them in protocols
     """
     if len(protocols) < 1:
-        data_list = dbc.fetch_all(SEC_DB,
-                                  SEC_COLLECT,
-                                  no_id=True)
-        for protocol_json in data_list:
-            add(protocol_from_json(protocol_json))
+        if get_client_code() == FIN:
+            print('Adding finsight protocol')
+            protocols[FINSIGHT_NAME] = FINSIGHT_PROTOCOL
+        else:
+            data_list = dbc.fetch_all(SEC_DB,
+                                      SEC_COLLECT,
+                                      no_id=True)
+            for protocol_json in data_list:
+                add(protocol_from_json(protocol_json))
 
 
 @needs_protocols
@@ -403,14 +412,12 @@ def add_to_db(protocol):
     return ret
 
 
-JOURNAL_CODE = os.environ.get('JOURNAL_CODE', '')
-
-COSMOS_JOURNAL_CODE = 'CAT'
+JOURNAL_CODE = os.environ.get('JOURNAL_CODE', CAT)
 
 
 def fetch_journal_protocol_name() -> str:
     """
-    We are assuming that SFA is the default journal for now
+    We are assuming that CAT is the default journal for now
     This code should move: security should not have to know about
     JOURNAL_CODE.
     """
@@ -477,9 +484,6 @@ GOOD_PROTOCOL = SecProtocol(TEST_NAME,
 FINSIGHT_NAME = 'FinsightIndex'
 FINSIGHT_SEC_CHECKS = ActionChecks(api_key=True)
 FINSIGHT_PROTOCOL = SecProtocol(FINSIGHT_NAME, read=FINSIGHT_SEC_CHECKS)
-
-if get_client_code() == FIN:
-    protocols[FINSIGHT_NAME] = FINSIGHT_PROTOCOL
 
 
 def main():

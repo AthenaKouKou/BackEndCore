@@ -8,6 +8,7 @@ import pytest
 from unittest.mock import patch
 import os
 
+from backendcore.common.clients import FIN
 import backendcore.data.db_connect as dbc
 import backendcore.users.query as uqry
 
@@ -305,7 +306,7 @@ def test_fetch_journal_protocol_name():
     This needs impprovement but I'm not sure how we want to go around testing
     different environment variables
     """
-    assert isinstance(sm.fetch_journal_protocol_name(), str,)
+    assert isinstance(sm.fetch_journal_protocol_name(), str)
 
 
 def test_checks_from_json():
@@ -369,3 +370,14 @@ def test_delete_user_from_protocol_invalid_action(temp_protocol):
         sm.add_to_db(temp_protocol)
         NEW_TEST_USER = 'tester@test.com'
         sm.delete_user_from_protocol(TEST_NAME, NEW_TEST_USER, ['fake action'])
+
+
+@patch('backendcore.security.sec_manager2.get_client_code',
+       autospec=True, return_value=FIN)
+def test_finsight_fetch_all(mock_client_code):
+    """
+    If client_code is FIN, we should get the Finsight protocol loaded.
+    """
+    sm.fetch_all()
+    print(sm.protocols)
+    assert sm.exists(sm.FINSIGHT_NAME)
