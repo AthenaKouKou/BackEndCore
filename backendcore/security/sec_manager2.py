@@ -301,7 +301,7 @@ def is_permitted(prot_name, action, user_id: str = '', auth_key: str = '',
     if not prot:
         raise ValueError(f'Unknown protocol: {prot_name=}')
     check_vals = {}
-    if not user_id:
+    if not user_id and auth_key:
         user_id = ak.fetch_user_id_by_key(auth_key)
     check_vals[VALIDATE_USER] = user_id
     check_vals[AUTH_KEY] = auth_key
