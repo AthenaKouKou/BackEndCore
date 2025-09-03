@@ -145,11 +145,11 @@ def test_sec_checks_is_not_permitted():
 
 def test_is_sec_checks_valid_api_key():
     apik.add(apik.TEST_KEY)
-    assert GOOD_SEC_CHECKS.is_valid_api_key(apik.TEST_KEY)
+    assert GOOD_SEC_CHECKS.is_valid_api_key('', apik.TEST_KEY)
 
 
 def test_is_sec_checks_not_valid_api_key():
-    assert not GOOD_SEC_CHECKS.is_valid_api_key('some bad key of sufficient length')
+    assert not GOOD_SEC_CHECKS.is_valid_api_key('', 'some bad key of sufficient length')
 
 
 def test_init_protocol_w_defaults():

@@ -155,7 +155,7 @@ class ActionChecks(object):
         auth_user = uqry.fetch_id_by_auth_key(auth_key)
         return user_id == auth_user
 
-    def is_valid_api_key(self, api_key: str) -> bool:
+    def is_valid_api_key(self, user_id: str, api_key: str) -> bool:
         return apik.exists(api_key)
 
     def is_valid_pass_phrase(self, user_id: str, pass_phrase: str) -> bool:
