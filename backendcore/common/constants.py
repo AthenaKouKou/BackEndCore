@@ -1,6 +1,6 @@
 AUTH = 'Authorization'
 AUTH_KEY = 'Auth-Key'
-API_KEY = 'APIKey'
+API_KEY = 'api_key'
 CODE = 'code'
 CODES = 'codes'
 CREATE = 'create'
