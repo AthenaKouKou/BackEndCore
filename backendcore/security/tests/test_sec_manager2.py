@@ -208,6 +208,7 @@ def test_protocol_is_permitted(mock_auth_key):
     assert GOOD_PROTOCOL.is_permitted(sm.CREATE, sm.TEST_EMAIL,
                                       {sm.VALIDATE_USER:
                                        sm.TEST_EMAIL,
+                                       sm.API_KEY: apik.TEST_KEY,
                                        sm.AUTH_KEY: TEST_AUTH_KEY,
                                        sm.PASS_PHRASE: sm.TEST_PHRASE})
 
@@ -286,7 +287,7 @@ def test_is_permitted(mock_auth_key, temp_protocol):
     assert sm.is_permitted(TEST_NAME,
                            sm.CREATE,
                            user_id=sm.TEST_EMAIL,
-                           api_key='some auth_key',
+                           api_key=apik.TEST_KEY,
                            auth_key='some auth_key',
                            phrase=sm.TEST_PHRASE)
 

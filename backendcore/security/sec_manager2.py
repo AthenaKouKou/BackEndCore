@@ -28,6 +28,7 @@ import backendcore.users.query as uqry
 from backendcore.security.constants import (
     JOURNAL,
 )
+
 import backendcore.security.api_key as apik
 import backendcore.security.auth_key as ak
 
@@ -40,10 +41,11 @@ BAD_TYPE = 'Bad type for: '
 VALIDATOR = 'validator'
 IN_EFFECT = 'in_effect'
 
-SEC_COLLECT = 'security_protocols'
-USERS = 'users'
+API_KEYS = 'api_keys'
 PASSWORD = 'password'
 PROT_NM = 'protocol_name'
+SEC_COLLECT = 'security_protocols'
+USERS = 'users'
 
 
 VALID_ACTIONS = [
@@ -83,6 +85,7 @@ class ActionChecks(object):
     def __init__(self,
                  auth_key=False,
                  api_key=False,
+                 valid_api_keys=[],
                  ip_address=None,
                  pass_phrase=False,
                  valid_users=None,
@@ -103,6 +106,12 @@ class ActionChecks(object):
             for user in valid_users:
                 if not isinstance(user, str):
                     raise TypeError(f'{BAD_TYPE}{type(user)=}')
+        if valid_api_keys:
+            if not isinstance(valid_api_keys, list):
+                raise TypeError(f'{BAD_TYPE}{type(valid_api_keys)=}')
+            for api_key_val in valid_api_keys:
+                if not isinstance(api_key_val, str):
+                    raise TypeError(f'{BAD_TYPE}{type(api_key_val)=}')
         if ip_address and not isinstance(ip_address, str):
             raise TypeError(f'{BAD_TYPE}{type(ip_address)=}')
         self.checks = {
@@ -129,6 +138,7 @@ class ActionChecks(object):
             # IP_ADDRESS: to be developed!
         }
         self.valid_users = valid_users
+        self.valid_api_keys = valid_api_keys
         self.codes = codes
 
     def __str__(self):
@@ -140,6 +150,8 @@ class ActionChecks(object):
             json_checks[check] = json_checks[check][IN_EFFECT]
         if self.valid_users:
             json_checks[USERS] = self.valid_users
+        if self.valid_api_keys:
+            json_checks[API_KEYS] = self.valid_api_keys
         if self.phrase:
             json_checks[PASSWORD] = self.phrase
         # Kludge because we have two types of checks: those that store their
@@ -156,7 +168,7 @@ class ActionChecks(object):
         return user_id == auth_user
 
     def is_valid_api_key(self, user_id: str, api_key: str) -> bool:
-        return apik.exists(api_key)
+        return api_key in self.valid_api_keys
 
     def is_valid_pass_phrase(self, user_id: str, pass_phrase: str) -> bool:
         """
@@ -353,8 +365,10 @@ def checks_from_json(check_json):
     """
     if not check_json:
         return ActionChecks()
-    return ActionChecks(auth_key=check_json.get(AUTH_KEY, False),
+    return ActionChecks(api_key=check_json.get(API_KEY, False),
+                        auth_key=check_json.get(AUTH_KEY, False),
                         pass_phrase=check_json.get(PASS_PHRASE, False),
+                        valid_api_keys=check_json.get(API_KEYS, []),
                         valid_users=check_json.get(USERS, None),
                         ip_address=check_json.get(IP_ADDRESS, None),
                         this_phrase=check_json.get(PASSWORD, None),
@@ -465,11 +479,12 @@ TEST_CODE = 'test code'
 TEST_CODES = {TEST_CODE: 'some event name'}
 
 GOOD_SEC_CHECKS = ActionChecks(auth_key=True,
-                               api_key=False,
+                               api_key=True,
                                pass_phrase=True,
                                this_phrase=TEST_PHRASE,
                                ip_address=False,
-                               valid_users=GOOD_VALID_USERS)
+                               valid_users=GOOD_VALID_USERS,
+                               valid_api_keys=[apik.TEST_KEY])
 
 NO_USERS_SEC_CHECKS = ActionChecks(auth_key=True,
                                    pass_phrase=True,
@@ -483,7 +498,8 @@ GOOD_PROTOCOL = SecProtocol(TEST_NAME,
                             delete=GOOD_SEC_CHECKS)
 
 FINSIGHT_NAME = 'FinsightIndex'
-FINSIGHT_SEC_CHECKS = ActionChecks(api_key=True)
+FINSIGHT_SEC_CHECKS = ActionChecks(api_key=True,
+                                   valid_api_keys=['FINSIGHT_API_KEY2025'])
 FINSIGHT_PROTOCOL = SecProtocol(FINSIGHT_NAME, read=FINSIGHT_SEC_CHECKS)
 
 
