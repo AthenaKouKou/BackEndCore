@@ -10,6 +10,8 @@ class Map:
     def __init__(self, name, data):
         # `name` can enable us to one day create lookup for
         # maps created in advance of use.
+        if not isinstance(name, str):
+            raise TypeError(f'name must be a str: {type(name)}')
         self.name = name
         # Create a copy to ensure external changes don't affect it:
         self.map = dict(data)
@@ -22,6 +24,9 @@ class Map:
 
     def __iter__(self):
         return iter(self.map)
+
+    def get_name(self):
+        return self.name
 
     def get_choices(self) -> dict:
         return deepcopy(self.map)  # prevent changing the map!

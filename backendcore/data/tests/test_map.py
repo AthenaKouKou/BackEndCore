@@ -16,6 +16,11 @@ TEST_VALS = {
 TEST_MAP = cmap.Map(TEST_NAME, TEST_VALS)
 
 
+def test_bad_name_init():
+    with pytest.raises(TypeError):
+        bad_map = cmap.Map(17, TEST_VALS)
+
+
 def test_get():
     assert TEST_MAP[KEY1] == VAL1
     assert TEST_MAP[KEY2] == VAL2
@@ -24,6 +29,16 @@ def test_get():
 def test_get_not_a_code():
     with pytest.raises(KeyError):
         TEST_MAP['not a code']
+
+
+def test_get_name():
+    assert TEST_MAP.get_name() == TEST_NAME
+
+
+def test_cannot_change_data():
+    # This is an immutable dictionary type!
+    with pytest.raises(TypeError):
+        TEST_MAP[KEY1] = 'a new value'
 
 
 def test_len():
