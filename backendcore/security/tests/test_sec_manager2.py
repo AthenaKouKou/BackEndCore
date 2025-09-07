@@ -379,6 +379,6 @@ def test_finsight_fetch_all(mock_client_code):
     """
     If client_code is FIN, we should get the Finsight protocol loaded.
     """
+    sm.refresh_all()
     sm.fetch_all()
-    print(sm.protocols)
     assert sm.exists(sm.FINSIGHT_NAME)
