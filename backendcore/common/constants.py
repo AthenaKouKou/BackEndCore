@@ -1,3 +1,5 @@
+SUCCESS = 0
+
 AUTH = 'Authorization'
 AUTH_KEY = 'Auth-Key'
 API_KEY = 'api_key'
