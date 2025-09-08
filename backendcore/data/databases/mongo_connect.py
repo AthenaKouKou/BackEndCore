@@ -113,8 +113,13 @@ def to_json(doc):
 
 def get_collect(db_nm, clct_nm):
     """
-    Just some syntactic sugar:
+    Mostly just some syntactic sugar, but also we
+    can check the parameters here.
     """
+    if not isinstance(db_nm, str) or not len(db_nm):
+        raise ValueError(f'Bad db name: {db_nm}')
+    if not isinstance(clct_nm, str) or not len(clct_nm):
+        raise ValueError(f'Bad collection name: {clct_nm}')
     return client[db_nm][clct_nm]
 
 
