@@ -382,11 +382,12 @@ class SqlDB():
         on_conflict_do_update() but only in the postgres dialect.
         -Boaz 1/9/25
         """
-        readres = self.read_one(db_nm, clct_nm, filters={
-            OBJ_ID_NM: update_dict[OBJ_ID_NM]
-        })
-        if len(readres) == 0:
-            return self.create(db_nm, clct_nm, update_dict)
+        if update_dict.get(OBJ_ID_NM):
+            readres = self.read_one(db_nm, clct_nm, filters={
+                OBJ_ID_NM: update_dict[OBJ_ID_NM]
+            })
+            if len(readres) == 0:
+                return self.create(db_nm, clct_nm, update_dict)
         return self.update(db_nm, clct_nm, filters, update_dict)
 
     def delete(self, db_nm, clct_nm, filters={}):
