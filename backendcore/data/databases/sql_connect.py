@@ -11,7 +11,7 @@ from backendcore.common.constants import OBJ_ID_NM
 con = None
 SQLITE_DB_NM = 'SQLITE_DB_NM'
 
-SQLITE_MEM = 'sqllite_mem'
+SQLITE_MEM = 'sqlite_mem'
 SQLITE = 'sqlite'
 
 SQL_DB_NM = 'sql.db'
@@ -220,7 +220,6 @@ class SqlDB():
         """
         Enter a document or set of documents into a table.
         """
-        print('Unused db_nm (create()):', db_nm)
         if with_date:
             raise NotImplementedError(
                 'with_date format is not supported at present time')
@@ -309,7 +308,6 @@ class SqlDB():
         Returns all docs from a collection.
         `sort` can be DESC, NO_SORT, or ASC.
         """
-        print(f'Unused db_nm (read()): {db_nm}')
         all_docs = []
         clct = self.get_collect(clct_nm)
         if clct is None:
@@ -396,7 +394,6 @@ class SqlDB():
         """
         Deletes documents matching the filters.
         """
-        print('Unused db_nm (delete()):', db_nm)
         collect = self.get_collect(clct_nm)
         if collect is None:
             raise ValueError(f'Cannot delete; {clct_nm} does not exist.')
@@ -426,7 +423,6 @@ class SqlDB():
         SQLA also offers Alembic for industrial-strength migration
         but for now this is ok. -Boaz 1/10/25
         """
-        print(f'Unused db_nm (add_fld()): {db_nm}')
         tp = type(fld_data)
         with engine.begin() as conn:
             conn.execute(
