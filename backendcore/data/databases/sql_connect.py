@@ -388,8 +388,7 @@ class SqlDB():
             readres = self.read_one(db_nm, clct_nm, filters={
                 OBJ_ID_NM: update_dict[OBJ_ID_NM]
             })
-        print(readres)
-        if len(readres) == 0:
+        if not readres:
             return self.create(db_nm, clct_nm, update_dict)
         return self.update(db_nm, clct_nm, filters, update_dict)
 
