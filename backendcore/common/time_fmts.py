@@ -438,6 +438,14 @@ def datetime_to_iso(t: dt.datetime) -> str:
     return t.isoformat()
 
 
+def get_current_rfc_datetime_str() -> str:
+    """
+    Returns the current datetime in an ISO 8601/RFC 3339 compliant string.
+    """
+    datetime = dt.datetime.now(dt.timezone.utc).replace(microsecond=0)
+    return datetime_to_iso(datetime)
+
+
 def main():
     t = dt.datetime.now()
     print(t.isoformat())

@@ -404,3 +404,11 @@ def test_datetime_to_iso():
     test_datetime = tfmt.TEST_OLD_DATETIME
     iso = tfmt.datetime_to_iso(test_datetime)
     assert iso == '2000-01-01T01:01:01.000001'
+
+
+def test_get_current_rfc_datetime_str():
+    rfc_str = tfmt.get_current_rfc_datetime_str()
+    dt_obj = dt.datetime.fromisoformat(rfc_str)
+    # Did we get a valid datetime object? Is there a timezone?
+    assert dt_obj
+    assert dt_obj.tzinfo
