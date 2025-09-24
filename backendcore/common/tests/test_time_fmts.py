@@ -407,11 +407,23 @@ def test_datetime_to_iso():
 
 
 def test_is_iso_datetime_str():
-    assert tfmt.is_iso_datetime_str('2025-09-24T02:49:40+00:00')
+    assert tfmt.is_iso_datetime_str('2025-09-24T02:49:40')
 
 
 def test_is_not_iso_datetime_str():
     assert not tfmt.is_iso_datetime_str('04/21/1959')
+
+
+def test_is_rfc_datetime_str():
+    assert tfmt.is_rfc_datetime_str('2025-09-24T02:49:40+00:00')
+
+
+def test_is_rfc_datetime_str_no_timezone():
+    assert not tfmt.is_rfc_datetime_str('2025-09-24T02:49:40')
+
+
+def test_is_not_rfc_datetime_str():
+    assert not tfmt.is_rfc_datetime_str('04/21/1959')
 
 
 def test_get_current_rfc_datetime_str():
