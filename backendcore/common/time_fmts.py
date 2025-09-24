@@ -447,6 +447,9 @@ def get_current_rfc_datetime_str() -> str:
 
 
 def is_iso_datetime_str(dt_str: str) -> bool:
+    """
+    Checks if the string passed in is ISO 8601/RFC 3339 compliant.
+    """
     try:
         # Did we get a valid datetime object? Is there a timezone?
         datetime_str = dt.datetime.fromisoformat(dt_str)
