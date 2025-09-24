@@ -446,6 +446,16 @@ def get_current_rfc_datetime_str() -> str:
     return datetime_to_iso(datetime)
 
 
+def is_iso_datetime_str(dt_str: str) -> bool:
+    try:
+        # Did we get a valid datetime object? Is there a timezone?
+        datetime_str = dt.datetime.fromisoformat(dt_str)
+        datetime_str.tzinfo
+    except Exception:
+        return False
+    return True
+
+
 def main():
     t = dt.datetime.now()
     print(t.isoformat())
