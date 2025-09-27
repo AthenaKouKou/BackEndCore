@@ -33,3 +33,6 @@ class Map:
 
     def is_valid(self, code) -> bool:
         return code in self.map
+
+    def get(self, code):
+        return self.map.get(code)

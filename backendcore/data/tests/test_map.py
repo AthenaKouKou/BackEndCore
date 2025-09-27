@@ -57,3 +57,13 @@ def test_get_choices():
 def test_is_valid():
     assert TEST_MAP.is_valid(KEY1)
     assert TEST_MAP.is_valid(KEY2)
+
+
+def test_get():
+    ret = TEST_MAP.get(KEY1)
+    assert ret == VAL1
+
+
+def test_get_no_result():
+    ret = TEST_MAP.get("Not a key")
+    assert ret is None
