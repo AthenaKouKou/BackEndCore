@@ -228,6 +228,7 @@ def read(
         sort=sort,
         sort_fld=sort_fld,
         no_id=no_id,
+        limit=limit,
         filters=filters,
     )
 
