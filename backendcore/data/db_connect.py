@@ -218,12 +218,18 @@ def read(
     sort_fld: str = None,
     no_id: bool = False,
     limit: int = None,
+    filters: dict = {},
 ):
     if not database:
         raise ValueError('No database is connected')
-    return database.read(db_nm, clct_nm, sort=sort,
-                         sort_fld=sort_fld,
-                         no_id=no_id)
+    return database.read(
+        db_nm,
+        clct_nm,
+        sort=sort,
+        sort_fld=sort_fld,
+        no_id=no_id,
+        filters=filters,
+    )
 
 
 @needs_db

@@ -268,6 +268,7 @@ class MongoDB():
         sort_fld: str = OBJ_ID_NM,
         no_id: bool = False,
         limit: int = None,
+        filters: dict = {}
     ) -> list:
         """
         Returns all docs from a collection.
@@ -276,7 +277,10 @@ class MongoDB():
         all_docs = []
         scond = _asmbl_sort_cond(sort=sort, sort_fld=sort_fld)
         doc_limit = limit if limit else DOC_LIMIT
-        for doc in client[db_nm][clct_nm].find(sort=scond).limit(doc_limit):
+        for doc in client[db_nm][clct_nm].find(
+            filters,
+            sort=scond
+        ).limit(doc_limit):
             rec = to_json(doc)
             rec = _id_handler(rec, no_id)
             all_docs.append(rec)
