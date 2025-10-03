@@ -297,13 +297,38 @@ class SqlDB():
             #         rec[OBJ_ID_NM] = rec[OBJ_ID_NM][INNER_DB_ID]
         return rec
 
-    def _asmbl_read_stmt(self, collect, filters, sort, sort_fld):
+    def _filter_limit(self, stmt, limit: int = None):
+        """
+        Simple wrapper for the limit method
+        """
+        if limit:
+            return stmt.limit(limit)
+        else:
+            return stmt
+
+    def _asmbl_read_stmt(
+        self,
+        collect,
+        filters: dict = {},
+        sort: int = NO_SORT,
+        sort_fld: str = OBJ_ID_NM,
+        limit: int = None,
+    ):
         stmt = self._asmbl_sort_slct(collect, sort=sort, sort_fld=sort_fld)
         stmt = self._filter_to_where(collect, stmt, filters)
+        stmt = self._filter_limit(stmt, limit)
         return stmt
 
-    def read(self, db_nm, clct_nm, filters={},
-             sort=NO_SORT, sort_fld=OBJ_ID_NM, no_id=False):
+    def read(
+        self,
+        db_nm: str,
+        clct_nm: str,
+        filters: dict = {},
+        sort: int = NO_SORT,
+        sort_fld: str = OBJ_ID_NM,
+        no_id: bool = False,
+        limit: int = None,
+    ):
         """
         Returns all docs from a collection.
         `sort` can be DESC, NO_SORT, or ASC.
@@ -312,7 +337,7 @@ class SqlDB():
         clct = self.get_collect(clct_nm)
         if clct is None:
             return all_docs
-        stmt = self._asmbl_read_stmt(clct, filters, sort, sort_fld)
+        stmt = self._asmbl_read_stmt(clct, filters, sort, sort_fld, limit)
         with engine.connect() as conn:
             res = conn.execute(stmt)
             all_docs = self._read_recs_to_objs(res)

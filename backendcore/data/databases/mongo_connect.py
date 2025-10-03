@@ -260,15 +260,23 @@ class MongoDB():
         mongo_del_obj = client[db_nm][clct_nm].delete_one(filter)
         return create_del_ret(mongo_del_obj)
 
-    def read(self, db_nm, clct_nm, sort=NO_SORT,
-             sort_fld=OBJ_ID_NM, no_id=False) -> list:
+    def read(
+        self,
+        db_nm: str,
+        clct_nm: str,
+        sort: int = NO_SORT,
+        sort_fld: str = OBJ_ID_NM,
+        no_id: bool = False,
+        limit: int = None,
+    ) -> list:
         """
         Returns all docs from a collection.
         `sort` can be DESC, NO_SORT, or ASC.
         """
         all_docs = []
         scond = _asmbl_sort_cond(sort=sort, sort_fld=sort_fld)
-        for doc in client[db_nm][clct_nm].find(sort=scond).limit(DOC_LIMIT):
+        doc_limit = limit if limit else DOC_LIMIT
+        for doc in client[db_nm][clct_nm].find(sort=scond).limit(doc_limit):
             rec = to_json(doc)
             rec = _id_handler(rec, no_id)
             all_docs.append(rec)

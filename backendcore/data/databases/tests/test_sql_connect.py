@@ -159,3 +159,10 @@ def test_delete_by_id(sqltobj, table_with_docs):
     assert res.succeeded()
     assert res.del_count() == 1
     assert len(afterdel) == 0
+
+
+def test_read_with_limit(sqltobj, table_with_docs):
+    LIMIT = 2
+    res = sqltobj.read(TEST_DB, table_with_docs.name, limit=LIMIT)
+    assert res is not None
+    assert len(res) == LIMIT

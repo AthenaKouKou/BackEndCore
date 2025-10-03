@@ -44,11 +44,13 @@ def some_docs():
     Creates a bunch o' docs, then deletes them after test runs.
     """
     db = mdb.MongoDB()
+    ids_to_del = []
     for i in range(RECS_TO_TEST):
-        db.create(TEST_DB, TEST_COLLECT, {DEF_FLD: f'val{i}'})
+        doc_id = db.create(TEST_DB, TEST_COLLECT, {DEF_FLD: f'val{i}'})
+        ids_to_del.append(doc_id)
     yield
-    for i in range(RECS_TO_TEST):
-        db.delete(TEST_DB, TEST_COLLECT, filters={DEF_FLD: f'val{i}'})
+    for curr_id in ids_to_del:
+        db.delete_by_id(TEST_DB, TEST_COLLECT, curr_id)
 
 
 @pytest.fixture(scope='function')
@@ -60,7 +62,7 @@ def a_doc():
     db = mdb.MongoDB()
     ret = db.create(TEST_DB, TEST_COLLECT, {DEF_FLD: DEF_VAL, LIST_FLD: []})
     yield ret
-    db.delete(TEST_DB, TEST_COLLECT, filters=DEF_PAIR)
+    db.delete_by_id(TEST_DB, TEST_COLLECT, ret)
 
 
 @pytest.fixture(scope='function')
@@ -219,6 +221,25 @@ def test_read_one_good_filter(mobj, a_doc):
     Tests that a fetch with a good filter works.
     """
     assert mobj.read_one(TEST_DB, TEST_COLLECT, filters=DEF_PAIR)
+
+
+def test_read(mobj, some_docs):
+    """
+    Tests that we can read many docs
+    """
+    ret = mobj.read(TEST_DB, TEST_COLLECT)
+    assert ret
+    assert len(ret) == RECS_TO_TEST
+
+
+def test_read_limit(mobj, some_docs):
+    """
+    Tests that we can read many docs
+    """
+    LIMIT = RECS_TO_TEST // 2
+    ret = mobj.read(TEST_DB, TEST_COLLECT, limit=LIMIT)
+    assert ret
+    assert len(ret) == LIMIT
 
 
 def test_delete_that_exists(mobj, a_doc):

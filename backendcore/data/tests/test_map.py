@@ -18,10 +18,10 @@ TEST_MAP = cmap.Map(TEST_NAME, TEST_VALS)
 
 def test_bad_name_init():
     with pytest.raises(TypeError):
-        bad_map = cmap.Map(17, TEST_VALS)
+        cmap.Map(17, TEST_VALS)
 
 
-def test_get():
+def test_getitem_dunder():
     assert TEST_MAP[KEY1] == VAL1
     assert TEST_MAP[KEY2] == VAL2
 

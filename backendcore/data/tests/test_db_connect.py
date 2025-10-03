@@ -76,6 +76,24 @@ def test_read_one_good_filter(mock_read_one):
     assert rec is not None
 
 
+@patch(f'{DB_OBJ}.read', autospec=True, return_value={})
+def test_read(mock_read_one):
+    """
+    Tests that a fetch with a good filter works.
+    """
+    rec = dbc.read(TEST_DB, TEST_COLLECT)
+    assert rec is not None
+
+
+@patch(f'{DB_OBJ}.read', autospec=True, return_value={})
+def test_read_good_limit(mock_read_one):
+    """
+    Tests that a fetch with a limit.
+    """
+    rec = dbc.read(TEST_DB, TEST_COLLECT, limit=5)
+    assert rec is not None
+
+
 @patch(f'{DB_OBJ}.fetch_by_id', autospec=True, return_value={})
 def test_fetch_by_id(mock_fetch_by_id):
     ret = dbc.fetch_by_id(TEST_DB, TEST_COLLECT, {'any': 'vals'})
@@ -279,9 +297,10 @@ def test_create():
     but let's test just that there is at least one.
     """
     unique_val = rand_fld_val()
-    dbc.create(TEST_DB, TEST_COLLECT, {DEF_FLD: unique_val})
+    ret = dbc.create(TEST_DB, TEST_COLLECT, {DEF_FLD: unique_val})
     recs = dbc.select(TEST_DB, TEST_COLLECT, filters={DEF_FLD: unique_val})
     assert len(recs) >= 1
+    dbc.delete_by_id(TEST_DB, TEST_COLLECT, ret)
 
 
 def test_insert_doc_w_date():
@@ -289,10 +308,25 @@ def test_insert_doc_w_date():
     Make sure `with_date=True` adds a date field to the doc.
     """
     unique_val = rand_fld_val()
-    dbc.insert_doc(TEST_DB, TEST_COLLECT, {DEF_FLD: unique_val}, with_date=True)
+    ret = dbc.insert_doc(
+        TEST_DB,
+        TEST_COLLECT,
+        {DEF_FLD: unique_val},
+        with_date=True,
+    )
     recs = dbc.select(TEST_DB, TEST_COLLECT, filters={DEF_FLD: unique_val})
     assert len(recs) >= 1
     for rec in recs:
         assert dbc.DATE in rec
         break
     assert len(recs) >= 1
+    dbc.delete_by_id(TEST_DB, TEST_COLLECT, ret)
+
+
+def test_cleanup():
+    """
+    Makes sure there are no documents left in the database after testing is
+    done
+    """
+    ret = dbc.read(TEST_DB, TEST_COLLECT)
+    assert len(ret) == 0

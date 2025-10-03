@@ -211,8 +211,14 @@ def del_by_id(db_nm, clct_nm, _id: str):
 
 
 @needs_db
-def read(db_nm, clct_nm, sort=NO_SORT, sort_fld=None,
-         no_id=False):
+def read(
+    db_nm: str,
+    clct_nm: str,
+    sort: int = NO_SORT,
+    sort_fld: str = None,
+    no_id: bool = False,
+    limit: int = None,
+):
     if not database:
         raise ValueError('No database is connected')
     return database.read(db_nm, clct_nm, sort=sort,
