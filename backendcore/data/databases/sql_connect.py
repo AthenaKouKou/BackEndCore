@@ -111,6 +111,7 @@ class SqlDB():
 
     def _connectDB(self):
         connect_str = DB_TABLE[self.variant]
+        print(f'{connect_str=}')
         return sqla.create_engine(connect_str, echo=False)
 
     def _get_metadata(self):
