@@ -16,10 +16,10 @@ SQLITE = 'sqlite'
 
 SQL_DB_NM = 'sql.db'
 db_nm = os.environ.get('SQL_DB_NM', SQL_DB_NM)
-db_loc = os.environ.get('SQLITE_LOC', './database/')
+db_loc = os.environ.get('SQLITE_LOC', './database')
 SQLITE_BASE = 'sqlite+pysqlite:///'
 SQLITE_MEM_STR = SQLITE_BASE + ':memory:'
-SQLITE_STR = SQLITE_BASE + db_loc + db_nm
+SQLITE_STR = SQLITE_BASE + db_loc + "/" + db_nm
 
 DB_TABLE = {
     SQLITE_MEM: SQLITE_MEM_STR,
