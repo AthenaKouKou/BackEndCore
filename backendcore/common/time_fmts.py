@@ -468,6 +468,15 @@ def is_rfc_datetime_str(dt_str: str) -> bool:
     return True
 
 
+def iso_datetime_str_to_date_str(dt_str: str) -> str:
+    """
+    Takes a datetime string and tries to turn it into just a date.
+    """
+    datetime = dt.datetime.fromisoformat(dt_str)
+    date = str(datetime.date())
+    return date
+
+
 def main():
     t = dt.datetime.now()
     print(t.isoformat())

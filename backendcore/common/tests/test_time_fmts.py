@@ -431,3 +431,23 @@ def test_get_current_rfc_datetime_str():
     dt_obj = dt.datetime.fromisoformat(rfc_str)
     assert dt_obj
     assert tfmt.is_iso_datetime_str(rfc_str)
+
+
+def test_iso_datetime_str_to_date_str():
+    curr_time = tfmt.get_current_rfc_datetime_str()
+    curr_time_date = curr_time.split('T', 1)[0]
+    date = tfmt.iso_datetime_str_to_date_str(curr_time)
+    assert date == curr_time_date
+
+
+def test_iso_datetime_str_to_date_str_just_date():
+    curr_time = tfmt.get_current_rfc_datetime_str()
+    curr_time_date = curr_time.split('T', 1)[0]
+    date = tfmt.iso_datetime_str_to_date_str(curr_time_date)
+    assert date == curr_time_date
+
+
+def test_iso_datetime_str_to_date_str_bad_datetime():
+    bad_time = "2025-asd09-2414T02:49:40"
+    with pytest.raises(ValueError):
+        tfmt.iso_datetime_str_to_date_str(bad_time)
