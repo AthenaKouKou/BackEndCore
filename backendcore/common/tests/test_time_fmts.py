@@ -451,3 +451,14 @@ def test_iso_datetime_str_to_date_str_bad_datetime():
     bad_time = "2025-asd09-2414T02:49:40"
     with pytest.raises(ValueError):
         tfmt.iso_datetime_str_to_date_str(bad_time)
+
+
+def test_days_between_date_strings():
+    first_day = 16
+    day_difference = 10
+    second_day = first_day + day_difference
+    year_month = "2025-10"
+    first_date_str = f"{year_month}-{first_day}"
+    second_date_str = f"{year_month}-{second_day}"
+    days = tfmt.days_between_date_strings(first_date_str, second_date_str)
+    assert days == day_difference

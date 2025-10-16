@@ -149,11 +149,17 @@ def date(year: int, month: int, day: int) -> dt.date:
 
 
 def today() -> dt.date:
+    """
+    Returns "local" date
+    """
     return dt.date.today()
 
 
 def now() -> dt.datetime:
-    return dt.datetime.utcnow()
+    """
+    Returns current UTC time
+    """
+    return dt.datetime.now(dt.UTC)
 
 
 def two_dig_yr_to_4(yr2: str) -> str:
@@ -475,6 +481,22 @@ def iso_datetime_str_to_date_str(dt_str: str) -> str:
     datetime = dt.datetime.fromisoformat(dt_str)
     date = str(datetime.date())
     return date
+
+
+def days_between_date_strings(
+    first_date_str: str,
+    second_date_str: str,
+) -> int:
+    """
+    Takes two date strings, and returns the number of days between them.
+    We do not need to take timezones into account as we are assuming they both
+    utilize the same time zone, and the number of days would be the same
+    regardless of timezone.
+    """
+    first_date = dt.datetime.fromisoformat(first_date_str).date()
+    second_date = dt.datetime.fromisoformat(second_date_str).date()
+    day_difference = (second_date - first_date).days
+    return day_difference
 
 
 def main():
