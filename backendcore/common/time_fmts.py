@@ -159,7 +159,7 @@ def now() -> dt.datetime:
     """
     Returns current UTC time
     """
-    return dt.datetime.now(dt.UTC)
+    return dt.datetime.now(dt.timezone.utc)
 
 
 def two_dig_yr_to_4(yr2: str) -> str:
