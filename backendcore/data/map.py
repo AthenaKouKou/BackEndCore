@@ -7,7 +7,7 @@ from copy import deepcopy
 
 
 class Map:
-    def __init__(self, name, data):
+    def __init__(self, name: str, data: dict):
         # `name` can enable us to one day create lookup for
         # maps created in advance of use.
         if not isinstance(name, str):
@@ -19,7 +19,7 @@ class Map:
     def __getitem__(self, key):
         return self.map[key]
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.map)
 
     def __iter__(self):
@@ -34,5 +34,23 @@ class Map:
     def is_valid(self, code) -> bool:
         return code in self.map
 
-    def get(self, code):
-        return self.map.get(code)
+    def get(self, code, default=None):
+        return self.map.get(code, default)
+
+
+class BiMap(Map):
+    def __init__(self, name, data):
+        super().__init__(name, data)
+        self.rev_map = {}
+        for key, val in self.map.items():
+            try:
+                hash(key)
+            except TypeError:
+                raise TypeError(f'{val=} in BiMap is not hashable.')
+            self.rev_map[val] = key
+
+    def is_rev_valid(self, val) -> bool:
+        return val in self.rev_map
+
+    def rev_get(self, val, default=None):
+        return self.rev_map.get(val, default)

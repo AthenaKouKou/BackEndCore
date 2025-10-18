@@ -59,11 +59,55 @@ def test_is_valid():
     assert TEST_MAP.is_valid(KEY2)
 
 
+def test_is_not_valid():
+    assert not TEST_MAP.is_valid('not a key')
+
+
 def test_get():
     ret = TEST_MAP.get(KEY1)
     assert ret == VAL1
 
 
+def test_get_default():
+    ret = TEST_MAP.get('not a key', default=17)
+    assert ret == 17
+
+
 def test_get_no_result():
     ret = TEST_MAP.get("Not a key")
     assert ret is None
+
+
+TEST_BIMAP = cmap.BiMap(TEST_NAME, TEST_VALS)
+BAD_BIMAP_DICT = {
+    KEY1: {'dict is': 'not hashable'},
+    KEY2: VAL2,
+}
+
+
+def test_bimap_is_a_map():
+    assert isinstance(TEST_BIMAP, cmap.Map)
+
+
+def test_catch_val_not_hashable():
+    with pytest.raises(TypeError):
+        cmap.BiMap(TEST_NAME, BAD_BIMAP_DICT)
+
+
+def test_is_rev_valid():
+    assert TEST_BIMAP.is_rev_valid(VAL1)
+    assert TEST_BIMAP.is_rev_valid(VAL2)
+
+
+def test_is_not_valid():
+    assert not TEST_BIMAP.is_rev_valid('not a val')
+
+
+def test_rev_get():
+    assert TEST_BIMAP.rev_get(VAL1) == KEY1
+    assert TEST_BIMAP.rev_get(VAL2) == KEY2
+
+
+def test_rev_get_default():
+    ret = TEST_BIMAP.rev_get('not a val', default=17)
+    assert ret == 17
