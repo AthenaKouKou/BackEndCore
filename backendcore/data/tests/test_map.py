@@ -99,7 +99,7 @@ def test_is_rev_valid():
     assert TEST_BIMAP.is_rev_valid(VAL2)
 
 
-def test_is_not_valid():
+def test_is_rev_not_valid():
     assert not TEST_BIMAP.is_rev_valid('not a val')
 
 

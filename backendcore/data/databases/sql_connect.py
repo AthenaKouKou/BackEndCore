@@ -379,7 +379,14 @@ class SqlDB():
     def fetch_by_id(self, db_nm, clct_nm, _id: str, no_id=False):
         return self.read_one(db_nm, clct_nm, {OBJ_ID_NM: _id}, no_id)
 
-    def update(self, db_nm, clct_nm, filters, update_dict):
+    def update(
+        self,
+        db_nm: str,
+        clct_nm: str,
+        filters: dict,
+        update_dict: dict,
+        upsert: bool = False,
+    ):
         collect = self.get_collect(clct_nm)
         if collect is None:
             raise ValueError(f'Cannot update; {clct_nm} does not exist.')
