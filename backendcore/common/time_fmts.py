@@ -157,9 +157,14 @@ def today() -> dt.date:
 
 def now() -> dt.datetime:
     """
-    Returns current UTC time
+    Returns current UTC time.
+    Drop timezone for now until we uniformly use tz aware dates.
     """
-    return dt.datetime.now(dt.timezone.utc)
+    return dt.datetime.now(dt.timezone.utc).replace(tzinfo=None)
+
+
+def old_now() -> dt.datetime:
+    return dt.datetime.utcnow()
 
 
 def two_dig_yr_to_4(yr2: str) -> str:
@@ -500,13 +505,8 @@ def days_between_date_strings(
 
 
 def main():
-    t = dt.datetime.now()
-    print(t.isoformat())
-    tc = tz_convert(t, pytz.timezone('est'))
-    print(tc.isoformat())
-    t = dt.datetime.now(tz=pytz.utc)
-    tc = aware_time_to_naive_time(t)
-    print(tc)
+    print(f'{now()=}')
+    print(f'{old_now()=}')
 
 
 if __name__ == '__main__':

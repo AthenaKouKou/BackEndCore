@@ -50,6 +50,7 @@ class BiMap(Map):
             self.rev_map[val] = key
 
     def is_rev_valid(self, val) -> bool:
+        print(f'{val=}; {self.rev_map=}')
         return val in self.rev_map
 
     def rev_get(self, val, default=None):
