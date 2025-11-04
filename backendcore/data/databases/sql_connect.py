@@ -229,6 +229,7 @@ class SqlDB():
                                    create_if_none=True)
         with engine.begin() as conn:
             conn.execute(sqla.insert(collect), doc)
+            conn.commit()
         if isinstance(doc, dict):
             return doc[OBJ_ID_NM]
         return doc[0][OBJ_ID_NM]
