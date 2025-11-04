@@ -94,7 +94,6 @@ def needs_db(fn):
     @wraps(fn)
     def wrapper(*args, **kwargs):
         global database
-        global db_type
         if not database:
             database = get_db(db_type)
         return fn(*args, **kwargs)
