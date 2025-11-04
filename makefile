@@ -1,7 +1,5 @@
 include common.mk
 
-WEB_BUILD_PUBLIC_URL ?= /static/react
-
 all_tests: FORCE
 	cd $(API_DIR); make tests
 	cd $(COMMON_DIR); make tests

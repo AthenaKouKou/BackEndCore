@@ -15,6 +15,7 @@ SQLITE_MEM = 'sqlite_mem'
 SQLITE = 'sqlite'
 
 SQL_DB_NM = 'sql.db'
+MEM_OR_DISK = os.environ.get('MEM_OR_DISK', SQLITE)
 db_nm = os.environ.get('SQL_DB_NM', SQL_DB_NM)
 db_loc = os.environ.get('SQLITE_LOC', './database')
 SQLITE_BASE = 'sqlite+pysqlite:///'
@@ -99,7 +100,7 @@ class SqlDB():
     """
     Encaspulates a connection to a SQL Server.
     """
-    def __init__(self, variant=SQLITE_MEM) -> None:
+    def __init__(self, variant=MEM_OR_DISK) -> None:
         self.variant = variant
         global engine
         self.mdata = sqla.MetaData()

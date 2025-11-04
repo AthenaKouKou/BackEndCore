@@ -13,8 +13,8 @@ export PANDOC = pandoc
 export PYLINT = flake8
 export PYLINTFLAGS = --exclude=__main__.py
 
-# make sure we test against local DB:
-export LOCAL_MONGO=1
+# make sure we test against memory DB:
+export MEM_OR_DISK = sqlite_mem
 
 PYTHONFILES = $(shell ls *.py)
 PYTESTFLAGS = -vv --verbose --cov-branch --cov-report term-missing --tb=short -W ignore::FutureWarning
