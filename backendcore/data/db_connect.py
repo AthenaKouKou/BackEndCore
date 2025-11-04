@@ -68,11 +68,12 @@ def setup_connection(db_nm: str):
     return db_nm
 
 
-def get_db():
+def get_db(db_type):
     """
     Sets up connection to appropriate DB.
     """
     db = None
+    print(f'{db_type=}')
     if db_type == MONGO:
         local = os.environ.get("LOCAL_MONGO", REMOTE) == LOCAL
         db = mdb.MongoDB(local_db=local)
@@ -93,8 +94,9 @@ def needs_db(fn):
     @wraps(fn)
     def wrapper(*args, **kwargs):
         global database
+        global db_type
         if not database:
-            database = get_db()
+            database = get_db(db_type)
         return fn(*args, **kwargs)
     return wrapper
 
