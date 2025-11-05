@@ -9,6 +9,18 @@ GOOD_URL = 'https://google.com/'
 GOOD_EMAIL = 'fred@sunsetpark.com'
 
 
+def test_is_int_number():
+    assert vld.is_number(12)
+
+
+def test_is_float_number():
+    assert vld.is_number(12.12)
+
+
+def test_is_not_number():
+    assert not vld.is_number('n is not a number')
+
+
 def test_is_valid_url():
     assert vld.is_valid_url(GOOD_URL)
 
