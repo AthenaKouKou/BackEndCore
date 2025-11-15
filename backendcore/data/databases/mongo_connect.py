@@ -8,6 +8,7 @@ import certifi
 
 import pymongo as pm
 from pymongo.server_api import ServerApi
+from pymongo.errors import ServerSelectionTimeoutError as MongoConnectError # noqa F401
 
 from bson.objectid import ObjectId
 import bson.json_util as bsutil

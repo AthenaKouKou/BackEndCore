@@ -61,6 +61,8 @@ DUP = "Can't add duplicate"
 database = None
 db_type = os.environ.get('DATABASE', MONGO)
 
+MAX_CONNECT_RETRIES = 3
+
 
 def setup_connection(db_nm: str):
     if os.environ.get("TEST_DB") == "1":
@@ -96,7 +98,14 @@ def needs_db(fn):
         global database
         if not database:
             database = get_db(db_type)
+        for i in range(MAX_CONNECT_RETRIES):
+            try:
+                return fn(*args, **kwargs)
+            except mdb.MongoConnectError as e:
+                print(f"Connection Error: {e}, trying to re-connect")
+                database = get_db(db_type)
         return fn(*args, **kwargs)
+
     return wrapper
 
 

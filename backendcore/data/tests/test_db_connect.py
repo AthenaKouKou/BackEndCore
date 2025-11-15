@@ -9,6 +9,7 @@ import pytest
 import os
 
 import backendcore.data.db_connect as dbc
+import backendcore.data.databases.mongo_connect as mdb
 
 TEST_DB = 'test_db'
 TEST_COLLECT = 'test_collect'
@@ -330,3 +331,33 @@ def test_cleanup():
     """
     ret = dbc.read(TEST_DB, TEST_COLLECT)
     assert len(ret) == 0
+
+
+@patch(
+    f'{DB_OBJ}.read_one',
+    autospec=True,
+    side_effect=[mdb.MongoConnectError, {}]
+)
+def test_disconnect_catch(mock_mongo_disconnect):
+    """
+    Tests that a fetch with no filter retrieves the rec we inserted
+    in the fixture.
+    """
+    rec = dbc.read_one(TEST_DB, TEST_COLLECT, filters={})
+    assert rec is not None
+
+
+@patch(
+    f'{DB_OBJ}.read_one',
+    autospec=True,
+    side_effect=[
+        mdb.MongoConnectError for i in range(dbc.MAX_CONNECT_RETRIES + 1)
+    ]
+)
+def test_disconnect_catch_too_many_retries(mock_mongo_disconnect):
+    """
+    Tests that a fetch with no filter retrieves the rec we inserted
+    in the fixture.
+    """
+    with pytest.raises(mdb.MongoConnectError):
+        dbc.read_one(TEST_DB, TEST_COLLECT, filters={})
