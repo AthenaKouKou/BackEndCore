@@ -101,7 +101,7 @@ def needs_db(fn):
         for i in range(MAX_CONNECT_RETRIES):
             try:
                 return fn(*args, **kwargs)
-            except mdb.MongoConnectError as e:
+            except Exception as e:
                 print(f"Connection Error: {e}, trying to re-connect")
                 database = get_db(db_type)
         return fn(*args, **kwargs)
