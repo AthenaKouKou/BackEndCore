@@ -130,18 +130,25 @@ def test_is_sec_checks_not_valid_auth_key(mock_auth_key):
 
 @patch(f'{FETCH_BY_AUTH_KEY}', autospec=True, return_value=sm.TEST_EMAIL)
 def test_sec_checks_is_permitted(mock_auth_key):
-    assert GOOD_SEC_CHECKS.is_permitted(sm.TEST_EMAIL, {sm.VALIDATE_USER:
-                                                        sm.TEST_EMAIL,
-                                                        sm.API_KEY: apik.TEST_KEY,
-                                                        sm.AUTH_KEY: TEST_AUTH_KEY,
-                                                        sm.PASS_PHRASE:
-                                                        sm.TEST_PHRASE,
-                                                        })
+    assert GOOD_SEC_CHECKS.is_permitted(
+        sm.TEST_EMAIL,
+        {
+            sm.VALIDATE_USER:
+            sm.TEST_EMAIL,
+            sm.API_KEY: apik.TEST_KEY,
+            sm.AUTH_KEY: TEST_AUTH_KEY,
+            sm.PASS_PHRASE:
+            sm.TEST_PHRASE,
+        },
+    )
 
 
 def test_sec_checks_is_not_permitted():
-    assert not GOOD_SEC_CHECKS.is_permitted(sm.TEST_EMAIL, {sm.VALIDATE_USER: 'Bad email',
-                                                            sm.AUTH_KEY: TEST_AUTH_KEY})
+    assert not GOOD_SEC_CHECKS.is_permitted(
+        sm.TEST_EMAIL,
+        {sm.VALIDATE_USER: 'Bad email', sm.AUTH_KEY: TEST_AUTH_KEY},
+    )
+
 
 def test_is_sec_checks_valid_api_key():
     apik.add(apik.TEST_KEY)
@@ -149,7 +156,10 @@ def test_is_sec_checks_valid_api_key():
 
 
 def test_is_sec_checks_not_valid_api_key():
-    assert not GOOD_SEC_CHECKS.is_valid_api_key('', 'some bad key of sufficient length')
+    assert not GOOD_SEC_CHECKS.is_valid_api_key(
+        '',
+        'some bad key of sufficient length',
+    )
 
 
 def test_init_protocol_w_defaults():
