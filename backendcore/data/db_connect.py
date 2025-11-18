@@ -103,8 +103,9 @@ def needs_db(fn):
                 return fn(*args, **kwargs)
             except Exception as e:
                 print(f"Connection Error: {e}, trying to re-connect")
-                database = get_db(db_type)
-        return fn(*args, **kwargs)
+                if i != MAX_CONNECT_RETRIES - 1:
+                    database = get_db(db_type)
+        raise ConnectionError("Failed to connect to database")
 
     return wrapper
 
