@@ -12,13 +12,15 @@ FIN = 'FIN'
 FIN_DB = None
 MFC = 'MFC'
 MFC_DB = 'mfcDB'
+TUG = 'TUG'
+TUG_DB = 'tugDB'
 
 client_code = None
 
 # For tests: add codes and dbs as needed!
-VALID_CODES = [CAT, DMM, FIN, MFC]
+VALID_CODES = [CAT, DMM, FIN, MFC, TUG]
 CODES_W_DB = [CAT, DMM, MFC]
-VALID_DBS = [CAT_DB, DMM_DB, MFC_DB]
+VALID_DBS = [CAT_DB, DMM_DB, MFC_DB, TUG_DB]
 CLIENT_HAS_NO_DB = FIN
 CLIENT_HAS_EMAIL = DMM
 CLIENT_HAS_NO_EMAIL = FIN
@@ -28,6 +30,7 @@ CLIENT_TABLE = {
     DMM: {DB_NM: DMM_DB, SALES_EMAIL: 'seanc@datamixmaster.com'},
     FIN: {DB_NM: FIN_DB},
     MFC: {DB_NM: MFC_DB},
+    TUG: {DB_NM: TUG_DB},
 }
 
 
