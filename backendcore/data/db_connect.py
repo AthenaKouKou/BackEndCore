@@ -61,7 +61,7 @@ DUP = "Can't add duplicate"
 database = None
 db_type = os.environ.get('DATABASE', MONGO)
 
-MAX_CONNECT_RETRIES = 3
+MAX_CONNECT_RETRIES = 2
 
 
 def setup_connection(db_nm: str):

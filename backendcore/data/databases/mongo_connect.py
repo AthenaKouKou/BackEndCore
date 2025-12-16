@@ -148,7 +148,7 @@ class MongoDB():
     """
     def _get_server_settings(self):
         settings = {
-            "connectTimeoutMS": 30000,
+            "connectTimeoutMS": 15000,
             "socketTimeoutMS": None,
             "connect": False,
             "maxPoolsize": 1,
