@@ -1,6 +1,8 @@
 import sqlalchemy as sqla
 from sqlalchemy import desc, asc
 from icecream import ic
+from copy import deepcopy
+import datetime as dt
 import time
 import os
 
@@ -50,18 +52,12 @@ _type_py2sql_dict = {
  bytes: sqla.sql.sqltypes.LargeBinary,
  bool: sqla.sql.sqltypes.Boolean,
  dict: sqla.sql.sqltypes.JSON,
- # Gene confirmed trying to use lists
- # should raise an exception. - Boaz 1/21/25
- #  list: sqla.sql.sqltypes.JSON,
- #  list: sqla.types.ARRAY(sqla.String),
- #  "<class 'str'>list": sqla.types.ARRAY(sqla.String),
- #  "<class 'int'>list": sqla.types.ARRAY(sqla.BigInteger),
-}
-
-_type_py2sqltext_dict = {
-    int: 'BIGINT',
-    str: 'VARCHAR',
-    float: 'FLOAT',
+ # Lists are stored as JSON, so code written for Mongo's list
+ # fields (user logins, protocol users) works unchanged.
+ list: sqla.sql.sqltypes.JSON,
+ # Dates are stored as ISO strings: see `_to_sql_val()`.
+ dt.date: sqla.sql.sqltypes.Unicode,
+ dt.datetime: sqla.sql.sqltypes.Unicode,
 }
 
 
@@ -76,15 +72,34 @@ def _type_py2sql(pytype):
             assignment in `_type_py2sql_dict`.")
 
 
-def _type_py2sqltext(pytype):
-    '''Return the closest textual sql type for a given python type'''
-    if pytype in _type_py2sqltext_dict:
-        return _type_py2sqltext_dict[pytype]
-    else:
-        raise NotImplementedError(
-            f"You may add custom `sqltype` to ` \
-            {str(pytype)} \
-            ` assignment in `_type_py2sqltext_dict`.")
+def _to_sql_val(val):
+    """
+    Dates go in as ISO strings, which is what `time_str_from_rec()`
+    callers expect to get back.
+    """
+    if isinstance(val, dt.date):
+        return val.isoformat()
+    return val
+
+
+def _change_list(doc: dict, list_nm: str, change):
+    """
+    Applies `change` to the list at `list_nm` in `doc`, creating the
+    list if need be. Like Mongo, `list_nm` may be a dotted path into a
+    nested dict. Returns the top-level column name and its new value;
+    `doc` itself is not modified.
+    """
+    col, *path = list_nm.split('.')
+    if not path:
+        return col, change(list(doc.get(col) or []))
+    top = deepcopy(doc.get(col))
+    if not isinstance(top, dict):
+        top = {}
+    container = top
+    for key in path[:-1]:
+        container = container.setdefault(key, {})
+    container[path[-1]] = change(list(container.get(path[-1]) or []))
+    return col, top
 
 
 def create_del_ret(sql_ret):
@@ -115,7 +130,13 @@ class SqlDB():
     def _connectDB(self):
         connect_str = DB_TABLE[self.variant]
         print(f'{connect_str=}')
-        return sqla.create_engine(connect_str, echo=False)
+        if self.variant == SQLITE:
+            # SQLite creates the file but not its directory.
+            os.makedirs(db_loc, exist_ok=True)
+        # We add columns to tables on the fly, which would leave stale
+        # SQL in the compiled-statement cache, so don't cache.
+        return sqla.create_engine(connect_str, echo=False,
+                                  query_cache_size=0)
 
     def _get_metadata(self):
         return self.mdata
@@ -176,16 +197,18 @@ class SqlDB():
             return clct
         return None
 
-    def get_field(self, collect, col_nm: str, create_if_none=False):
+    def get_field(self, collect, col_nm: str, create_if_none=False,
+                  sample=''):
         """
         Returns a field if it exists, with option to
         create it if it doesn't.
+        A created field gets the column type for `sample`'s type.
         """
         field = collect.c.get(col_nm)
         if field is not None:
             return field
         if create_if_none:
-            field = self.add_fld(DB_NAME, collect.name, col_nm)
+            field = self.add_fld(DB_NAME, collect.name, col_nm, sample)
             if field is None:
                 raise ValueError('Field creation failed.')
             return field
@@ -197,7 +220,7 @@ class SqlDB():
         of that field in the supplied document.
         """
         if isinstance(doc, list):
-            doc = doc.pop()
+            doc = doc[0]
         columns = self._doc_to_cols(doc)
         self.create_table(clct_nm, columns)
         return self.get_collect(clct_nm)
@@ -207,18 +230,26 @@ class SqlDB():
         for column in doc:
             if column == OBJ_ID_NM or doc[column] is None:
                 continue
-            pytp = type(doc[column])
-            # Detecting lists; only postgresql allows arrays
-            if pytp == list:
-                raise ValueError("SQL columns can't be arrays.")
-            tp = _type_py2sql(pytp)
+            tp = _type_py2sql(type(doc[column]))
             columns.append((column, tp))
         return columns
 
-    def _add_extra_flds_from_doc(self, collect, doc: dict):
-        for fld in doc:
-            self.get_field(collect, fld, create_if_none=True)
-        return collect
+    def _add_missing_flds(self, collect, rows: list):
+        """
+        Unlike a Mongo collection, a table has fixed fields, so add any
+        that these rows need. A field that is only ever None gets no
+        column and is dropped from the rows: reading it back gives
+        no value, as with a missing Mongo field.
+        """
+        for row in rows:
+            for fld, val in row.items():
+                if val is not None:
+                    self.get_field(collect, fld, create_if_none=True,
+                                   sample=val)
+        for row in rows:
+            for fld in [f for f in row if f not in collect.c]:
+                del row[fld]
+        return rows
 
     def create(self, db_nm: str, clct_nm: str, doc, with_date=False):
         """
@@ -228,10 +259,15 @@ class SqlDB():
             raise NotImplementedError(
                 'with_date format is not supported at present time')
         doc_with_ids = self.add_ids(doc)
-        collect = self.get_collect(clct_nm, doc=doc_with_ids,
+        docs = doc_with_ids if isinstance(doc_with_ids, list) \
+            else [doc_with_ids]
+        rows = [{fld: _to_sql_val(val) for fld, val in d.items()}
+                for d in docs]
+        collect = self.get_collect(clct_nm, doc=rows[0],
                                    create_if_none=True)
+        rows = self._add_missing_flds(collect, rows)
         with engine.begin() as conn:
-            conn.execute(sqla.insert(collect), doc)
+            conn.execute(sqla.insert(collect), rows)
             conn.commit()
         if isinstance(doc, dict):
             return doc[OBJ_ID_NM]
@@ -272,9 +308,10 @@ class SqlDB():
 
     def _update_dict_to_vals(self, clct, update_dict):
         vals = {}
-        for key in update_dict:
-            field = self.get_field(clct, key, create_if_none=True)
-            vals[field] = update_dict[key]
+        for key, val in update_dict.items():
+            field = self.get_field(clct, key, create_if_none=True,
+                                   sample=val)
+            vals[field] = _to_sql_val(val)
         return vals
 
     def _filter_to_where(self, clct, stmt, filter={}, vals=None):
@@ -282,11 +319,10 @@ class SqlDB():
         Converts a basic {field: val} filter to a WHERE clause
         Should add other mongo operators.
         """
-        if not len(filter.keys()):
-            return stmt
-        for fld_nm in list(filter.keys()):
-            field = self.get_field(clct, fld_nm, create_if_none=True)
-            stmt = stmt.where(field == filter[fld_nm])
+        for fld_nm, val in filter.items():
+            field = self.get_field(clct, fld_nm, create_if_none=True,
+                                   sample=val)
+            stmt = stmt.where(field == _to_sql_val(val))
         if vals is not None:
             stmt = stmt.values(self._update_dict_to_vals(clct, vals))
         return stmt
@@ -393,7 +429,8 @@ class SqlDB():
     ):
         collect = self.get_collect(clct_nm)
         if collect is None:
-            raise ValueError(f'Cannot update; {clct_nm} does not exist.')
+            # As in Mongo, a missing collection just matches nothing.
+            return cmn.UpdateReturn(0, 0)
         stmt = sqla.update(collect)
         stmt = self._filter_to_where(collect, stmt,
                                      filters, update_dict)
@@ -433,7 +470,8 @@ class SqlDB():
         """
         collect = self.get_collect(clct_nm)
         if collect is None:
-            raise ValueError(f'Cannot delete; {clct_nm} does not exist.')
+            # As in Mongo, a missing collection just matches nothing.
+            return cmn.DeleteReturn(0)
         stmt = sqla.delete(collect)
         stmt = self._filter_to_where(collect, stmt, filters)
         with engine.begin() as conn:
@@ -459,15 +497,19 @@ class SqlDB():
         (as SQL does generally) so I'm using a text alter command.
         SQLA also offers Alembic for industrial-strength migration
         but for now this is ok. -Boaz 1/10/25
+        A None `fld_data` gets a string column.
         """
-        tp = type(fld_data)
+        tp = _type_py2sql(str if fld_data is None else type(fld_data))
+        type_text = tp().compile(dialect=engine.dialect)
+        # Field names like `create` are SQL keywords, so quote them.
+        quote = engine.dialect.identifier_preparer.quote
         with engine.begin() as conn:
             conn.execute(
-                sqla.text(f'alter table {clct_nm} add column ' +
-                          f'{fld_nm} {_type_py2sqltext(tp)}')
+                sqla.text(f'alter table {quote(clct_nm)} add column ' +
+                          f'{quote(fld_nm)} {type_text}')
             )
         collect = self.get_collect(clct_nm)
-        column = sqla.Column(fld_nm, _type_py2sql(tp))
+        column = sqla.Column(fld_nm, tp)
         collect.append_column(column, replace_existing=True)
         self.mdata.create_all(engine)
         return column
@@ -479,12 +521,41 @@ class SqlDB():
 
     def append_to_list(self, db_nm, clct_nm, filter_fld_nm, filter_fld_val,
                        list_nm, new_list_item):
-        filter = {filter_fld_nm: filter_fld_val}
-        doc = self.read_one(db_nm, clct_nm, filter)
-        arr = doc[list_nm]
-        arr.push(new_list_item)
-        return self.update_fld(db_nm, clct_nm, filter,
-                               fld_nm=list_nm, fld_val=arr)
+        """
+        Appends a value to a list in a single document, creating the
+        list, or the document, if need be (Mongo's $push with upsert).
+        `list_nm` may be a dotted path into a nested dict.
+        """
+        filters = {filter_fld_nm: filter_fld_val}
+        doc = self.read_one(db_nm, clct_nm, filters)
+        if doc is None:
+            new_doc = dict(filters)
+            col, val = _change_list(new_doc, list_nm,
+                                    lambda lst: lst + [new_list_item])
+            new_doc[col] = val
+            self.create(db_nm, clct_nm, new_doc)
+            return cmn.UpdateReturn(0, 0)
+        col, val = _change_list(doc, list_nm,
+                                lambda lst: lst + [new_list_item])
+        return self.update_fld(db_nm, clct_nm, filters,
+                               fld_nm=col, fld_val=val)
+
+    def delete_from_list(self, db_nm, clct_nm, filter_fld_nm,
+                         filter_fld_val, list_nm, new_list_item):
+        """
+        Removes every copy of a value from a list in a single document
+        (Mongo's $pull). If there is no such document, nothing happens.
+        `list_nm` may be a dotted path into a nested dict.
+        """
+        filters = {filter_fld_nm: filter_fld_val}
+        doc = self.read_one(db_nm, clct_nm, filters)
+        if doc is None:
+            return cmn.UpdateReturn(0, 0)
+        col, val = _change_list(
+            doc, list_nm,
+            lambda lst: [item for item in lst if item != new_list_item])
+        return self.update_fld(db_nm, clct_nm, filters,
+                               fld_nm=col, fld_val=val)
 
     def rename(self, db_nm: str, clct_nm: str, nm_map: dict):
         """

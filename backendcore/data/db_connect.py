@@ -49,8 +49,9 @@ LISTS_IN_DB_DICT = {
     MONGO: '1',
     SQL: '0',
     MY_SQL: '0',
-    SQLITE: '0',
-    SQLITE_MEM: '0',
+    # SQLite stores lists as JSON:
+    SQLITE: '1',
+    SQLITE_MEM: '1',
 }
 
 # DB messages:
